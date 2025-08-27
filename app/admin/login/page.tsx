@@ -1,7 +1,8 @@
 "use client";
-import { Card, Form } from "antd";
+import { AuthForm } from "@/app/components/AuthForm";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { Button, Card, Form, Input } from "antd";
 import { useRouter } from "next/navigation";
-import { AuthForm } from "../components/AuthForm";
 
 export default function Login() {
   const [form] = Form.useForm();
@@ -15,7 +16,7 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <Card className="w-[350px] shadow-lg rounded-xl">
-        <h2 className="text-xl font-semibold mb-4 text-center">User Login</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">Admin Login</h2>
         <Form
           form={form}
           onFinish={handleSubmit}
