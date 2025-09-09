@@ -13,7 +13,7 @@ export default function Login() {
 
   const handleSubmit = async (values: any) => {
     loginMutation.mutate(values);
-    router.push("/dashboard");
+    router.push("/admin/dashboard");
   };
 
   useEffect(() => {
