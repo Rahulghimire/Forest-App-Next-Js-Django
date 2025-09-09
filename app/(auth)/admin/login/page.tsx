@@ -1,16 +1,27 @@
 "use client";
 import { AuthForm } from "@/app/components/AuthForm";
-import { Card, Form, Input } from "antd";
+import { useLogin } from "@/app/hooks/useAuth";
+import { Card, Form } from "antd";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Login() {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  const handleSubmit = (values: any) => {
-    console.log(values);
+  const loginMutation = useLogin();
+
+  const handleSubmit = async (values: any) => {
+    loginMutation.mutate(values);
     router.push("/dashboard");
   };
+
+  useEffect(() => {
+    form.setFieldsValue({
+      email: "admin@gmail.com",
+      password: "admin123",
+    });
+  }, [form]);
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">

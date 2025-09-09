@@ -1,15 +1,16 @@
 import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Form, Input, Button } from "antd";
+import { AntButton } from "./AntButton";
 
 export const AuthForm = () => {
   return (
     <>
       <Form.Item
-        name="username"
-        label="Username"
-        rules={[{ required: true, message: "Please input your username!" }]}
+        name="email"
+        label="Email"
+        rules={[{ type: "email", message: "Please input your email!" }]}
       >
-        <Input placeholder="Enter username" />
+        <Input placeholder="Enter email" />
       </Form.Item>
       <Form.Item
         name="password"
@@ -24,9 +25,9 @@ export const AuthForm = () => {
         />
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit" block>
+        <AntButton type="primary" htmlType="submit" block>
           Submit
-        </Button>
+        </AntButton>
       </Form.Item>
     </>
   );
