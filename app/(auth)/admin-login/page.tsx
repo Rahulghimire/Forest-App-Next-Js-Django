@@ -18,8 +18,8 @@ export default function Login() {
 
   useEffect(() => {
     form.setFieldsValue({
-      email: "admin@gmail.com",
-      password: "admin123",
+      email: "test@gmail.com",
+      password: "password123",
     });
   }, [form]);
 

@@ -22,7 +22,7 @@ export interface ApiError {
 export const authAPI = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/employee/login/`,
+      `${process.env.NEXT_PUBLIC_API_URL}user/login/`,
       {
         method: "POST",
         headers: {
