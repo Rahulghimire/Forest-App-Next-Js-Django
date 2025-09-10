@@ -9,7 +9,7 @@ export default function Login() {
 
   const handleSubmit = (values: any) => {
     console.log(values);
-    router.push("/dashboard");
+    router.push("/user/dashboard");
   };
 
   return (
