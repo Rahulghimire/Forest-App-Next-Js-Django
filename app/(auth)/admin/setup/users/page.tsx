@@ -129,7 +129,11 @@ export default function Users() {
         title={editingUser ? "Edit User" : "Add User"}
         open={isModalOpen}
         footer={null}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingUser(null);
+          form.resetFields();
+        }}
       >
         <Form
           form={form}

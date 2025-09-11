@@ -1,7 +1,7 @@
 "use client";
 
 import { AntButton } from "@/app/components/AntButton";
-import { useChangePassword } from "@/app/hooks/useAuth";
+import { useUserChangePassword } from "@/app/hooks/useAuthUser";
 import {
   EyeOutlined,
   EyeInvisibleOutlined,
@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 export default function ChangePassword() {
   const router = useRouter();
 
-  const changePasswordMutation = useChangePassword();
+  const changePasswordMutation = useUserChangePassword();
 
   const onFinish = (values: any) => {
     changePasswordMutation.mutate({...values,

@@ -6,6 +6,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   AppstoreOutlined,
+  DashboardOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Layout, Menu, Modal, theme, Tooltip } from "antd";
 import { useState } from "react";
@@ -48,7 +49,7 @@ export default function AdminLayout({
           }}
         >
           <div className="p-2 text-center">
-            {collapsed ? "F" : "Forest Management System"}
+            {collapsed ? <Avatar>F</Avatar> : "Forest Management System"}
           </div>
           <Menu
             mode="inline"
@@ -60,7 +61,7 @@ export default function AdminLayout({
               if (key === "2") router.push("/admin/setup/users");
             }}
             items={[
-              { key: "1", icon: <AppstoreOutlined />, label: "Dashboard" },
+              { key: "1", icon: <DashboardOutlined />, label: "Dashboard" },
               { key: "2", icon: <UserOutlined />, label: "Users" },
             ]}
           />

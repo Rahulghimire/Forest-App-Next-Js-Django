@@ -1,10 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-// import { message } from "antd";
 import { ApiError, authAPI } from "../lib/auth";
 import { toast } from "react-toastify";
 
-export const useLogin = () => {
+export const useUserLogin = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -16,25 +15,24 @@ export const useLogin = () => {
       queryClient.setQueryData(["currentUser"], data.user);
       toast.success(data?.message || "Login successful!");
       if(!data?.user?.password_changed){
-        router.push("/admin-login/change-password");
+        router.push("/change-password");
         return;
       }
-      router.push("/admin/dashboard");
+      router.push("/user/dashboard");
     },
     onError: (error: ApiError) => {
       toast.error(error?.message || "Login failed. Please try again.");
-      // message.error(error?.message || "Login failed. Please try again.");
     },
   });
 };
 
-export const useChangePassword = () => {
+export const useUserChangePassword = () => {
   const router = useRouter();
   return useMutation({
     mutationFn: authAPI.changePassword,
     onSuccess: () => {
       toast.success("Password changed successfully");
-      router.push("/admin/dashboard");
+      router.push("/user/dashboard");
     },
     onError: () => {
       toast.error("Password change failed");
@@ -42,7 +40,7 @@ export const useChangePassword = () => {
   });
 };
 
-export const useLogout = () => {
+export const useUserLogout = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -52,13 +50,13 @@ export const useLogout = () => {
       localStorage.removeItem("access_token");
       queryClient.clear();
       toast.success("Logged out successfully");
-      router.push("/admin-login");
+      router.push("/");
     },
     onError: () => {
       toast.error("Logout failed");
       localStorage.removeItem("access_token");
       queryClient.clear();
-      router.push("/admin-login");
+      router.push("/");
     },
   });
 };

@@ -16,8 +16,8 @@ export interface LoginResponse {
   expires_in: number;
   refresh_token: string;
   token_type: string;
-  must_change_password: boolean;
   user: {
+    password_changed: boolean;
     id: string;
     email: string;
     name: string;
@@ -65,6 +65,7 @@ export const authAPI = {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
       }
@@ -77,6 +78,9 @@ export const authAPI = {
   },
 
   logout: async (): Promise<void> => {
+    const formData = new FormData();
+    formData.append("refresh", localStorage.getItem("refresh_token") || "");
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}user/logout/`,
       {
@@ -84,9 +88,7 @@ export const authAPI = {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
-        body: JSON.stringify({
-          refresh: localStorage.getItem("refresh_token"),
-        }),
+        body: formData,
       }
     );
 

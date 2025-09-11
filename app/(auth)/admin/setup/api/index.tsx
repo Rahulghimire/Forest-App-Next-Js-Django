@@ -9,8 +9,8 @@ export interface User {
 
 export interface UserList {
   count: number;
-  next: string|null;
-  previous: string|null;
+  next: string | null;
+  previous: string | null;
   data: User[];
 }
 
@@ -56,8 +56,8 @@ export const updateUser = async (user: User) => {
 export const deleteUser = async (id: number) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/${id}/`, {
     method: "DELETE",
-
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("access_token")}`,
     },
   });

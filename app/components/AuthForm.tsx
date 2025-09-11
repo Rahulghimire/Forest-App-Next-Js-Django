@@ -1,6 +1,5 @@
 import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Form, Input, Button } from "antd";
-import { AntButton } from "./AntButton";
 
 export const AuthForm = () => {
   return (
@@ -10,7 +9,7 @@ export const AuthForm = () => {
         label="Email"
         rules={[{ type: "email", message: "Please input your email!" }]}
       >
-        <Input placeholder="Enter email" />
+        <Input placeholder="Enter email" autoComplete="off" />
       </Form.Item>
       <Form.Item
         name="password"
@@ -19,14 +18,12 @@ export const AuthForm = () => {
       >
         <Input.Password
           placeholder="input password"
+          autoComplete="off"
           iconRender={(visible) =>
             visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
           }
         />
       </Form.Item>
-        {/* <AntButton type="primary" htmlType="submit" block>
-          Submit
-        </AntButton> */}
     </>
   );
 };

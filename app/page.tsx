@@ -1,15 +1,16 @@
 "use client";
 import { AuthForm } from "@/app/components/AuthForm";
 import { Card, Form } from "antd";
-import { useRouter } from "next/navigation";
+import { AntButton } from "./components/AntButton";
+import { useUserLogin } from "./hooks/useAuthUser";
 
-export default function Login() {
+export default function Home() {
   const [form] = Form.useForm();
-  const router = useRouter();
+
+  const loginMutation = useUserLogin();
 
   const handleSubmit = (values: any) => {
-    console.log(values);
-    router.push("/user/dashboard");
+    loginMutation.mutate(values);
   };
 
   return (
@@ -23,6 +24,14 @@ export default function Login() {
           autoComplete="off"
         >
           <AuthForm />
+          <AntButton
+            type="primary"
+            htmlType="submit"
+            block
+            loading={loginMutation.isPending}
+          >
+            Submit
+          </AntButton>
         </Form>
       </Card>
     </div>

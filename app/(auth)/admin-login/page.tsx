@@ -8,12 +8,12 @@ import { useEffect } from "react";
 
 export default function Login() {
   const [form] = Form.useForm();
-  const router = useRouter();
 
   const loginMutation = useLogin();
 
   const handleSubmit = async (values: any) => {
     loginMutation.mutate(values);
+    localStorage.setItem("user_email", values?.email);
   };
 
   useEffect(() => {
