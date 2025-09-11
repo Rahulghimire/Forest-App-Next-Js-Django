@@ -58,13 +58,17 @@ export const authAPI = {
   },
 
   changePassword: async (credentials: PasswordCredentials): Promise<void> => {
-    const response = await fetch("/user/change-password/", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: JSON.stringify(credentials),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}user/change-password/`,
+
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(credentials),
+      }
+    );
 
     if (!response.ok) {
       message.error("Change password failed");

@@ -24,11 +24,9 @@ export const AuthForm = () => {
           }
         />
       </Form.Item>
-      <Form.Item>
-        <AntButton type="primary" htmlType="submit" block>
+        {/* <AntButton type="primary" htmlType="submit" block>
           Submit
-        </AntButton>
-      </Form.Item>
+        </AntButton> */}
     </>
   );
 };

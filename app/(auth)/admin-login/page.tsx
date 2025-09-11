@@ -1,4 +1,5 @@
 "use client";
+import { AntButton } from "@/app/components/AntButton";
 import { AuthForm } from "@/app/components/AuthForm";
 import { useLogin } from "@/app/hooks/useAuth";
 import { Card, Form } from "antd";
@@ -33,6 +34,11 @@ export default function Login() {
           autoComplete="off"
         >
           <AuthForm />
+          <AntButton type="primary" htmlType="submit" block
+          loading={loginMutation.isPending}
+          >
+            Submit
+          </AntButton>
         </Form>
       </Card>
     </div>

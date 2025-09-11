@@ -42,7 +42,7 @@ export default function RootLayout({
             </ConfigProvider>
           </AntdRegistry>
         </QueryClientProvider>
-      </body>
+    </body>
     </html>
   );
 }

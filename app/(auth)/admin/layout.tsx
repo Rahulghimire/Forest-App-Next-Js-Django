@@ -7,10 +7,11 @@ import {
   MenuUnfoldOutlined,
   AppstoreOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Layout, Menu, theme, Tooltip } from "antd";
+import { Avatar, Button, Layout, Menu, Modal, theme, Tooltip } from "antd";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLogout } from "@/app/hooks/useAuth";
+import { AntButton } from "@/app/components/AntButton";
 
 const { Header, Sider, Content } = Layout;
 
@@ -20,10 +21,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
   const logoutMutation = useLogout();
 
   return (
@@ -42,6 +44,9 @@ export default function AdminLayout({
           bottom: 0,
         }}
       >
+        <div className="p-2 text-center">
+          {collapsed ? "F" : "Forest Management System"}
+        </div>
         <Menu
           mode="inline"
           style={{ background: "rgb(237, 242, 248)", color: "#343c46" }}
@@ -76,22 +81,29 @@ export default function AdminLayout({
             <Tooltip title="Admin">
               <Avatar>A</Avatar>
             </Tooltip>
-            <Button
-              type="primary"
-              danger
-              icon={<LogoutOutlined />}
-              onClick={() => logoutMutation.mutate()}
-              loading={logoutMutation.isPending}
-            >
-              Logout
-            </Button>
+
+            <Tooltip title="Logout">
+              <AntButton
+                color="lightGreen"
+                icon={<LogoutOutlined />}
+                // onClick={() => logoutMutation.mutate()}
+                onClick={() => {
+                  Modal.confirm({
+                    title: "Are you sure you want to logout?",
+                    onOk: () => logoutMutation.mutate(),
+                  });
+                }}
+                loading={logoutMutation.isPending}
+              />
+            </Tooltip>
           </div>
         </Header>
 
         <Content
           style={{
-            margin: "24px 16px",
-            padding: 24,
+            // margin: "24px 16px",
+            margin: "10px",
+            padding: 10,
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,

@@ -11,9 +11,8 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: authAPI.login,
     onSuccess: (data) => {
-      localStorage.setItem("token", data?.access_token);
+      localStorage.setItem("access_token", data?.access_token);
       queryClient.setQueryData(["currentUser"], data.user);
-      // message.success(data?.message || "Login successful!");
       toast.success(data?.message || "Login successful!");
       if(data?.must_change_password){
         router.push("/admin/change-password");
@@ -51,15 +50,14 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: authAPI.logout,
     onSuccess: () => {
-      localStorage.removeItem("token");
+      localStorage.removeItem("access_token");
       queryClient.clear();
       toast.success("Logged out successfully");
-      // message.success("Logged out successfully");
       router.push("/admin-login");
     },
     onError: () => {
       toast.error("Logout failed");
-      localStorage.removeItem("token");
+      localStorage.removeItem("access_token");
       queryClient.clear();
       router.push("/admin-login");
     },
