@@ -32,7 +32,6 @@ import { toast } from "react-toastify";
 
 export default function Users() {
   const queryClient = useQueryClient();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();

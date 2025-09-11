@@ -12,6 +12,7 @@ export const useLogin = () => {
     mutationFn: authAPI.login,
     onSuccess: (data) => {
       localStorage.setItem("access_token", data?.access_token);
+      localStorage.setItem("refresh_token", data?.refresh_token);
       queryClient.setQueryData(["currentUser"], data.user);
       toast.success(data?.message || "Login successful!");
       if(data?.must_change_password){

@@ -84,6 +84,9 @@ export const authAPI = {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
+        body: JSON.stringify({
+          refresh: localStorage.getItem("refresh_token"),
+        }),
       }
     );
 
