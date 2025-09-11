@@ -1,11 +1,13 @@
 "use client";
 
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastContainer } from "react-toastify";
+import ToastProvider from "./components/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +37,9 @@ export default function RootLayout({
       >
         <QueryClientProvider client={queryClient}>
           <AntdRegistry>
-            <ConfigProvider theme={{}}>{children}</ConfigProvider>
+            <ConfigProvider theme={{}}>
+              <ToastProvider>{children}</ToastProvider>
+            </ConfigProvider>
           </AntdRegistry>
         </QueryClientProvider>
       </body>

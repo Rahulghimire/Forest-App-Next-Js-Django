@@ -1,6 +1,14 @@
+import { message } from "antd";
+
 export interface LoginCredentials {
   email: string;
   password: string;
+}
+
+export interface PasswordCredentials {
+  old_password: string;
+  new_password: string;
+  confirm_password: string;
 }
 
 export interface LoginResponse {
@@ -37,8 +45,10 @@ export const authAPI = {
       }
     );
 
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      message.error(errorData.message || "Login failed");
       throw {
         message: errorData.message || "Login failed",
         status: response.status,
@@ -48,15 +58,33 @@ export const authAPI = {
     return response.json();
   },
 
+  changePassword: async (
+   credentials: PasswordCredentials
+  ): Promise<void> => {
+    const response = await fetch("/user/change-password/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    body: JSON.stringify(credentials),
+    });
+
+    if (!response.ok) {
+      message.error("Change password failed");
+      throw new Error("Change password failed");
+    }
+  },
+
   logout: async (): Promise<void> => {
     const response = await fetch("/api/auth/logout", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
     });
 
     if (!response.ok) {
+      message.error("Logout failed");
       throw new Error("Logout failed");
     }
   },
