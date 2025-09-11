@@ -4,12 +4,17 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  token: string;
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  token_type: string;
+  must_change_password: boolean;
   user: {
     id: string;
     email: string;
     name: string;
     role: string;
+    permissions: string[];
   };
   message: string;
 }

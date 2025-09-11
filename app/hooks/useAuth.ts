@@ -10,9 +10,15 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: authAPI.login,
     onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
+
+      console.log("Dsfdsdffsddfsd",data)
+      localStorage.setItem("token", data?.access_token);
       queryClient.setQueryData(["currentUser"], data.user);
-      message.success(data.message || "Login successful!");
+      message.success(data?.message || "Login successful!");
+      if(data?.must_change_password){
+        router.push("/admin/change-password");
+        return;
+      }
       router.push("/admin/dashboard");
     },
     onError: (error: ApiError) => {
@@ -31,12 +37,12 @@ export const useLogout = () => {
       localStorage.removeItem("token");
       queryClient.clear();
       message.success("Logged out successfully");
-      router.push("/admin/login");
+      router.push("/admin-login");
     },
     onError: () => {
       localStorage.removeItem("token");
       queryClient.clear();
-      router.push("/admin/login");
+      router.push("/admin-login");
     },
   });
 };
