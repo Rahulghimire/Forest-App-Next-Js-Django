@@ -45,7 +45,6 @@ export const authAPI = {
       }
     );
 
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       message.error(errorData.message || "Login failed");
@@ -58,15 +57,13 @@ export const authAPI = {
     return response.json();
   },
 
-  changePassword: async (
-   credentials: PasswordCredentials
-  ): Promise<void> => {
+  changePassword: async (credentials: PasswordCredentials): Promise<void> => {
     const response = await fetch("/user/change-password/", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
-    body: JSON.stringify(credentials),
+      body: JSON.stringify(credentials),
     });
 
     if (!response.ok) {
@@ -76,12 +73,15 @@ export const authAPI = {
   },
 
   logout: async (): Promise<void> => {
-    const response = await fetch("/api/auth/logout", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}user/logout/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       message.error("Logout failed");

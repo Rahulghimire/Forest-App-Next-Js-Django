@@ -48,7 +48,7 @@ export default function AdminLayout({
           defaultSelectedKeys={["1"]}
           onClick={({ key }) => {
             if (key === "1") router.push("/admin/dashboard");
-            if (key === "2") router.push("/admin/users");
+            if (key === "2") router.push("/admin/setup/users");
           }}
           items={[
             { key: "1", icon: <AppstoreOutlined />, label: "Dashboard" },
