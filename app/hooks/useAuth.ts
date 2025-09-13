@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-// import { message } from "antd";
 import { ApiError, authAPI } from "../lib/auth";
 import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
 export const useLogin = () => {
   const router = useRouter();
@@ -11,11 +11,18 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: authAPI.login,
     onSuccess: (data) => {
-      localStorage.setItem("access_token", data?.access_token);
-      localStorage.setItem("refresh_token", data?.refresh_token);
+      Cookies.set("admin_access_token", data?.access_token, {
+        expires: 7,
+      });
+      Cookies.set("admin_refresh_token", data?.refresh_token, {
+        expires: 7,
+      });
+      localStorage.setItem("admin_data", JSON.stringify(data?.user));
+      // localStorage.setItem("access_token", data?.access_token);
+      // localStorage.setItem("refresh_token", data?.refresh_token);
       queryClient.setQueryData(["currentUser"], data.user);
       toast.success(data?.message || "Login successful!");
-      if(!data?.user?.password_changed){
+      if (!data?.user?.password_changed) {
         router.push("/admin-login/change-password");
         return;
       }
@@ -23,7 +30,6 @@ export const useLogin = () => {
     },
     onError: (error: ApiError) => {
       toast.error(error?.message || "Login failed. Please try again.");
-      // message.error(error?.message || "Login failed. Please try again.");
     },
   });
 };
@@ -49,6 +55,9 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: authAPI.logout,
     onSuccess: () => {
+      Object.keys(Cookies.get()).forEach((cookieName) => {
+        Cookies.remove(cookieName);
+      });
       localStorage.removeItem("access_token");
       queryClient.clear();
       toast.success("Logged out successfully");

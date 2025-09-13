@@ -14,10 +14,12 @@ export interface UserList {
   data: User[];
 }
 
+import Cookies from "js-cookie";
+
 export const fetchUsers = async (): Promise<UserList> => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/`, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
     },
   });
   if (!res.ok) throw new Error("Error fetching users");
@@ -29,7 +31,8 @@ export const createUser = async (data: Omit<User, "id">) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
     },
     body: JSON.stringify(data),
   });
@@ -44,7 +47,8 @@ export const updateUser = async (user: User) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
+        // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
       body: JSON.stringify(user),
     }
@@ -58,7 +62,8 @@ export const deleteUser = async (id: number) => {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
     },
   });
   if (!res.ok) throw new Error("Error deleting user");
