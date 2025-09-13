@@ -32,6 +32,8 @@ export interface ApiError {
   status: number;
 }
 
+import Cookies from "js-cookie";
+
 export const authAPI = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await fetch(
@@ -64,7 +66,8 @@ export const authAPI = {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
@@ -79,14 +82,14 @@ export const authAPI = {
 
   logout: async (): Promise<void> => {
     const formData = new FormData();
-    formData.append("refresh", localStorage.getItem("refresh_token") || "");
+    formData.append("refresh", Cookies.get("admin_refresh_token") || "");
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}user/logout/`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
         },
         body: formData,
       }

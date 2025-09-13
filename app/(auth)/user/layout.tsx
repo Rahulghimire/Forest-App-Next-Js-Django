@@ -1,9 +1,6 @@
 "use client";
 
-
-
 import {
-  UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -22,12 +19,21 @@ import {
   TeamOutlined,
   TransactionOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Layout, Menu, theme, Tooltip } from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Dropdown,
+  Layout,
+  Menu,
+  theme,
+  Tooltip,
+} from "antd";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLogout } from "@/app/hooks/useAuth";
 import { AntButton } from "@/app/components/AntButton";
 import { useUserLogout } from "@/app/hooks/useAuthUser";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { Header, Sider, Content } = Layout;
 
@@ -42,6 +48,8 @@ export default function AdminLayout({
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const logoutMutation = useUserLogout();
+
+  const data = JSON.parse(localStorage.getItem("user_data") || "");
 
   return (
     <Layout>
@@ -88,9 +96,26 @@ export default function AdminLayout({
             onClick={() => setCollapsed(!collapsed)}
           />
           <div className="flex items-center gap-x-4">
-            <Tooltip title="User">
-              <Avatar>U</Avatar>
-            </Tooltip>
+            <Dropdown
+              trigger={["click"]}
+              popupRender={() => (
+                <Card className="w-64 shadow-md">
+                  <div className="flex items-center gap-3">
+                    <Avatar size="large">U</Avatar>
+                    <div>
+                      <p className="font-medium">{data?.name}</p>
+                      <p className="text-xs text-gray-500">
+                        john.doe@email.com
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            >
+              <Tooltip title="User">
+                <Avatar>U</Avatar>
+              </Tooltip>
+            </Dropdown>
             <AntButton
               color="lightGreen"
               icon={<LogoutOutlined />}
@@ -115,8 +140,6 @@ export default function AdminLayout({
     </Layout>
   );
 }
-
-
 
 const items = [
   { key: "1", icon: <AppstoreOutlined />, label: "Dashboard" },

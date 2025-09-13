@@ -12,6 +12,8 @@ export interface PasswordCredentials {
   confirm_password: string;
 }
 
+import Cookies from "js-cookie";
+
 export interface LoginResponse {
   access_token: string;
   expires_in: number;
@@ -90,14 +92,14 @@ export const authAPI = {
 
   logout: async (): Promise<void> => {
     const formData = new FormData();
-    formData.append("refresh", localStorage.getItem("refresh_token") || "");
-
+    formData.append("refresh", Cookies.get("user_refresh_token") || "");
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}user/logout/`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          Authorization: `Bearer  ${Cookies.get("user_access_token")}`,
         },
         body: formData,
       }

@@ -8,7 +8,17 @@ import {
   AppstoreOutlined,
   DashboardOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Layout, Menu, Modal, theme, Tooltip } from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Dropdown,
+  Layout,
+  Menu,
+  Modal,
+  theme,
+  Tooltip,
+} from "antd";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useLogout } from "@/app/hooks/useAuth";
@@ -30,6 +40,8 @@ export default function AdminLayout({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const logoutMutation = useLogout();
+
+  const data = JSON.parse(localStorage.getItem("admin_data") || "");
 
   return (
     <>
@@ -83,9 +95,26 @@ export default function AdminLayout({
               onClick={() => setCollapsed(!collapsed)}
             />
             <div className="flex items-center gap-x-4">
-              <Tooltip title="Admin">
-                <Avatar>A</Avatar>
-              </Tooltip>
+              <Dropdown
+                trigger={["click"]}
+                popupRender={() => (
+                  <Card className="w-64 shadow-md">
+                    <div className="flex items-center gap-3">
+                      <Avatar size="large">A</Avatar>
+                      <div>
+                        <p className="font-medium">{data?.name}</p>
+                        <p className="text-xs text-gray-500">
+                          john.doe@email.com
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              >
+                <Tooltip title="Admin">
+                  <Avatar>A</Avatar>
+                </Tooltip>
+              </Dropdown>
 
               <Tooltip title="Logout">
                 <AntButton
