@@ -1,20 +1,22 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ApiError, authAPI } from "../lib/auth";
 import { toast } from "react-toastify";
+import { ApiError, authAPI, LoginCredentials } from "../lib/userAuth";
 
 export const useUserLogin = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: authAPI.login,
+    // mutationFn: authAPI.login,
+    mutationFn: (credentials: LoginCredentials) =>
+      authAPI.login(credentials, router),
     onSuccess: (data) => {
       localStorage.setItem("access_token", data?.access_token);
       localStorage.setItem("refresh_token", data?.refresh_token);
       queryClient.setQueryData(["currentUser"], data.user);
       toast.success(data?.message || "Login successful!");
-      if(!data?.user?.password_changed){
+      if (!data?.user?.password_changed) {
         router.push("/change-password");
         return;
       }
@@ -32,7 +34,8 @@ export const useUserChangePassword = () => {
     mutationFn: authAPI.changePassword,
     onSuccess: () => {
       toast.success("Password changed successfully");
-      router.push("/user/dashboard");
+      // router.push("/user/dashboard");
+      router.push("/");
     },
     onError: () => {
       toast.error("Password change failed");

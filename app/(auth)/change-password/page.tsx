@@ -17,8 +17,9 @@ export default function ChangePassword() {
   const changePasswordMutation = useUserChangePassword();
 
   const onFinish = (values: any) => {
-    changePasswordMutation.mutate({...values,
-      email: localStorage.getItem("user_email")
+    changePasswordMutation.mutate({
+      ...values,
+      email: localStorage.getItem("user_email"),
     });
   };
 
@@ -135,7 +136,7 @@ export default function ChangePassword() {
                   color="red"
                   icon={<CloseCircleOutlined />}
                   onClick={() => {
-                    router.push("/admin-login");
+                    router.push("/");
                   }}
                 >
                   Cancel
@@ -147,7 +148,6 @@ export default function ChangePassword() {
                 >
                   Save
                 </AntButton>
-
               </Space>
             </div>
           </Form>
