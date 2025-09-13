@@ -10,6 +10,7 @@ export default function Home() {
   const loginMutation = useUserLogin();
 
   const handleSubmit = (values: any) => {
+    localStorage.setItem("user_email", values?.email);
     loginMutation.mutate(values);
   };
 
