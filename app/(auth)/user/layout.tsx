@@ -75,6 +75,12 @@ export default function AdminLayout({
           onClick={({ key }) => {
             if (key === "1") router.push("/user/dashboard");
             if (key === "2") router.push("/user");
+            if (key === "11-1") router.push("/user/setup/office/employee");
+            if (key === "11-2") router.push("/user/setup/office/position");
+            if (key === "11-3") router.push("/user/setup/office/member");
+            if (key === "11-4")
+              router.push("/user/setup/office/roles-permissions");
+            if (key === "11-5") router.push("/user/setup/office/fiscal-year");
           }}
           items={items}
         />

@@ -5,7 +5,6 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  AppstoreOutlined,
   DashboardOutlined,
 } from "@ant-design/icons";
 import {
