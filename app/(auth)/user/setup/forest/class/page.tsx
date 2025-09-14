@@ -12,14 +12,7 @@ import {
   Table,
 } from "antd";
 import { useState } from "react";
-import {
-    createApi,
-    deleteApi,
-    fetchApi,
-  updateApi,
-  User,
-  UserList,
-} from "../api";
+
 import { AntButton } from "@/app/components/AntButton";
 import {
   CloseCircleOutlined,
@@ -29,6 +22,7 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 
 export default function Users() {
   const queryClient = useQueryClient();
@@ -36,11 +30,10 @@ export default function Users() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
-const { data:users, isLoading } = useQuery({
-  queryKey: ["users"],
-  queryFn: () => fetchApi(`user/`),
-});
-
+  const { data: users, isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => fetchApi(`user/`),
+  });
 
   const columns = [
     { title: "Name", dataIndex: "name", key: "name" },
@@ -71,36 +64,29 @@ const { data:users, isLoading } = useQuery({
   ];
 
   const createMutation = useMutation({
-  mutationFn: (data: Omit<User, "id">) =>
-    createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
+    mutationFn: (data: Omit<User, "id">) =>
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employee"] });
       toast.success("User created");
     },
   });
 
-const updateMutation = useMutation({
-  mutationFn: (user: User) =>
-    updateApi(`user/`, user),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["employee"] });
-    toast.success("User updated");
-  },
-});
+  const updateMutation = useMutation({
+    mutationFn: (user: User) => updateApi(`user/`, user),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employee"] });
+      toast.success("User updated");
+    },
+  });
 
-
-
-
-const deleteMutation = useMutation({
-  mutationFn: (id: number) =>
-    deleteApi(`user/${id}/`),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["employee"] });
-    toast.success("User deleted");
-  },
-});
-
-
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteApi(`user/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employee"] });
+      toast.success("User deleted");
+    },
+  });
 
   const handleFinish = (values: any) => {
     if (editingUser) {
