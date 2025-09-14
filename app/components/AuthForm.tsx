@@ -17,7 +17,7 @@ export const AuthForm = () => {
         rules={[{ required: true, message: "Please input your password!" }]}
       >
         <Input.Password
-          placeholder="input password"
+          placeholder="Enter password"
           autoComplete="off"
           iconRender={(visible) =>
             visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />

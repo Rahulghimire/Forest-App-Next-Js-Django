@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 export interface User {
   id: number;
   name: string;
@@ -13,7 +14,6 @@ export interface UserList {
   previous: string | null;
   data: User[];
 }
-import Cookies from "js-cookie";
 
 export const fetchApi = async (url: string): Promise<UserList> => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {

@@ -37,12 +37,20 @@ export default function RootLayout({
       >
         <QueryClientProvider client={queryClient}>
           <AntdRegistry>
-            <ConfigProvider theme={{}}>
+            <ConfigProvider
+              theme={{
+                components: {
+                  Form: {
+                    itemMarginBottom: 10,
+                  },
+                },
+              }}
+            >
               <ToastProvider>{children}</ToastProvider>
             </ConfigProvider>
           </AntdRegistry>
         </QueryClientProvider>
-    </body>
+      </body>
     </html>
   );
 }

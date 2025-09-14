@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Checkbox,
   Divider,
   Form,
   Input,
@@ -15,7 +16,9 @@ import { useState } from "react";
 import {
   createUser,
   deleteUser,
+  fetchPermission,
   fetchUsers,
+  Permission,
   updateUser,
   User,
   UserList,
@@ -36,9 +39,18 @@ export default function Users() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
+  const [selected, setSelected] = useState<string[]>([]);
+
   const { data: users, isLoading } = useQuery<UserList>({
     queryKey: ["users"],
     queryFn: fetchUsers,
+  });
+
+  const { data: permissionData, isLoading: loadingPermission } = useQuery<
+    Permission[]
+  >({
+    queryKey: ["permissions"],
+    queryFn: fetchPermission,
   });
 
   const columns = [
@@ -95,9 +107,13 @@ export default function Users() {
 
   const handleFinish = (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      updateMutation.mutate({
+        ...editingUser,
+        permission_list: selected,
+        ...values,
+      });
     } else {
-      createMutation.mutate(values);
+      createMutation.mutate({ ...values, permission_list: selected });
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -141,7 +157,7 @@ export default function Users() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-3 gap-x-2">
+          <div className="grid grid-cols-4 gap-x-2">
             <Form.Item name="name" label="Name" rules={[{ required: true }]}>
               <Input />
             </Form.Item>
@@ -186,11 +202,15 @@ export default function Users() {
             </Form.Item>
           </div>
 
-          <Divider />
+          <Divider
+            style={{
+              margin: "6px 0",
+            }}
+          />
 
           <div className="font-semibold mb-2">Position Details</div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <div>
               <Form.Item
                 name={["position_data", "position_name"]}
@@ -282,7 +302,26 @@ export default function Users() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-x-3">
+          <Divider
+            style={{
+              margin: "6px 0",
+            }}
+          />
+
+          <div className="font-semibold mb-2">Permission</div>
+
+          <div className="py-2">
+            <Checkbox.Group
+              options={permissionData?.map((p) => ({
+                label: p.code,
+                value: p.code,
+              }))}
+              value={selected}
+              onChange={(vals) => setSelected(vals as string[])}
+            />
+          </div>
+
+          <div className="flex justify-end gap-x-3 mt-3">
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

@@ -24,15 +24,15 @@ import {
 import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 
-export default function Users() {
+export default function Plot() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchApi(`user/`),
+  const { data: plots, isLoading } = useQuery({
+    queryKey: ["plots"],
+    queryFn: () => fetchApi(`forest/plots/`),
   });
 
   const columns = [
@@ -106,14 +106,14 @@ export default function Users() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add User
+        Add Plot
       </AntButton>
 
       <Table
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={users?.data || []}
+        dataSource={plots?.data || []}
         loading={isLoading}
         style={{ marginTop: 16 }}
         scroll={{ y: 300, x: "800px" }}
