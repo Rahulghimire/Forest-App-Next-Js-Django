@@ -9,7 +9,7 @@ export default function Home() {
 
   const loginMutation = useUserLogin();
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: { email: string; password: string }) => {
     localStorage.setItem("user_email", values?.email);
     loginMutation.mutate(values);
   };

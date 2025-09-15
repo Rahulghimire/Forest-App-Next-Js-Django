@@ -1,5 +1,5 @@
 import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
-import { Form, Input, Button } from "antd";
+import { Form, Input } from "antd";
 
 export const AuthForm = () => {
   return (
