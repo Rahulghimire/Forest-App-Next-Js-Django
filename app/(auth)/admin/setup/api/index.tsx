@@ -5,6 +5,7 @@ export interface User {
   role: string;
   user_email: string;
   phone_number: string;
+  permission: any[];
 }
 
 export interface UserList {

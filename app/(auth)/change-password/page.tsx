@@ -49,8 +49,8 @@ export default function ChangePassword() {
                   message: "Please enter the old password.",
                 },
                 {
-                  min: 6,
-                  message: "Password must be at least 6 characters.",
+                  min: 5,
+                  message: "Password must be at least 5 characters.",
                 },
                 {
                   max: 20,

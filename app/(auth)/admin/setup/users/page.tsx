@@ -34,10 +34,10 @@ import {
 import { toast } from "react-toastify";
 
 export default function Users() {
+  const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [form] = Form.useForm();
 
   const [selected, setSelected] = useState<string[]>([]);
 
@@ -66,6 +66,12 @@ export default function Users() {
           <Button
             onClick={() => {
               setEditingUser(record);
+              const codes = record?.permission
+                ?.map((id) => permissionData?.find((p) => p.id === id)?.code)
+                .filter((c): c is string => !!c);
+
+              setSelected(codes);
+
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
@@ -141,6 +147,7 @@ export default function Users() {
       />
 
       <Modal
+        loading={loadingPermission}
         width={"90vw"}
         title={editingUser ? "Edit User" : "Add User"}
         open={isModalOpen}
