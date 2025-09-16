@@ -33,7 +33,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AntButton } from "@/app/components/AntButton";
 import { useUserLogout } from "@/app/hooks/useAuthUser";
-import { useQueryClient } from "@tanstack/react-query";
 
 const { Header, Sider, Content } = Layout;
 

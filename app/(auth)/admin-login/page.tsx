@@ -3,7 +3,6 @@ import { AntButton } from "@/app/components/AntButton";
 import { AuthForm } from "@/app/components/AuthForm";
 import { useLogin } from "@/app/hooks/useAuth";
 import { Card, Form } from "antd";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Login() {
@@ -34,8 +33,11 @@ export default function Login() {
           autoComplete="off"
         >
           <AuthForm />
-          <AntButton type="primary" htmlType="submit" block
-          loading={loginMutation.isPending}
+          <AntButton
+            type="primary"
+            htmlType="submit"
+            block
+            loading={loginMutation.isPending}
           >
             Submit
           </AntButton>

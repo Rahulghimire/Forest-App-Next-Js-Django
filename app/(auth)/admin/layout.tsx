@@ -19,7 +19,7 @@ import {
   Tooltip,
 } from "antd";
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useLogout } from "@/app/hooks/useAuth";
 import { AntButton } from "@/app/components/AntButton";
 
