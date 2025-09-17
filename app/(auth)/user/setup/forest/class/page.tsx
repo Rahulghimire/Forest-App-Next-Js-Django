@@ -89,6 +89,9 @@ export default function Class() {
       queryClient.invalidateQueries({ queryKey: ["class"] });
       toast.success("Class created");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const updateMutation = useMutation({
@@ -96,6 +99,9 @@ export default function Class() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["class"] });
       toast.success("Class updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -105,13 +111,16 @@ export default function Class() {
       queryClient.invalidateQueries({ queryKey: ["class"] });
       toast.success("Class deleted");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      createMutation.mutate(values);
+      await createMutation.mutateAsync(values);
     }
     setIsModalOpen(false);
     form.resetFields();

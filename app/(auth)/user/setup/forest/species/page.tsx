@@ -101,6 +101,9 @@ export default function Species() {
       queryClient.invalidateQueries({ queryKey: ["species"] });
       toast.success("Species created");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const updateMutation = useMutation({
@@ -108,6 +111,9 @@ export default function Species() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["species"] });
       toast.success("Species updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -117,13 +123,16 @@ export default function Species() {
       queryClient.invalidateQueries({ queryKey: ["species"] });
       toast.success("Species deleted");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      createMutation.mutate(values);
+      await createMutation.mutateAsync(values);
     }
     setIsModalOpen(false);
     form.resetFields();
