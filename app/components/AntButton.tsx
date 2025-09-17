@@ -58,3 +58,5 @@ export const AntButton = React.forwardRef<any, Props>(
     );
   }
 );
+
+AntButton.displayName = "AntButton";

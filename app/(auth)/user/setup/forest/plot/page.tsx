@@ -1,16 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Space,
-  Table,
-} from "antd";
+import { Button, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 
 import { AntButton } from "@/app/components/AntButton";
@@ -23,26 +14,56 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
+import { AntInput } from "@/app/components/AntInput";
+import { AntSelect } from "@/app/components/AntSelect";
+import { AntInputNumber } from "@/app/components/AntInputNumber";
 
-export default function Users() {
+export default function Plot() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchApi(`user/`),
+  const { data: plots, isLoading } = useQuery({
+    queryKey: ["plots"],
+    queryFn: () => fetchApi(`forest/plots/`),
   });
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Department", dataIndex: "department", key: "department" },
-    { title: "Email", dataIndex: "user_email", key: "user_email" },
-    { title: "Phone No.", dataIndex: "phone_number", key: "phone_number" },
+    { title: "प्लट आईडी", dataIndex: "plot_id", key: "plot_id" },
+    { title: "प्लट नाम", dataIndex: "plot_name", key: "plot_name" },
+    {
+      title: "क्षेत्रफल (हेक्टरमा)",
+      dataIndex: "area_hectares",
+      key: "area_hectares",
+    },
+    { title: "स्थान (जिल्ला, वडा)", dataIndex: "location", key: "location" },
+    {
+      title: "जीआईएस निर्देशाङ्क",
+      dataIndex: "gis_coordinates",
+      key: "gis_coordinates",
+    },
+    { title: "वन प्रकार", dataIndex: "forest_type", key: "forest_type" },
+    { title: "स्वामित्व", dataIndex: "ownership", key: "ownership" },
+    {
+      title: "प्रमुख प्रजाति",
+      dataIndex: "dominant_species",
+      key: "dominant_species",
+    },
+    {
+      title: "प्वृक्ष घनत्व (प्रति हे.)",
+      dataIndex: "tree_density",
+      key: "tree_density",
+    },
+    {
+      title: "औसत उमेर (वर्षमा)",
+      dataIndex: "avg_age_years",
+      key: "avg_age_years",
+    },
     {
       title: "Actions",
       key: "actions",
+      fixed: "right" as const,
       render: (_: any, record: User) => (
         <Space>
           <Button
@@ -64,27 +85,27 @@ export default function Users() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<User, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/plots/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User created");
+      queryClient.invalidateQueries({ queryKey: ["plots"] });
+      toast.success("Plot created");
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: User) => updateApi(`user/`, user),
+    mutationFn: (user: any) => updateApi(`forest/plots/`, user),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User updated");
+      queryClient.invalidateQueries({ queryKey: ["plots"] });
+      toast.success("Plot updated");
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`user/${id}/`),
+    mutationFn: (id: number) => deleteApi(`forest/plots/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User deleted");
+      queryClient.invalidateQueries({ queryKey: ["plots"] });
+      toast.success("Plot deleted");
     },
   });
 
@@ -106,22 +127,27 @@ export default function Users() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add User
+        Add Plot
       </AntButton>
 
       <Table
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={users?.data || []}
-        loading={isLoading}
+        dataSource={plots?.data || []}
+        loading={
+          isLoading ||
+          deleteMutation?.isPending ||
+          createMutation?.isPending ||
+          updateMutation?.isPending
+        }
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "800px" }}
+        scroll={{ y: 300, x: "1500px" }}
       />
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit User" : "Add User"}
+        title={editingUser ? "Edit Plot" : "Add Plot"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -136,148 +162,80 @@ export default function Users() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-3 gap-x-2">
-            <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[{ required: true, type: "email" }]}
-            >
-              <Input autoComplete="off" />
-            </Form.Item>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            <AntInput formProps={{ name: "plot_id", label: "प्लट आईडी" }} />
+            <AntInput formProps={{ name: "plot_name", label: "प्लट नाम" }} />
+            <AntInput
+              formProps={{
+                name: "area_hectares",
+                label: "क्षेत्रफल (हेक्टरमा)",
+              }}
+            />
 
-            {!editingUser && (
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[
-                  { required: true, message: "Please enter your password" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-            )}
+            <AntInput
+              formProps={{
+                name: "location",
+                label: "स्थान (जिल्ला, वडा)",
+              }}
+            />
 
-            <Form.Item
-              name={"department"}
-              label="Department"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+            <AntInput
+              formProps={{
+                name: "gis_coordinates",
+                label: "जीआईएस निर्देशाङ्क",
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "शाल", name: "शाल" },
+                { id: "साल", name: "साल" },
+                { id: "मिश्रित", name: "मिश्रित" },
               ]}
-            >
-              <Input placeholder="Enter department" />
-            </Form.Item>
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                label: "वन प्रकार",
+                name: "forest_type",
+              }}
+            />
 
-            <Form.Item
-              name={"phone_number"}
-              label="Phone Number"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+            <AntSelect
+              array={[
+                { id: "राष्ट्रिय", name: "राष्ट्रिय" },
+                { id: "सामुदायिक", name: "सामुदायिक" },
               ]}
-            >
-              <Input placeholder="Enter phone no." />
-            </Form.Item>
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                label: "स्वामित्व",
+                name: "ownership",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "dominant_species",
+                label: "प्रमुख प्रजाति",
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "tree_density",
+                label: "प्वृक्ष घनत्व (प्रति हे.)",
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "avg_age_years",
+                label: "औसत उमेर (वर्षमा)",
+              }}
+            />
           </div>
 
-          <Divider />
-
-          <div className="font-semibold mb-2">Position Details</div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Form.Item
-                name={["position_data", "position_name"]}
-                label="Position Name"
-                rules={[
-                  { required: true, message: "Please enter your position" },
-                ]}
-              >
-                <Input placeholder="Enter position name" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "level"]}
-                label="Level"
-                rules={[{ required: true, message: "Please enter your level" }]}
-              >
-                <Select
-                  options={[
-                    { value: "Senior-level", label: "Senior-level" },
-                    { value: "Mid-level", label: "Mid-level" },
-                    { value: "Junior-level", label: "Junior-level" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "responsibilities"]}
-                label="Responsibilities"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your responsibilities",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter responsibilities" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "qualification"]}
-                label="Qualification"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your qualification",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter qualification" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "salary_scale"]}
-                label="Salary Scale"
-                rules={[
-                  { required: true, message: "Please enter your salary scale" },
-                ]}
-              >
-                <Select
-                  options={[
-                    { value: "10000-20000", label: "10000-20000" },
-                    { value: "20000-30000", label: "20000-30000" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "department"]}
-                label="Department"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your department",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter department" />
-              </Form.Item>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-x-3">
+          <div className="flex justify-end gap-x-3 mt-3">
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

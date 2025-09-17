@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Checkbox,
   Divider,
   Form,
   Input,
@@ -15,7 +16,9 @@ import { useState } from "react";
 import {
   createUser,
   deleteUser,
+  fetchPermission,
   fetchUsers,
+  Permission,
   updateUser,
   User,
   UserList,
@@ -31,14 +34,23 @@ import {
 import { toast } from "react-toastify";
 
 export default function Users() {
+  const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [form] = Form.useForm();
+
+  const [selected, setSelected] = useState<string[]>([]);
 
   const { data: users, isLoading } = useQuery<UserList>({
     queryKey: ["users"],
     queryFn: fetchUsers,
+  });
+
+  const { data: permissionData, isLoading: loadingPermission } = useQuery<
+    Permission[]
+  >({
+    queryKey: ["permissions"],
+    queryFn: fetchPermission,
   });
 
   const columns = [
@@ -54,11 +66,13 @@ export default function Users() {
           <Button
             onClick={() => {
               setEditingUser(record);
+              const codes = record?.permission?.map((p) => p.code);
+              setSelected(codes);
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -95,20 +109,28 @@ export default function Users() {
 
   const handleFinish = (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      updateMutation.mutate({
+        ...editingUser,
+        permission_list: selected,
+        ...values,
+      });
     } else {
-      createMutation.mutate(values);
+      createMutation.mutate({ ...values, permission_list: selected });
     }
     setIsModalOpen(false);
     form.resetFields();
     setEditingUser(null);
+    setSelected([]);
   };
 
   return (
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setIsModalOpen(true);
+          setSelected([]);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add User
@@ -119,12 +141,18 @@ export default function Users() {
         columns={columns || []}
         bordered
         dataSource={users?.data || []}
-        loading={isLoading}
+        loading={
+          isLoading ||
+          deleteMutation?.isPending ||
+          createMutation?.isPending ||
+          updateMutation?.isPending
+        }
         style={{ marginTop: 16 }}
         scroll={{ y: 300, x: "800px" }}
       />
 
       <Modal
+        loading={loadingPermission}
         width={"90vw"}
         title={editingUser ? "Edit User" : "Add User"}
         open={isModalOpen}
@@ -141,7 +169,7 @@ export default function Users() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-3 gap-x-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <Form.Item name="name" label="Name" rules={[{ required: true }]}>
               <Input />
             </Form.Item>
@@ -186,11 +214,15 @@ export default function Users() {
             </Form.Item>
           </div>
 
-          <Divider />
+          <Divider
+            style={{
+              margin: "6px 0",
+            }}
+          />
 
           <div className="font-semibold mb-2">Position Details</div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
             <div>
               <Form.Item
                 name={["position_data", "position_name"]}
@@ -282,7 +314,44 @@ export default function Users() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-x-3">
+          <Divider
+            style={{
+              margin: "6px 0",
+            }}
+          />
+
+          <div className="font-semibold text-gray-700 mb-3">Permissions</div>
+          <Checkbox
+            indeterminate={
+              selected.length > 0 &&
+              selected.length < (permissionData?.length ?? 0)
+            }
+            checked={
+              selected.length > 0 &&
+              selected.length === (permissionData?.length ?? 0)
+            }
+            onChange={(e) =>
+              setSelected(
+                e.target.checked ? permissionData?.map((p) => p.code) ?? [] : []
+              )
+            }
+          >
+            Check all
+          </Checkbox>
+
+          <div className="p-4 mt-2 rounded-lg shadow-sm bg-white">
+            <Checkbox.Group
+              className="grid grid-cols-2 gap-2"
+              options={permissionData?.map((p) => ({
+                label: p.code,
+                value: p.code,
+              }))}
+              value={selected}
+              onChange={(vals) => setSelected(vals as string[])}
+            />
+          </div>
+
+          <div className="flex justify-end gap-x-3 mt-3">
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

@@ -1,4 +1,5 @@
-import { message } from "antd";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 export interface LoginCredentials {
   email: string;
@@ -32,10 +33,11 @@ export interface ApiError {
   status: number;
 }
 
-import Cookies from "js-cookie";
-
 export const authAPI = {
-  login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
+  login: async (
+    credentials: LoginCredentials,
+    router: any
+  ): Promise<LoginResponse> => {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}user/login/`,
       {
@@ -47,16 +49,22 @@ export const authAPI = {
       }
     );
 
+    const resData = await response.json();
+
+    if (resData?.detail?.toLowerCase() === "password change required") {
+      router.push("/admin-login/change-password");
+    }
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      message.error(errorData.message || "Login failed");
+      toast.error(errorData.message || "Login failed");
       throw {
         message: errorData.message || "Login failed",
         status: response.status,
       } as ApiError;
     }
 
-    return response.json();
+    return resData;
   },
 
   changePassword: async (credentials: PasswordCredentials): Promise<void> => {
@@ -75,7 +83,7 @@ export const authAPI = {
     );
 
     if (!response.ok) {
-      message.error("Change password failed");
+      toast.error("Change password failed");
       throw new Error("Change password failed");
     }
   },
@@ -96,7 +104,7 @@ export const authAPI = {
     );
 
     if (!response.ok) {
-      message.error("Logout failed");
+      toast.error("Logout failed");
       throw new Error("Logout failed");
     }
   },

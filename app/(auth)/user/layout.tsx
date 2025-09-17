@@ -29,11 +29,10 @@ import {
   theme,
   Tooltip,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AntButton } from "@/app/components/AntButton";
 import { useUserLogout } from "@/app/hooks/useAuthUser";
-import { useQueryClient } from "@tanstack/react-query";
 
 const { Header, Sider, Content } = Layout;
 
@@ -49,7 +48,15 @@ export default function AdminLayout({
   } = theme.useToken();
   const logoutMutation = useUserLogout();
 
-  const data = JSON.parse(localStorage.getItem("user_data") || "");
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user_data");
+      if (stored) setData(JSON.parse(stored));
+    } catch {
+      setData(null);
+    }
+  }, []);
 
   return (
     <Layout>
@@ -81,6 +88,15 @@ export default function AdminLayout({
             if (key === "11-4")
               router.push("/user/setup/office/roles-permissions");
             if (key === "11-5") router.push("/user/setup/office/fiscal-year");
+            if (key === "12-1") router.push("/user/setup/forest/plot");
+            if (key === "12-2") router.push("/user/setup/forest/species");
+            if (key === "12-3") router.push("/user/setup/forest/stock-types");
+            if (key === "12-4")
+              router.push("/user/setup/forest/classification-title");
+            if (key === "12-5") router.push("/user/setup/forest/class");
+            if (key === "12-6")
+              router.push("/user/setup/forest/grade-cutting-rule");
+            if (key === "12-7") router.push("/user/setup/forest/unit");
           }}
           items={items}
         />
@@ -93,7 +109,7 @@ export default function AdminLayout({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            paddingInlineEnd: "10px",
+            paddingInlineEnd: "17px",
           }}
         >
           <Button
@@ -133,8 +149,9 @@ export default function AdminLayout({
 
         <Content
           style={{
-            margin: "24px 16px",
-            padding: 24,
+            margin: "10px",
+            // margin: "10px 10px 0px 16px",
+            padding: 10,
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,

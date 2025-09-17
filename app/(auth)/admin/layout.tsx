@@ -18,8 +18,8 @@ import {
   theme,
   Tooltip,
 } from "antd";
-import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLogout } from "@/app/hooks/useAuth";
 import { AntButton } from "@/app/components/AntButton";
 
@@ -40,7 +40,17 @@ export default function AdminLayout({
 
   const logoutMutation = useLogout();
 
-  const data = JSON.parse(localStorage.getItem("admin_data") || "");
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("admin_data");
+      if (stored) {
+        setData(JSON.parse(stored));
+      }
+    } catch {
+      setData(null);
+    }
+  }, []);
 
   return (
     <>

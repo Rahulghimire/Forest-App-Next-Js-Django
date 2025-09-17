@@ -1,5 +1,5 @@
 import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
-import { Form, Input, Button } from "antd";
+import { Form, Input } from "antd";
 
 export const AuthForm = () => {
   return (
@@ -17,7 +17,7 @@ export const AuthForm = () => {
         rules={[{ required: true, message: "Please input your password!" }]}
       >
         <Input.Password
-          placeholder="input password"
+          placeholder="Enter password"
           autoComplete="off"
           iconRender={(visible) =>
             visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />

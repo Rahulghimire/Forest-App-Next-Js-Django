@@ -1,6 +1,3 @@
-import { message } from "antd";
-import { redirect } from "next/navigation";
-
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -13,6 +10,7 @@ export interface PasswordCredentials {
 }
 
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 export interface LoginResponse {
   access_token: string;
@@ -60,7 +58,7 @@ export const authAPI = {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      message.error(errorData.message || "Login failed");
+      toast.error(errorData.message || "Login failed");
       throw {
         message: errorData.message || "Login failed",
         status: response.status,
@@ -85,7 +83,7 @@ export const authAPI = {
     );
 
     if (!response.ok) {
-      message.error("Change password failed");
+      toast.error("Change password failed");
       throw new Error("Change password failed");
     }
   },
@@ -106,7 +104,7 @@ export const authAPI = {
     );
 
     if (!response.ok) {
-      message.error("Logout failed");
+      toast.error("Logout failed");
       throw new Error("Logout failed");
     }
   },

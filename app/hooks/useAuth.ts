@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { ApiError, authAPI } from "../lib/auth";
+import { ApiError, authAPI, LoginCredentials } from "../lib/auth";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 
@@ -9,7 +9,8 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: authAPI.login,
+    mutationFn: (credentials: LoginCredentials) =>
+      authAPI.login(credentials, router),
     onSuccess: (data) => {
       Cookies.set("admin_access_token", data?.access_token, {
         expires: 7,

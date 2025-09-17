@@ -5,6 +5,7 @@ export interface User {
   role: string;
   user_email: string;
   phone_number: string;
+  permission: { id: number; code: string }[];
 }
 
 export interface UserList {
@@ -12,6 +13,11 @@ export interface UserList {
   next: string | null;
   previous: string | null;
   data: User[];
+}
+
+export interface Permission {
+  code: string;
+  id: number;
 }
 
 import Cookies from "js-cookie";
@@ -22,6 +28,19 @@ export const fetchUsers = async (): Promise<UserList> => {
       Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
     },
   });
+  if (!res.ok) throw new Error("Error fetching users");
+  return res.json();
+};
+
+export const fetchPermission = async (): Promise<Permission[]> => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}user/permission/`,
+    {
+      headers: {
+        Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
+      },
+    }
+  );
   if (!res.ok) throw new Error("Error fetching users");
   return res.json();
 };
