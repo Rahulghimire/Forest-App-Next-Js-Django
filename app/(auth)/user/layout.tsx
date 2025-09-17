@@ -29,7 +29,7 @@ import {
   theme,
   Tooltip,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AntButton } from "@/app/components/AntButton";
 import { useUserLogout } from "@/app/hooks/useAuthUser";
@@ -48,7 +48,15 @@ export default function AdminLayout({
   } = theme.useToken();
   const logoutMutation = useUserLogout();
 
-  const data = JSON.parse(localStorage.getItem("user_data") || "");
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user_data");
+      if (stored) setData(JSON.parse(stored));
+    } catch {
+      setData(null);
+    }
+  }, []);
 
   return (
     <Layout>

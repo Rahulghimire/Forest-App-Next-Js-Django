@@ -23,6 +23,9 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
+import { AntInput } from "@/app/components/AntInput";
+import { AntSelect } from "@/app/components/AntSelect";
+import { AntInputNumber } from "@/app/components/AntInputNumber";
 
 export default function Plot() {
   const queryClient = useQueryClient();
@@ -36,10 +39,52 @@ export default function Plot() {
   });
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Department", dataIndex: "department", key: "department" },
-    { title: "Email", dataIndex: "user_email", key: "user_email" },
-    { title: "Phone No.", dataIndex: "phone_number", key: "phone_number" },
+    { title: "Status", dataIndex: "status", key: "status" },
+    { title: "Plot Name", dataIndex: "plot_name", key: "plot_name" },
+    {
+      title: "Area (Hectares)",
+      dataIndex: "area_hectares",
+      key: "area_hectares",
+    },
+    { title: "Location", dataIndex: "location", key: "location" },
+    {
+      title: "GIS Coordinates",
+      dataIndex: "gis_coordinates",
+      key: "gis_coordinates",
+    },
+    { title: "Forest Type", dataIndex: "forest_type", key: "forest_type" },
+    { title: "Ownership", dataIndex: "ownership", key: "ownership" },
+    {
+      title: "Dominant Species",
+      dataIndex: "dominant_species",
+      key: "dominant_species",
+    },
+    { title: "Tree Density", dataIndex: "tree_density", key: "tree_density" },
+    {
+      title: "Avg Age (Years)",
+      dataIndex: "avg_age_years",
+      key: "avg_age_years",
+    },
+    {
+      title: "Produce Types",
+      dataIndex: "produce_types",
+      key: "produce_types",
+    },
+    {
+      title: "Protected Area",
+      dataIndex: "protected_area",
+      key: "protected_area",
+    },
+    {
+      title: "Boundary Description",
+      dataIndex: "boundary_description",
+      key: "boundary_description",
+    },
+    {
+      title: "Mgmt Plan Ref No",
+      dataIndex: "mgmt_plan_ref_no",
+      key: "mgmt_plan_ref_no",
+    },
     {
       title: "Actions",
       key: "actions",
@@ -64,27 +109,27 @@ export default function Plot() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<User, "id">) =>
+    mutationFn: (data: Omit<any, "id">) =>
       createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User created");
+      queryClient.invalidateQueries({ queryKey: ["plots"] });
+      toast.success("Plot created");
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: User) => updateApi(`user/`, user),
+    mutationFn: (user: any) => updateApi(`user/`, user),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User updated");
+      queryClient.invalidateQueries({ queryKey: ["plots"] });
+      toast.success("Plot updated");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteApi(`user/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User deleted");
+      queryClient.invalidateQueries({ queryKey: ["plots"] });
+      toast.success("Plot deleted");
     },
   });
 
@@ -121,7 +166,7 @@ export default function Plot() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit User" : "Add User"}
+        title={editingUser ? "Edit Plot" : "Add Plot"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -136,164 +181,87 @@ export default function Plot() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-3 gap-x-2">
-            <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[{ required: true, type: "email" }]}
-            >
-              <Input autoComplete="off" />
-            </Form.Item>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            <AntInput formProps={{ name: "plot_id", label: "प्लट आईडी" }} />
+            <AntInput formProps={{ name: "plot_name", label: "प्लट नाम" }} />
+            <AntInput
+              formProps={{
+                name: "area_hectares",
+                label: "क्षेत्रफल (हेक्टरमा)",
+              }}
+            />
 
-            {!editingUser && (
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[
-                  { required: true, message: "Please enter your password" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-            )}
+            <AntInput
+              formProps={{
+                name: "location",
+                label: "स्थान (जिल्ला, वडा)",
+              }}
+            />
 
-            <Form.Item
-              name={"department"}
-              label="Department"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+            <AntInput
+              formProps={{
+                name: "location",
+                label: "स्थान (जिल्ला, वडा)",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "gis_coordinates",
+                label: "जीआईएस निर्देशाङ्क",
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "शाल", name: "शाल" },
+                { id: "साल", name: "साल" },
+                { id: "मिश्रित", name: "मिश्रित" },
               ]}
-            >
-              <Input placeholder="Enter department" />
-            </Form.Item>
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                label: "वन प्रकार",
+                name: "forest_type",
+              }}
+            />
 
-            <Form.Item
-              name={"phone_number"}
-              label="Phone Number"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+            <AntSelect
+              array={[
+                { id: "राष्ट्रिय", name: "राष्ट्रिय" },
+                { id: "सामुदायिक", name: "सामुदायिक" },
               ]}
-            >
-              <Input placeholder="Enter phone no." />
-            </Form.Item>
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                label: "स्वामित्व",
+                name: "ownership",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "dominant_species",
+                label: "प्रमुख प्रजाति",
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "tree_density",
+                label: "प्वृक्ष घनत्व (प्रति हे.)",
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "avg_age_years",
+                label: "औसत उमेर (वर्षमा)",
+              }}
+            />
           </div>
 
           <Divider />
-
-          <div className="font-semibold mb-2">Position Details</div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Form.Item
-                name={["position_data", "position_name"]}
-                label="Position Name"
-                rules={[
-                  { required: true, message: "Please enter your position" },
-                ]}
-              >
-                <Input placeholder="Enter position name" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "level"]}
-                label="Level"
-                rules={[{ required: true, message: "Please enter your level" }]}
-              >
-                <Select
-                  options={[
-                    { value: "Senior-level", label: "Senior-level" },
-                    { value: "Mid-level", label: "Mid-level" },
-                    { value: "Junior-level", label: "Junior-level" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "responsibilities"]}
-                label="Responsibilities"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your responsibilities",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter responsibilities" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "qualification"]}
-                label="Qualification"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your qualification",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter qualification" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "salary_scale"]}
-                label="Salary Scale"
-                rules={[
-                  { required: true, message: "Please enter your salary scale" },
-                ]}
-              >
-                <Select
-                  options={[
-                    { value: "10000-20000", label: "10000-20000" },
-                    { value: "20000-30000", label: "20000-30000" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "department"]}
-                label="Department"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your department",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter department" />
-              </Form.Item>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-x-3">
-            <AntButton
-              color="red"
-              icon={<CloseCircleOutlined />}
-              onClick={() => {
-                setIsModalOpen(false);
-                setEditingUser(null);
-                form.resetFields();
-              }}
-            >
-              Cancel
-            </AntButton>
-
-            <AntButton htmlType="submit" icon={<SaveOutlined />}>
-              Save
-            </AntButton>
-          </div>
         </Form>
       </Modal>
     </div>

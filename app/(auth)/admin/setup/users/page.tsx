@@ -66,17 +66,13 @@ export default function Users() {
           <Button
             onClick={() => {
               setEditingUser(record);
-              const codes = record?.permission
-                ?.map((id) => permissionData?.find((p) => p.id === id)?.code)
-                .filter((c): c is string => !!c);
-
+              const codes = record?.permission?.map((p) => p.code);
               setSelected(codes);
-
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -124,13 +120,17 @@ export default function Users() {
     setIsModalOpen(false);
     form.resetFields();
     setEditingUser(null);
+    setSelected([]);
   };
 
   return (
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setIsModalOpen(true);
+          setSelected([]);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add User
@@ -164,7 +164,7 @@ export default function Users() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-4 gap-x-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <Form.Item name="name" label="Name" rules={[{ required: true }]}>
               <Input />
             </Form.Item>
@@ -217,7 +217,7 @@ export default function Users() {
 
           <div className="font-semibold mb-2">Position Details</div>
 
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
             <div>
               <Form.Item
                 name={["position_data", "position_name"]}
@@ -315,10 +315,28 @@ export default function Users() {
             }}
           />
 
-          <div className="font-semibold mb-2">Permission</div>
+          <div className="font-semibold text-gray-700 mb-3">Permissions</div>
+          <Checkbox
+            indeterminate={
+              selected.length > 0 &&
+              selected.length < (permissionData?.length ?? 0)
+            }
+            checked={
+              selected.length > 0 &&
+              selected.length === (permissionData?.length ?? 0)
+            }
+            onChange={(e) =>
+              setSelected(
+                e.target.checked ? permissionData?.map((p) => p.code) ?? [] : []
+              )
+            }
+          >
+            Check all
+          </Checkbox>
 
-          <div className="py-2">
+          <div className="p-4 mt-2 rounded-lg shadow-sm bg-white">
             <Checkbox.Group
+              className="grid grid-cols-2 gap-2"
               options={permissionData?.map((p) => ({
                 label: p.code,
                 value: p.code,

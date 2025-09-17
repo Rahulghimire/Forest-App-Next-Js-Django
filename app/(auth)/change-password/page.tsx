@@ -17,9 +17,11 @@ export default function ChangePassword() {
   const changePasswordMutation = useUserChangePassword();
 
   const onFinish = (values: any) => {
+    const email =
+      typeof window !== "undefined" ? localStorage.getItem("user_email") : "";
     changePasswordMutation.mutate({
       ...values,
-      email: localStorage.getItem("user_email"),
+      email,
     });
   };
 

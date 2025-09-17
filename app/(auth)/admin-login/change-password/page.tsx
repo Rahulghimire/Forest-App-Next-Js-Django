@@ -17,8 +17,12 @@ export default function ChangePassword() {
   const changePasswordMutation = useChangePassword();
 
   const onFinish = (values: any) => {
-    changePasswordMutation.mutate({...values,
-      email: localStorage.getItem("user_email")
+    const email =
+      typeof window !== "undefined" ? localStorage.getItem("user_email") : "";
+
+    changePasswordMutation.mutate({
+      ...values,
+      email,
     });
   };
 
@@ -147,7 +151,6 @@ export default function ChangePassword() {
                 >
                   Save
                 </AntButton>
-
               </Space>
             </div>
           </Form>

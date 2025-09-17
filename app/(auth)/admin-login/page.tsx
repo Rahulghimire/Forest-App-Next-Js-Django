@@ -12,7 +12,9 @@ export default function Login() {
 
   const handleSubmit = async (values: any) => {
     loginMutation.mutate(values);
-    localStorage.setItem("user_email", values?.email);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_email", values?.email);
+    }
   };
 
   useEffect(() => {
