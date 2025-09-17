@@ -70,6 +70,9 @@ export default function Classification() {
       queryClient.invalidateQueries({ queryKey: ["classifications"] });
       toast.success("Classification Title created");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const updateMutation = useMutation({
@@ -77,6 +80,9 @@ export default function Classification() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classifications"] });
       toast.success("Classification Title updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -86,13 +92,16 @@ export default function Classification() {
       queryClient.invalidateQueries({ queryKey: ["classifications"] });
       toast.success("Classification Title deleted");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      createMutation.mutate(values);
+      await createMutation.mutateAsync(values);
     }
     setIsModalOpen(false);
     form.resetFields();

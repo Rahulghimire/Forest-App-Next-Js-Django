@@ -69,6 +69,9 @@ export default function Depot() {
       queryClient.invalidateQueries({ queryKey: ["depot"] });
       toast.success("Depot created");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const updateMutation = useMutation({
@@ -76,6 +79,9 @@ export default function Depot() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["depot"] });
       toast.success("Depot updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -85,13 +91,16 @@ export default function Depot() {
       queryClient.invalidateQueries({ queryKey: ["depot"] });
       toast.success("Depot deleted");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      createMutation.mutate(values);
+      await createMutation.mutateAsync(values);
     }
     setIsModalOpen(false);
     form.resetFields();

@@ -70,6 +70,9 @@ export default function StockType() {
       queryClient.invalidateQueries({ queryKey: ["stocks"] });
       toast.success("Stock Type created");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const updateMutation = useMutation({
@@ -77,6 +80,9 @@ export default function StockType() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stocks"] });
       toast.success("Stock Type updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -86,13 +92,16 @@ export default function StockType() {
       queryClient.invalidateQueries({ queryKey: ["stocks"] });
       toast.success("Stock Type deleted");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      createMutation.mutate(values);
+      await createMutation.mutateAsync(values);
     }
     setIsModalOpen(false);
     form.resetFields();
