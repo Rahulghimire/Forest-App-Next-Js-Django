@@ -1,16 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Space,
-  Table,
-} from "antd";
+import { Button, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 
 import { AntButton } from "@/app/components/AntButton";
@@ -23,32 +14,65 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
+import { AntInput } from "@/app/components/AntInput";
+import { AntSelect } from "@/app/components/AntSelect";
+import { AntInputNumber } from "@/app/components/AntInputNumber";
 
-export default function Users() {
+export default function Member() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchApi(`user/`),
+  const { data: plots, isLoading } = useQuery({
+    queryKey: ["position"],
+    queryFn: () => fetchApi(`user/position/`),
   });
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Department", dataIndex: "department", key: "department" },
-    { title: "Email", dataIndex: "user_email", key: "user_email" },
-    { title: "Phone No.", dataIndex: "phone_number", key: "phone_number" },
+    { title: "Forest Type", dataIndex: "forest_type", key: "forest_type" },
+    { title: "Ownership", dataIndex: "ownership", key: "ownership" },
+    {
+      title: "Dominant Species",
+      dataIndex: "dominant_species",
+      key: "dominant_species",
+    },
+    { title: "Tree Density", dataIndex: "tree_density", key: "tree_density" },
+    {
+      title: "Avg Age Years",
+      dataIndex: "avg_age_years",
+      key: "avg_age_years",
+    },
+    {
+      title: "Product Types",
+      dataIndex: "produce_types",
+      key: "produce_types",
+    },
+    {
+      title: "Protected Area",
+      dataIndex: "protected_area",
+      key: "protected_area",
+    },
+    {
+      title: "Boundary Description",
+      dataIndex: "boundary_description",
+      key: "boundary_description",
+    },
+    {
+      title: "Mgmt Plan Ref No",
+      dataIndex: "mgmt_plan_ref_no",
+      key: "mgmt_plan_ref_no",
+    },
     {
       title: "Actions",
       key: "actions",
+      fixed: "right" as const,
       render: (_: any, record: User) => (
         <Space>
           <Button
             onClick={() => {
               setEditingUser(record);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              form.setFieldsValue({ ...record });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
@@ -64,35 +88,44 @@ export default function Users() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<User, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/position/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User created");
+      queryClient.invalidateQueries({ queryKey: ["position"] });
+      toast.success("Position created");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: User) => updateApi(`user/`, user),
+    mutationFn: (user: any) => updateApi(`user/position/`, user),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User updated");
+      queryClient.invalidateQueries({ queryKey: ["position"] });
+      toast.success("Position updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`user/${id}/`),
+    mutationFn: (id: number) => deleteApi(`user/position/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User deleted");
+      queryClient.invalidateQueries({ queryKey: ["position"] });
+      toast.success("Position deleted");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      createMutation.mutate(values);
+      await createMutation.mutateAsync(values);
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -106,22 +139,27 @@ export default function Users() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add User
+        Add Member
       </AntButton>
 
       <Table
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={users?.data || []}
-        loading={isLoading}
+        dataSource={plots?.data || []}
+        loading={
+          isLoading ||
+          deleteMutation?.isPending ||
+          createMutation?.isPending ||
+          updateMutation?.isPending
+        }
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "800px" }}
+        scroll={{ y: 300, x: "1500px" }}
       />
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit User" : "Add User"}
+        title={editingUser ? "Edit Plot" : "Add Plot"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -136,148 +174,101 @@ export default function Users() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-3 gap-x-2">
-            <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[{ required: true, type: "email" }]}
-            >
-              <Input autoComplete="off" />
-            </Form.Item>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            <AntInput
+              formProps={{
+                name: "forest_type",
+                label: "Forest Type",
+                rules: [{ required: true, message: "Forest Type" }],
+              }}
+            />
+            <AntInput
+              formProps={{
+                name: "ownership",
+                label: "Ownership",
+                rules: [{ required: true, message: "Ownership" }],
+              }}
+            />
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Dominant Species" }],
+                name: "dominant_species",
+                label: "Dominant Species",
+              }}
+            />
 
-            {!editingUser && (
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[
-                  { required: true, message: "Please enter your password" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-            )}
+            <AntInput
+              formProps={{
+                name: "tree_density",
+                rules: [{ required: true, message: "Tree Density" }],
+                label: "Tree Density",
+              }}
+            />
 
-            <Form.Item
-              name={"department"}
-              label="Department"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+            <AntInputNumber
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "Avg Age Years" }],
+                name: "avg_age_years",
+                label: "Avg Age Years",
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "wood", name: "wood" },
+                { id: "wood", name: "wood" },
+                { id: "wood", name: "wood" },
               ]}
-            >
-              <Input placeholder="Enter department" />
-            </Form.Item>
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "Product Types" }],
+                label: "Product Types",
+                name: "produce_types",
+              }}
+            />
 
-            <Form.Item
-              name={"phone_number"}
-              label="Phone Number"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+            <AntSelect
+              array={[
+                { id: "YES", name: "YES" },
+                { id: "NO", name: "NO" },
               ]}
-            >
-              <Input placeholder="Enter phone no." />
-            </Form.Item>
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "Protected Area" }],
+                label: "Protected Area",
+                name: "protected_area",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Boundary Description" }],
+                name: "boundary_description",
+                label: "Boundary Description",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Boundary Description" }],
+                name: "boundary_description",
+                label: "Boundary Description",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Mgmt Plan Ref No" }],
+                name: "mgmt_plan_ref_no",
+                label: "प्वृक्ष घनत्व (प्रति हे.)",
+              }}
+            />
           </div>
 
-          <Divider />
-
-          <div className="font-semibold mb-2">Position Details</div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Form.Item
-                name={["position_data", "position_name"]}
-                label="Position Name"
-                rules={[
-                  { required: true, message: "Please enter your position" },
-                ]}
-              >
-                <Input placeholder="Enter position name" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "level"]}
-                label="Level"
-                rules={[{ required: true, message: "Please enter your level" }]}
-              >
-                <Select
-                  options={[
-                    { value: "Senior-level", label: "Senior-level" },
-                    { value: "Mid-level", label: "Mid-level" },
-                    { value: "Junior-level", label: "Junior-level" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "responsibilities"]}
-                label="Responsibilities"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your responsibilities",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter responsibilities" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "qualification"]}
-                label="Qualification"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your qualification",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter qualification" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "salary_scale"]}
-                label="Salary Scale"
-                rules={[
-                  { required: true, message: "Please enter your salary scale" },
-                ]}
-              >
-                <Select
-                  options={[
-                    { value: "10000-20000", label: "10000-20000" },
-                    { value: "20000-30000", label: "20000-30000" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "department"]}
-                label="Department"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your department",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter department" />
-              </Form.Item>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-x-3">
+          <div className="flex justify-end gap-x-3 mt-3">
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}
