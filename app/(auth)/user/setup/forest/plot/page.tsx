@@ -1,16 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Space,
-  Table,
-} from "antd";
+import { Button, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 
 import { AntButton } from "@/app/components/AntButton";
@@ -39,55 +30,40 @@ export default function Plot() {
   });
 
   const columns = [
-    { title: "Status", dataIndex: "status", key: "status" },
-    { title: "Plot Name", dataIndex: "plot_name", key: "plot_name" },
+    { title: "प्लट आईडी", dataIndex: "plot_id", key: "plot_id" },
+    { title: "प्लट नाम", dataIndex: "plot_name", key: "plot_name" },
     {
-      title: "Area (Hectares)",
+      title: "क्षेत्रफल (हेक्टरमा)",
       dataIndex: "area_hectares",
       key: "area_hectares",
     },
-    { title: "Location", dataIndex: "location", key: "location" },
+    { title: "स्थान (जिल्ला, वडा)", dataIndex: "location", key: "location" },
     {
-      title: "GIS Coordinates",
+      title: "जीआईएस निर्देशाङ्क",
       dataIndex: "gis_coordinates",
       key: "gis_coordinates",
     },
-    { title: "Forest Type", dataIndex: "forest_type", key: "forest_type" },
-    { title: "Ownership", dataIndex: "ownership", key: "ownership" },
+    { title: "वन प्रकार", dataIndex: "forest_type", key: "forest_type" },
+    { title: "स्वामित्व", dataIndex: "ownership", key: "ownership" },
     {
-      title: "Dominant Species",
+      title: "प्रमुख प्रजाति",
       dataIndex: "dominant_species",
       key: "dominant_species",
     },
-    { title: "Tree Density", dataIndex: "tree_density", key: "tree_density" },
     {
-      title: "Avg Age (Years)",
+      title: "प्वृक्ष घनत्व (प्रति हे.)",
+      dataIndex: "tree_density",
+      key: "tree_density",
+    },
+    {
+      title: "औसत उमेर (वर्षमा)",
       dataIndex: "avg_age_years",
       key: "avg_age_years",
     },
     {
-      title: "Produce Types",
-      dataIndex: "produce_types",
-      key: "produce_types",
-    },
-    {
-      title: "Protected Area",
-      dataIndex: "protected_area",
-      key: "protected_area",
-    },
-    {
-      title: "Boundary Description",
-      dataIndex: "boundary_description",
-      key: "boundary_description",
-    },
-    {
-      title: "Mgmt Plan Ref No",
-      dataIndex: "mgmt_plan_ref_no",
-      key: "mgmt_plan_ref_no",
-    },
-    {
       title: "Actions",
       key: "actions",
+      fixed: "right" as const,
       render: (_: any, record: User) => (
         <Space>
           <Button
@@ -110,7 +86,7 @@ export default function Plot() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/plots/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["plots"] });
       toast.success("Plot created");
@@ -118,7 +94,7 @@ export default function Plot() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`user/`, user),
+    mutationFn: (user: any) => updateApi(`forest/plots/`, user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["plots"] });
       toast.success("Plot updated");
@@ -126,7 +102,7 @@ export default function Plot() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`user/${id}/`),
+    mutationFn: (id: number) => deleteApi(`forest/plots/${id}/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["plots"] });
       toast.success("Plot deleted");
@@ -159,9 +135,14 @@ export default function Plot() {
         columns={columns || []}
         bordered
         dataSource={plots?.data || []}
-        loading={isLoading}
+        loading={
+          isLoading ||
+          deleteMutation?.isPending ||
+          createMutation?.isPending ||
+          updateMutation?.isPending
+        }
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "800px" }}
+        scroll={{ y: 300, x: "1500px" }}
       />
 
       <Modal
@@ -188,13 +169,6 @@ export default function Plot() {
               formProps={{
                 name: "area_hectares",
                 label: "क्षेत्रफल (हेक्टरमा)",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                name: "location",
-                label: "स्थान (जिल्ला, वडा)",
               }}
             />
 
@@ -261,7 +235,23 @@ export default function Plot() {
             />
           </div>
 
-          <Divider />
+          <div className="flex justify-end gap-x-3 mt-3">
+            <AntButton
+              color="red"
+              icon={<CloseCircleOutlined />}
+              onClick={() => {
+                setIsModalOpen(false);
+                setEditingUser(null);
+                form.resetFields();
+              }}
+            >
+              Cancel
+            </AntButton>
+
+            <AntButton htmlType="submit" icon={<SaveOutlined />}>
+              Save
+            </AntButton>
+          </div>
         </Form>
       </Modal>
     </div>

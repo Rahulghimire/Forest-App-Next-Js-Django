@@ -90,7 +90,7 @@ export default function AdminLayout({
             if (key === "11-5") router.push("/user/setup/office/fiscal-year");
             if (key === "12-1") router.push("/user/setup/forest/plot");
             if (key === "12-2") router.push("/user/setup/forest/species");
-            if (key === "12-3") router.push("/user/setup/forest/stock-type");
+            if (key === "12-3") router.push("/user/setup/forest/stock-types");
             if (key === "12-4")
               router.push("/user/setup/forest/classification-title");
             if (key === "12-5") router.push("/user/setup/forest/class");

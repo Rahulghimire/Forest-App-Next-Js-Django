@@ -141,7 +141,12 @@ export default function Users() {
         columns={columns || []}
         bordered
         dataSource={users?.data || []}
-        loading={isLoading}
+        loading={
+          isLoading ||
+          deleteMutation?.isPending ||
+          createMutation?.isPending ||
+          updateMutation?.isPending
+        }
         style={{ marginTop: 16 }}
         scroll={{ y: 300, x: "800px" }}
       />
