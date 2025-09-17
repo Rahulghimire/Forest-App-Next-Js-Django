@@ -153,6 +153,7 @@ export default function Classification() {
             />
             <AntInputNumber
               formProps={{
+                rules: [{ required: true, message: "रूपान्तरण फ्याक्टर" }],
                 name: "conversion_factor",
                 label: "रूपान्तरण फ्याक्टर",
               }}
