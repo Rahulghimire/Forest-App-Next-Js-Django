@@ -1,18 +1,9 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  DatePicker,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Space,
-  Table,
-} from "antd";
+import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
+import dayjs from "dayjs";
 
 import { AntButton } from "@/app/components/AntButton";
 import {
@@ -41,19 +32,109 @@ export default function Employee() {
   });
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Department", dataIndex: "department", key: "department" },
-    { title: "Email", dataIndex: "user_email", key: "user_email" },
-    { title: "Phone No.", dataIndex: "phone_number", key: "phone_number" },
+    { title: "Employee Id", dataIndex: "employee_id", key: "employee_id" },
+    {
+      title: "Employee Code",
+      dataIndex: "employee_code",
+      key: "employee_code",
+    },
+    { title: "Employee Name", dataIndex: "name", key: "name" },
+    {
+      title: "Employee Department",
+      dataIndex: "department",
+      key: "department",
+    },
+    { title: "Phone Number", dataIndex: "phone_number", key: "phone_number" },
+    { title: "Province", dataIndex: "province", key: "province" },
+    { title: "District", dataIndex: "district", key: "district" },
+    {
+      title: "Local Level Type",
+      dataIndex: "local_level_type",
+      key: "local_level_type",
+    },
+    {
+      title: "Local Level Name",
+      dataIndex: "local_level_name",
+      key: "local_level_name",
+    },
+    { title: "Ward No.", dataIndex: "ward_no", key: "ward_no" },
+    { title: "Tole", dataIndex: "tole", key: "tole" },
+    {
+      title: "Date of Birth",
+      dataIndex: "date_of_birth",
+      key: "date_of_birth",
+    },
+    {
+      title: "Appointment Date",
+      dataIndex: "appointment_date",
+      key: "appointment_date",
+    },
+    {
+      title: "Service Duration",
+      dataIndex: "service_duration",
+      key: "service_duration",
+    },
+    { title: "Status", dataIndex: "status", key: "status" },
+    {
+      title: "Citizenship No.",
+      dataIndex: "citizenship_no",
+      key: "citizenship_no",
+    },
+    { title: "Gender", dataIndex: "gender", key: "gender" },
+    {
+      title: "Emergency Contact",
+      dataIndex: "emergency_contact",
+      key: "emergency_contact",
+    },
+    {
+      title: "Bank Account No.",
+      dataIndex: "bank_account_no",
+      key: "bank_account_no",
+    },
+    { title: "Bank Name", dataIndex: "bank_name", key: "bank_name" },
+    {
+      title: "Employee Type",
+      dataIndex: "employment_type",
+      key: "employment_type",
+    },
+    { title: "Appointed By", dataIndex: "appointed_by", key: "appointed_by" },
+    {
+      title: "Contract End Date",
+      dataIndex: "contract_end_date",
+      key: "contract_end_date",
+    },
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: User) => (
+      fixed: "right" as const,
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
-              setEditingUser(record);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              setEditingUser({
+                ...record,
+                date_of_birth: record?.date_of_birth
+                  ? dayjs(record?.date_of_birth)
+                  : null,
+                appointment_date: record?.appointment_date
+                  ? dayjs(record?.appointment_date)
+                  : null,
+                contract_end_date: record?.contract_end_date
+                  ? dayjs(record?.contract_end_date)
+                  : null,
+              });
+              form.setFieldsValue({
+                ...record,
+                date_of_birth: record?.date_of_birth
+                  ? dayjs(record?.date_of_birth)
+                  : null,
+                appointment_date: record?.appointment_date
+                  ? dayjs(record?.appointment_date)
+                  : null,
+                contract_end_date: record?.contract_end_date
+                  ? dayjs(record?.contract_end_date)
+                  : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
@@ -121,7 +202,7 @@ export default function Employee() {
         dataSource={users?.data || []}
         loading={isLoading}
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "800px" }}
+        scroll={{ y: 300, x: "3000px" }}
       />
 
       <Modal
