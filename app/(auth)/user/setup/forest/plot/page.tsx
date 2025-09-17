@@ -17,6 +17,7 @@ import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSelect } from "@/app/components/AntSelect";
 import { AntInputNumber } from "@/app/components/AntInputNumber";
+import { AntSwitch } from "@/app/components/AntSwitch";
 
 export default function Plot() {
   const queryClient = useQueryClient();
@@ -167,6 +168,7 @@ export default function Plot() {
             <AntInput formProps={{ name: "plot_name", label: "प्लट नाम" }} />
             <AntInput
               formProps={{
+                rules: [{ required: true, message: "क्षेत्रफल (हेक्टरमा)" }],
                 name: "area_hectares",
                 label: "क्षेत्रफल (हेक्टरमा)",
               }}
@@ -175,12 +177,14 @@ export default function Plot() {
             <AntInput
               formProps={{
                 name: "location",
+                rules: [{ required: true, message: "स्थान (जिल्ला, वडा)" }],
                 label: "स्थान (जिल्ला, वडा)",
               }}
             />
 
             <AntInput
               formProps={{
+                rules: [{ required: true, message: "जीआईएस निर्देशाङ्क" }],
                 name: "gis_coordinates",
                 label: "जीआईएस निर्देशाङ्क",
               }}
@@ -195,6 +199,7 @@ export default function Plot() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
+                rules: [{ required: true, message: "वन प्रकार" }],
                 label: "वन प्रकार",
                 name: "forest_type",
               }}
@@ -208,6 +213,7 @@ export default function Plot() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
+                rules: [{ required: true, message: "स्वामित्व" }],
                 label: "स्वामित्व",
                 name: "ownership",
               }}
@@ -215,6 +221,7 @@ export default function Plot() {
 
             <AntInput
               formProps={{
+                rules: [{ required: true, message: "प्रमुख प्रजाति" }],
                 name: "dominant_species",
                 label: "प्रमुख प्रजाति",
               }}
@@ -222,6 +229,9 @@ export default function Plot() {
 
             <AntInputNumber
               formProps={{
+                rules: [
+                  { required: true, message: "प्वृक्ष घनत्व (प्रति हे.)" },
+                ],
                 name: "tree_density",
                 label: "प्वृक्ष घनत्व (प्रति हे.)",
               }}
@@ -229,8 +239,16 @@ export default function Plot() {
 
             <AntInputNumber
               formProps={{
+                rules: [{ required: true, message: "औसत उमेर (वर्षमा)" }],
                 name: "avg_age_years",
                 label: "औसत उमेर (वर्षमा)",
+              }}
+            />
+
+            <AntSwitch
+              formProps={{
+                name: "status",
+                label: "स्थिति",
               }}
             />
           </div>
