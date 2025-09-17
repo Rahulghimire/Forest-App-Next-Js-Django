@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  DatePicker,
   Divider,
   Form,
   Input,
@@ -23,16 +24,20 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
+import { AntInput } from "@/app/components/AntInput";
+import { AntInputNumber } from "@/app/components/AntInputNumber";
+import { AntSwitch } from "@/app/components/AntSwitch";
+import { AntSelect } from "@/app/components/AntSelect";
 
-export default function Users() {
+export default function Employee() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
   const { data: users, isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchApi(`user/`),
+    queryKey: ["employees"],
+    queryFn: () => fetchApi(`user/employee/`),
   });
 
   const columns = [
@@ -65,26 +70,26 @@ export default function Users() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<User, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/employee/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User created");
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      toast.success("Employee created");
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: User) => updateApi(`user/`, user),
+    mutationFn: (user: User) => updateApi(`user/employee/`, user),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User updated");
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      toast.success("Employee updated");
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`user/${id}/`),
+    mutationFn: (id: number) => deleteApi(`user/employee/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User deleted");
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      toast.success("Employee deleted");
     },
   });
 
@@ -106,7 +111,7 @@ export default function Users() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add User
+        Add Employee
       </AntButton>
 
       <Table
@@ -121,7 +126,7 @@ export default function Users() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit User" : "Add User"}
+        title={editingUser ? "Edit Employee" : "Add Employee"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -136,145 +141,199 @@ export default function Users() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-3 gap-x-2">
-            <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-2">
+            <AntInput
+              formProps={{
+                name: "employee_id",
+                label: "Employee Id",
+                rules: [{ required: true, message: "Employee Id" }],
+              }}
+            />
+            <AntInput
+              formProps={{
+                name: "employee_code",
+                label: "Employee Code",
+                rules: [{ required: true, message: "Employee Code" }],
+              }}
+            />
+            <AntInput
+              formProps={{
+                name: "name",
+                label: "Employee Name",
+                rules: [{ required: true, message: "Employee Name" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "department",
+                label: "Employee Department",
+                rules: [{ required: true, message: "Employee Department" }],
+              }}
+            />
+
+            <AntInput
+              min={10}
+              max={10}
+              formProps={{
+                name: "phone_number",
+                label: "Phone Number",
+                rules: [{ required: true, message: "Phone Number" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "province",
+                label: "Province",
+                rules: [{ required: true, message: "Province" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "district",
+                label: "District",
+                rules: [{ required: true, message: "District" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "local_level_type",
+                label: "Local Level Type",
+                rules: [{ required: true, message: "Local Level Type" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "local_level_name",
+                label: "Local Level Name",
+                rules: [{ required: true, message: "Local Level Name" }],
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "ward_no",
+                label: "Ward No.",
+                rules: [{ required: true, message: "Ward No." }],
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "tole",
+                label: "Tole",
+                rules: [{ required: true, message: "Tole" }],
+              }}
+            />
+
             <Form.Item
-              name="email"
-              label="Email"
-              rules={[{ required: true, type: "email" }]}
+              name={"date_of_birth"}
+              label="Date of Birth"
+              rules={[{ required: true, message: "Date of Birth" }]}
             >
-              <Input autoComplete="off" />
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
 
-            {!editingUser && (
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[
-                  { required: true, message: "Please enter your password" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-            )}
-
             <Form.Item
-              name={"department"}
-              label="Department"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+              name={"appointment_date"}
+              label="Appointment Date"
+              rules={[{ required: true, message: "Appointment Date" }]}
+            >
+              <DatePicker style={{ width: "100%" }} />
+            </Form.Item>
+
+            <AntInputNumber
+              type="number"
+              formProps={{
+                name: "service_duration",
+                label: "Service Duration",
+                rules: [{ required: true, message: "Service Duration" }],
+              }}
+            />
+
+            <AntSwitch
+              formProps={{
+                name: "status",
+                label: "Status",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "citizenship_no",
+                label: "Citizenship No.",
+                rules: [{ required: true, message: "Citizenship No" }],
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "M", name: "Male" },
+                { id: "F", name: "Female" },
+                { id: "O", name: "Others" },
               ]}
-            >
-              <Input placeholder="Enter department" />
-            </Form.Item>
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "Gender" }],
+                label: "Gender",
+                name: "gender",
+              }}
+            />
+            <AntInput
+              formProps={{
+                name: "emergency_contact",
+                label: "Emergency Contact",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "bank_account_no",
+                label: "Bank Account No.",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "bank_name",
+                label: "Bank Name",
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "Contract", name: "Contract" },
+                { id: "Full", name: "Full-time" },
+                { id: "Part", name: "Part-time" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "Employee Type" }],
+                label: "Employee Type",
+                name: "employment_type",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "appointed_by",
+                label: "Appointed By",
+              }}
+            />
 
             <Form.Item
-              name={"phone_number"}
-              label="Phone Number"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
-              ]}
+              name={"contract_end_date"}
+              label="Contract End Date"
+              rules={[{ required: true, message: "Contract End Date" }]}
             >
-              <Input placeholder="Enter phone no." />
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
-          </div>
-
-          <Divider />
-
-          <div className="font-semibold mb-2">Position Details</div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Form.Item
-                name={["position_data", "position_name"]}
-                label="Position Name"
-                rules={[
-                  { required: true, message: "Please enter your position" },
-                ]}
-              >
-                <Input placeholder="Enter position name" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "level"]}
-                label="Level"
-                rules={[{ required: true, message: "Please enter your level" }]}
-              >
-                <Select
-                  options={[
-                    { value: "Senior-level", label: "Senior-level" },
-                    { value: "Mid-level", label: "Mid-level" },
-                    { value: "Junior-level", label: "Junior-level" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "responsibilities"]}
-                label="Responsibilities"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your responsibilities",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter responsibilities" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "qualification"]}
-                label="Qualification"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your qualification",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter qualification" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "salary_scale"]}
-                label="Salary Scale"
-                rules={[
-                  { required: true, message: "Please enter your salary scale" },
-                ]}
-              >
-                <Select
-                  options={[
-                    { value: "10000-20000", label: "10000-20000" },
-                    { value: "20000-30000", label: "20000-30000" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "department"]}
-                label="Department"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your department",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter department" />
-              </Form.Item>
-            </div>
           </div>
 
           <div className="flex justify-end gap-x-3">
