@@ -16,7 +16,6 @@ import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSelect } from "@/app/components/AntSelect";
-import { AntInputNumber } from "@/app/components/AntInputNumber";
 
 export default function Position() {
   const queryClient = useQueryClient();
@@ -30,38 +29,35 @@ export default function Position() {
   });
 
   const columns = [
-    { title: "Forest Type", dataIndex: "forest_type", key: "forest_type" },
-    { title: "Ownership", dataIndex: "ownership", key: "ownership" },
     {
-      title: "Dominant Species",
-      dataIndex: "dominant_species",
-      key: "dominant_species",
-    },
-    { title: "Tree Density", dataIndex: "tree_density", key: "tree_density" },
-    {
-      title: "Avg Age Years",
-      dataIndex: "avg_age_years",
-      key: "avg_age_years",
+      title: "Position Name",
+      dataIndex: "position_name",
+      key: "position_name",
     },
     {
-      title: "Product Types",
-      dataIndex: "produce_types",
-      key: "produce_types",
+      title: "Level",
+      dataIndex: "level",
+      key: "level",
     },
     {
-      title: "Protected Area",
-      dataIndex: "protected_area",
-      key: "protected_area",
+      title: "Responsibilities",
+      dataIndex: "responsibilities",
+      key: "responsibilities",
     },
     {
-      title: "Boundary Description",
-      dataIndex: "boundary_description",
-      key: "boundary_description",
+      title: "Qualification",
+      dataIndex: "qualification",
+      key: "qualification",
     },
     {
-      title: "Mgmt Plan Ref No",
-      dataIndex: "mgmt_plan_ref_no",
-      key: "mgmt_plan_ref_no",
+      title: "Salary Scale",
+      dataIndex: "salary_scale",
+      key: "salary_scale",
+    },
+    {
+      title: "Department",
+      dataIndex: "department",
+      key: "department",
     },
     {
       title: "Actions",
@@ -177,93 +173,62 @@ export default function Position() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput
               formProps={{
-                name: "forest_type",
-                label: "Forest Type",
-                rules: [{ required: true, message: "Forest Type" }],
-              }}
-            />
-            <AntInput
-              formProps={{
-                name: "ownership",
-                label: "Ownership",
-                rules: [{ required: true, message: "Ownership" }],
-              }}
-            />
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "Dominant Species" }],
-                name: "dominant_species",
-                label: "Dominant Species",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                name: "tree_density",
-                rules: [{ required: true, message: "Tree Density" }],
-                label: "Tree Density",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [{ required: true, message: "Avg Age Years" }],
-                name: "avg_age_years",
-                label: "Avg Age Years",
+                name: "position_name",
+                label: "Position Name",
+                rules: [{ required: true, message: "Position Name" }],
               }}
             />
 
             <AntSelect
               array={[
-                { id: "wood", name: "wood" },
-                { id: "wood", name: "wood" },
-                { id: "wood", name: "wood" },
+                { id: "Senior-level", name: "Senior-level" },
+                { id: "Mid-level", name: "Mid-level" },
+                { id: "Junior-level", name: "Junior-level" },
               ]}
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
-                rules: [{ required: true, message: "Product Types" }],
-                label: "Product Types",
-                name: "produce_types",
+                rules: [{ required: true, message: "Level" }],
+                label: "Level",
+                name: "level",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Responsibilities" }],
+                name: "responsibilities",
+                label: "Responsibilities",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Qualification" }],
+                name: "qualification",
+                label: "Qualification",
               }}
             />
 
             <AntSelect
               array={[
-                { id: "YES", name: "YES" },
-                { id: "NO", name: "NO" },
+                { id: "10000-20000", name: "10000-20000" },
+                { id: "20000-30000", name: "20000-30000" },
               ]}
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
-                rules: [{ required: true, message: "Protected Area" }],
-                label: "Protected Area",
-                name: "protected_area",
+                rules: [{ required: true, message: "Salary Scale" }],
+                label: "Salary Scale",
+                name: "salary_scale",
               }}
             />
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "Boundary Description" }],
-                name: "boundary_description",
-                label: "Boundary Description",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "Boundary Description" }],
-                name: "boundary_description",
-                label: "Boundary Description",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "Mgmt Plan Ref No" }],
-                name: "mgmt_plan_ref_no",
-                label: "प्वृक्ष घनत्व (प्रति हे.)",
+                rules: [{ required: true, message: "Department" }],
+                name: "department",
+                label: "Department",
               }}
             />
           </div>
