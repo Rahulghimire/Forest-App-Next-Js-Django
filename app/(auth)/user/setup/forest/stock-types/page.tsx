@@ -151,6 +151,7 @@ export default function StockType() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
+                rules: [{ required: true, message: "स्टक प्रका" }],
                 label: "स्टक प्रका",
                 name: "stock_type",
               }}
@@ -165,6 +166,7 @@ export default function StockType() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
+                rules: [{ required: true, message: "उपप्रकार" }],
                 label: "उपप्रकार",
                 name: "sub_type",
               }}
@@ -178,6 +180,7 @@ export default function StockType() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
+                rules: [{ required: true, message: "मापन एकाइ" }],
                 label: "मापन एकाइ",
                 name: "measurement_unit",
               }}
@@ -185,6 +188,7 @@ export default function StockType() {
 
             <AntInput
               formProps={{
+                rules: [{ required: true, message: "विवरण" }],
                 name: "description",
                 label: "विवरण",
               }}

@@ -92,10 +92,9 @@ export default function AdminLayout({
             if (key === "12-2") router.push("/user/setup/forest/species");
             if (key === "12-3") router.push("/user/setup/forest/stock-types");
             if (key === "12-4")
-              router.push("/user/setup/forest/classification-title");
+              router.push("/user/setup/forest/classification");
             if (key === "12-5") router.push("/user/setup/forest/class");
-            if (key === "12-6")
-              router.push("/user/setup/forest/grade-cutting-rule");
+            if (key === "12-6") router.push("/user/setup/forest/grade-rules");
             if (key === "12-7") router.push("/user/setup/forest/unit");
           }}
           items={items}

@@ -173,6 +173,7 @@ export default function Species() {
               formProps={{
                 name: "species_name",
                 label: "प्रजाति नाम",
+                rules: [{ required: true, message: "प्रजाति नाम" }],
               }}
             />
 
@@ -180,6 +181,7 @@ export default function Species() {
               formProps={{
                 name: "scientific_name",
                 label: "वैज्ञानिक नाम",
+                rules: [{ required: true, message: "वैज्ञानिक नाम" }],
               }}
             />
 
@@ -192,13 +194,18 @@ export default function Species() {
               ]}
               renderKey={"name"}
               valueKey={"id"}
-              formProps={{ label: "प्रकार", name: "type" }}
+              formProps={{
+                label: "प्रकार",
+                name: "type",
+                rules: [{ required: true, message: "प्रकार" }],
+              }}
             />
 
             <AntInput
               formProps={{
                 name: "production_capacity",
                 label: "उत्पादन क्षमता",
+                rules: [{ required: true, message: "उत्पादन क्षमता" }],
               }}
             />
 
@@ -206,6 +213,7 @@ export default function Species() {
               formProps={{
                 name: "conservation_status",
                 label: "संरक्षण स्थिति",
+                rules: [{ required: true, message: "संरक्षण स्थिति" }],
               }}
             />
 
@@ -213,6 +221,7 @@ export default function Species() {
               formProps={{
                 name: "avg_lifespan_years",
                 label: "औसत वृक्ष आयु",
+                rules: [{ required: true, message: "औसत वृक्ष आयु" }],
               }}
             />
 
@@ -220,6 +229,7 @@ export default function Species() {
               formProps={{
                 name: "avg_height_m",
                 label: "औसत उचाइ",
+                rules: [{ required: true, message: "औसत उचाइ" }],
               }}
             />
 
@@ -227,6 +237,7 @@ export default function Species() {
               formProps={{
                 name: "usage",
                 label: "विज्ञानमूर्ति",
+                rules: [{ required: true, message: "विज्ञानमूर्ति" }],
               }}
             />
 
@@ -234,6 +245,7 @@ export default function Species() {
               formProps={{
                 name: "notes",
                 label: "नोट्स/कैफियत",
+                rules: [{ required: true, message: "नोट्स/कैफियत" }],
               }}
             />
 
