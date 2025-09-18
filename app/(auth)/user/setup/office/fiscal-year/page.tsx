@@ -1,16 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Space,
-  Table,
-} from "antd";
+import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 
 import { AntButton } from "@/app/components/AntButton";
@@ -23,6 +14,10 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
+import { AntInput } from "@/app/components/AntInput";
+import { AntSelect } from "@/app/components/AntSelect";
+import { AntInputNumber } from "@/app/components/AntInputNumber";
+import { AntSwitch } from "@/app/components/AntSwitch";
 
 export default function FiscalYear() {
   const queryClient = useQueryClient();
@@ -30,25 +25,48 @@ export default function FiscalYear() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchApi(`user/`),
+  const { data: plots, isLoading } = useQuery({
+    queryKey: ["fiscal_year"],
+    queryFn: () => fetchApi(`finance/`),
   });
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Department", dataIndex: "department", key: "department" },
-    { title: "Email", dataIndex: "user_email", key: "user_email" },
-    { title: "Phone No.", dataIndex: "phone_number", key: "phone_number" },
+    {
+      title: "आर्थिक वर्ष",
+      dataIndex: "fiscal_year",
+      key: "fiscal_year",
+    },
+    {
+      title: "सुरु मिति",
+      dataIndex: "start_date",
+      key: "start_date",
+    },
+    {
+      title: "अन्त्य मिति",
+      dataIndex: "end_date",
+      key: "end_date",
+    },
+    {
+      title: "बजेट सीमा",
+      dataIndex: "budget_limit",
+      key: "budget_limit",
+    },
+    {
+      title: "स्थिति",
+      dataIndex: "active",
+      key: "active",
+      render: (value: boolean) => (value ? "सक्रिय" : "निष्क्रिय"),
+    },
     {
       title: "Actions",
       key: "actions",
+      fixed: "right" as const,
       render: (_: any, record: User) => (
         <Space>
           <Button
             onClick={() => {
               setEditingUser(record);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              form.setFieldsValue({ ...record });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
@@ -64,35 +82,44 @@ export default function FiscalYear() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<User, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}finance/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User created");
+      queryClient.invalidateQueries({ queryKey: ["fiscal_year"] });
+      toast.success("Fiscal Year created");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: User) => updateApi(`user/`, user),
+    mutationFn: (user: any) => updateApi(`finance/`, user),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User updated");
+      queryClient.invalidateQueries({ queryKey: ["fiscal_year"] });
+      toast.success("Fiscal Year updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`user/${id}/`),
+    mutationFn: (id: number) => deleteApi(`finance/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employee"] });
-      toast.success("User deleted");
+      queryClient.invalidateQueries({ queryKey: ["fiscal_year"] });
+      toast.success("Fiscal Year deleted");
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      createMutation.mutate(values);
+      await createMutation.mutateAsync(values);
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -106,22 +133,27 @@ export default function FiscalYear() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Fiscal User
+        Add Fiscal Year
       </AntButton>
 
       <Table
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={users?.data || []}
-        loading={isLoading}
+        dataSource={plots?.data || []}
+        loading={
+          isLoading ||
+          deleteMutation?.isPending ||
+          createMutation?.isPending ||
+          updateMutation?.isPending
+        }
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "800px" }}
+        scroll={{ y: 300, x: "1500px" }}
       />
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit User" : "Add User"}
+        title={editingUser ? "Edit Fiscal Year" : "Add Fiscal Year"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -136,148 +168,56 @@ export default function FiscalYear() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid grid-cols-3 gap-x-2">
-            <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[{ required: true, type: "email" }]}
-            >
-              <Input autoComplete="off" />
-            </Form.Item>
-
-            {!editingUser && (
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[
-                  { required: true, message: "Please enter your password" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-            )}
-
-            <Form.Item
-              name={"department"}
-              label="Department"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            <AntSelect
+              array={[
+                { id: "2082/83", name: "2082/83" },
+                { id: "2081/82", name: "2081/82" },
               ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "आर्थिक वर्ष" }],
+                label: "आर्थिक वर्ष",
+                name: "fiscal_year",
+              }}
+            />
+
+            <Form.Item
+              name={"start_date"}
+              label="सुरु मिति"
+              rules={[{ required: true, message: "सुरु मिति" }]}
             >
-              <Input placeholder="Enter department" />
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
 
             <Form.Item
-              name={"phone_number"}
-              label="Phone Number"
-              rules={[
-                { required: true, message: "Please enter your phone number" },
-              ]}
+              name={"end_date"}
+              label="अन्त्य मिति"
+              rules={[{ required: true, message: "अन्त्य मिति" }]}
             >
-              <Input placeholder="Enter phone no." />
+              <DatePicker style={{ width: "100%" }} />
             </Form.Item>
+
+            <AntInputNumber
+              type="number"
+              formProps={{
+                name: "budget_limit",
+                label: "बजेट सीमा",
+                rules: [{ required: true, message: "बजेट सीमा" }],
+              }}
+            />
+
+            <AntSwitch
+              formProps={{
+                initialValue: false,
+                label: "स्थिति",
+                name: "active",
+              }}
+            />
           </div>
 
-          <Divider />
-
-          <div className="font-semibold mb-2">Position Details</div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Form.Item
-                name={["position_data", "position_name"]}
-                label="Position Name"
-                rules={[
-                  { required: true, message: "Please enter your position" },
-                ]}
-              >
-                <Input placeholder="Enter position name" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "level"]}
-                label="Level"
-                rules={[{ required: true, message: "Please enter your level" }]}
-              >
-                <Select
-                  options={[
-                    { value: "Senior-level", label: "Senior-level" },
-                    { value: "Mid-level", label: "Mid-level" },
-                    { value: "Junior-level", label: "Junior-level" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "responsibilities"]}
-                label="Responsibilities"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your responsibilities",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter responsibilities" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "qualification"]}
-                label="Qualification"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your qualification",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter qualification" />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "salary_scale"]}
-                label="Salary Scale"
-                rules={[
-                  { required: true, message: "Please enter your salary scale" },
-                ]}
-              >
-                <Select
-                  options={[
-                    { value: "10000-20000", label: "10000-20000" },
-                    { value: "20000-30000", label: "20000-30000" },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-
-            <div>
-              <Form.Item
-                name={["position_data", "department"]}
-                label="Department"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your department",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter department" />
-              </Form.Item>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-x-3">
+          <div className="flex justify-end gap-x-3 mt-3">
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

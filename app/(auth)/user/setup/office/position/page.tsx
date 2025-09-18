@@ -155,7 +155,7 @@ export default function Position() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Plot" : "Add Plot"}
+        title={editingUser ? "Edit Position" : "Add Position"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
