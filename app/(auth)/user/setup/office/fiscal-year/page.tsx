@@ -14,10 +14,10 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
-import { AntInput } from "@/app/components/AntInput";
 import { AntSelect } from "@/app/components/AntSelect";
 import { AntInputNumber } from "@/app/components/AntInputNumber";
 import { AntSwitch } from "@/app/components/AntSwitch";
+import dayjs from "dayjs";
 
 export default function FiscalYear() {
   const queryClient = useQueryClient();
@@ -61,12 +61,18 @@ export default function FiscalYear() {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
               setEditingUser(record);
-              form.setFieldsValue({ ...record });
+              form.setFieldsValue({
+                ...record,
+                start_date: record?.start_date
+                  ? dayjs(record?.start_date)
+                  : null,
+                end_date: record?.end_date ? dayjs(record?.end_date) : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
@@ -119,7 +125,11 @@ export default function FiscalYear() {
     if (editingUser) {
       await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync({
+        ...values,
+        start_date: values.start_date ? dayjs(values.start_date) : null,
+        end_date: values.end_date ? dayjs(values.end_date) : null,
+      });
     }
     setIsModalOpen(false);
     form.resetFields();
