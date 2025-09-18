@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Modal, Space, Table } from "antd";
+import { Button, Checkbox, Divider, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 
 import { AntButton } from "@/app/components/AntButton";
@@ -16,6 +16,8 @@ import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSelect } from "@/app/components/AntSelect";
+import { AntSwitch } from "@/app/components/AntSwitch";
+// import { fetchPermission, Permission } from "@/app/(auth)/admin/setup/api";
 
 export default function Member() {
   const queryClient = useQueryClient();
@@ -23,66 +25,60 @@ export default function Member() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
+  const [selected, setSelected] = useState<string[]>([]);
+
+  // const { data: permissionData } = useQuery<Permission[]>({
+  //   queryKey: ["permissions"],
+  //   queryFn: fetchPermission,
+  // });
+
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["member"],
-    queryFn: () => fetchApi(`member/`),
+    queryKey: ["roles"],
+    queryFn: () => fetchApi(`roles/`),
   });
 
   const columns = [
     {
-      title: "Position Name",
-      dataIndex: "position_name",
-      key: "position_name",
+      title: "Role Name",
+      dataIndex: "role_name",
+      key: "role_name",
     },
     {
-      title: "Level",
-      dataIndex: "level",
-      key: "level",
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
     },
     {
-      title: "Responsibilities",
-      dataIndex: "responsibilities",
-      key: "responsibilities",
+      title: "Access Level",
+      dataIndex: "access_level",
+      key: "access_level",
     },
     {
-      title: "Qualification",
-      dataIndex: "qualification",
-      key: "qualification",
-    },
-    {
-      title: "Tree Density",
-      dataIndex: "tree_density",
-      key: "tree_density",
-    },
-    {
-      title: "Salary Scale",
-      dataIndex: "salary_scale",
-      key: "salary_scale",
-    },
-    {
-      title: "Department",
-      dataIndex: "department",
-      key: "department",
+      title: "Active",
+      dataIndex: "active",
+      key: "active",
+      render: (value: boolean) => (value ? "Yes" : "No"),
     },
     {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
               setEditingUser(record);
               form.setFieldsValue({ ...record });
+              setSelected(record.permission_list ?? []);
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -90,47 +86,49 @@ export default function Member() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}member/`, data),
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}roles/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["member"] });
-      toast.success("Member created");
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+      toast.success("Role created");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`member/`, user),
+    mutationFn: (user: any) => updateApi(`roles/`, user),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["member"] });
-      toast.success("Member updated");
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+      toast.success("Role updated");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`member/${id}/`),
+    mutationFn: (id: number) => deleteApi(`roles/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["member"] });
-      toast.success("Member deleted");
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+      toast.success("Roles deleted");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
 
   const handleFinish = async (values: any) => {
+    const payload = { ...values, permission: selected };
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...payload });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync(payload);
     }
     setIsModalOpen(false);
     form.resetFields();
     setEditingUser(null);
+    setSelected([]);
   };
 
   return (
@@ -140,12 +138,12 @@ export default function Member() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add Member
+        Add Role
       </AntButton>
 
       <Table
         rowKey="id"
-        columns={columns || []}
+        columns={columns}
         bordered
         dataSource={plots?.data || []}
         loading={
@@ -160,13 +158,14 @@ export default function Member() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Member" : "Add Member"}
+        title={editingUser ? "Edit Role" : "Add Role"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
           setIsModalOpen(false);
           setEditingUser(null);
           form.resetFields();
+          setSelected([]);
         }}
       >
         <Form
@@ -178,71 +177,77 @@ export default function Member() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput
               formProps={{
-                name: "position_name",
-                label: "Position Name",
-                rules: [{ required: true, message: "Position Name" }],
+                name: "role_name",
+                label: "Role Name",
+                rules: [{ required: true, message: "Role Name" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "description",
+                label: "Description",
+                rules: [{ required: true, message: "Description" }],
               }}
             />
 
             <AntSelect
-              array={[
-                { id: "Senior-level", name: "Senior-level" },
-                { id: "Mid-level", name: "Mid-level" },
-                { id: "Junior-level", name: "Junior-level" },
-              ]}
+              array={[{ id: "Staff", name: "Staff" }]}
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
                 rules: [{ required: true, message: "Level" }],
-                label: "Level",
-                name: "level",
+                label: "Access Level",
+                name: "access_level",
               }}
             />
 
-            <AntInput
+            <AntSwitch
               formProps={{
-                name: "responsibilities",
-                label: "Responsibilities",
-                rules: [{ required: true, message: "Responsibilities" }],
-              }}
-            />
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "Qualification" }],
-                name: "qualification",
-                label: "Qualification",
+                initialValue: false,
+                label: "Active",
+                name: "active",
               }}
             />
 
-            <AntInput
-              formProps={{
-                name: "tree_density",
-                rules: [{ required: true, message: "Tree Density" }],
-                label: "Tree Density",
-              }}
-            />
+            {/* <div className="col-span-full">
+              <Divider style={{ margin: "6px 0" }} />
 
-            <AntSelect
-              array={[
-                { id: "10000-20000", name: "10000-20000" },
-                { id: "20000-30000", name: "20000-30000" },
-              ]}
-              renderKey={"name"}
-              valueKey={"id"}
-              formProps={{
-                rules: [{ required: true, message: "Salary Scale" }],
-                label: "Salary Scale",
-                name: "salary_scale",
-              }}
-            />
+              <div className="font-semibold text-gray-700 mb-3">
+                Permissions
+              </div>
+              <Checkbox
+                indeterminate={
+                  selected.length > 0 &&
+                  selected.length < (permissionData?.length ?? 0)
+                }
+                checked={
+                  selected.length > 0 &&
+                  selected.length === (permissionData?.length ?? 0)
+                }
+                onChange={(e) =>
+                  setSelected(
+                    e.target.checked
+                      ? permissionData?.map((p) => p.code) ?? []
+                      : []
+                  )
+                }
+              >
+                Check all
+              </Checkbox>
 
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "Department" }],
-                name: "department",
-                label: "Department",
-              }}
-            />
+              <div className="p-4 mt-2 rounded-lg shadow-sm bg-white">
+                <Checkbox.Group
+                  className="grid grid-cols-2 gap-2"
+                  options={permissionData?.map((p) => ({
+                    label: p.code,
+                    value: p.code,
+                  }))}
+                  value={selected}
+                  onChange={(vals) => setSelected(vals as string[])}
+                />
+              </div>
+            </div> */}
           </div>
 
           <div className="flex justify-end gap-x-3 mt-3">
@@ -253,6 +258,7 @@ export default function Member() {
                 setIsModalOpen(false);
                 setEditingUser(null);
                 form.resetFields();
+                setSelected([]);
               }}
             >
               Cancel

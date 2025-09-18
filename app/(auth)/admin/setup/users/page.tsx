@@ -41,16 +41,16 @@ export default function Users() {
 
   const [selected, setSelected] = useState<string[]>([]);
 
-  const { data: users, isLoading } = useQuery<UserList>({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
-  });
-
   const { data: permissionData, isLoading: loadingPermission } = useQuery<
     Permission[]
   >({
     queryKey: ["permissions"],
     queryFn: fetchPermission,
+  });
+
+  const { data: users, isLoading } = useQuery<UserList>({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
   });
 
   const columns = [
