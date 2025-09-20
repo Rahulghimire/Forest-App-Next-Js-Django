@@ -15,7 +15,7 @@ export interface UserList {
   data: User[];
 }
 
-export const fetchApi = async (url: string): Promise<UserList> => {
+export const fetchApi = async (url: string): Promise<any> => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
     headers: {
       // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -27,7 +27,7 @@ export const fetchApi = async (url: string): Promise<UserList> => {
   return res.json();
 };
 
-export const createApi = async (url: string, data: Omit<User, "id">) => {
+export const createApi = async (url: string, data: Omit<any, "id">) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
     method: "POST",
     headers: {
@@ -41,7 +41,7 @@ export const createApi = async (url: string, data: Omit<User, "id">) => {
   return res.json();
 };
 
-export const updateApi = async (url: string, user: User) => {
+export const updateApi = async (url: string, user: any) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}${url}${user.id}/`,
     {
