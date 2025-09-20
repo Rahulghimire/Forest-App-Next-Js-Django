@@ -191,11 +191,23 @@ export default function Intake() {
   });
 
   const handleFinish = async (values: any) => {
+    const payload = {
+      ...editingUser,
+      ...values,
+      intake_date: values?.intake_date
+        ? dayjs(values.intake_date).format("YYYY-MM-DD")
+        : null,
+    };
+
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...payload,
+        id: editingUser.intake_id,
+      });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync(payload);
     }
+
     setIsModalOpen(false);
     form.resetFields();
     setEditingUser(null);
@@ -349,7 +361,7 @@ export default function Intake() {
               formProps={{
                 rules: [{ required: true, message: "वर्ग" }],
                 label: "वर्ग",
-                name: "class_id ",
+                name: "class_id",
               }}
             />
 
