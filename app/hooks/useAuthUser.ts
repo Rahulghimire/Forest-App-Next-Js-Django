@@ -26,7 +26,7 @@ export const useUserLogin = () => {
       router.push("/user/dashboard");
     },
     onError: (error: ApiError) => {
-      toast.error(error?.message || "Login failed. Please try again.");
+      // toast.error(error?.message || "Login failed. Please try again.");
     },
   });
 };
