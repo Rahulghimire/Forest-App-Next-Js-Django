@@ -62,7 +62,7 @@ export const useUserLogout = () => {
       router.push("/");
     },
     onError: () => {
-      toast.error("Logout failed");
+      // toast.error("Logout failed");
       localStorage.removeItem("access_token");
       queryClient.clear();
       router.push("/");

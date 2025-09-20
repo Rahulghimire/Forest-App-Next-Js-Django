@@ -96,6 +96,17 @@ export default function AdminLayout({
             if (key === "12-5") router.push("/user/setup/forest/class");
             if (key === "12-6") router.push("/user/setup/forest/grade-rules");
             if (key === "12-7") router.push("/user/setup/forest/unit");
+            if (key === "4-1") router.push("/user/piling-management/intake");
+            if (key === "4-2")
+              router.push("/user/piling-management/classification-update");
+            if (key === "4-3")
+              router.push("/user/piling-management/piling-account");
+            if (key === "4-4")
+              router.push("/user/piling-management/internal-transfer");
+            if (key === "4-5")
+              router.push("/user/piling-management/adjustment");
+            if (key === "4-6")
+              router.push("/user/piling-management/internal-transfer");
           }}
           items={items}
         />
@@ -193,7 +204,7 @@ const items = [
     icon: <FolderOpenOutlined />,
     label: "घाटघारी/पाइलिङ (वन पैदावार भण्डार)",
     children: [
-      { key: "4-1", label: "इकट्ठ (नाप–तौल/ग्रेडिङ)" },
+      { key: "4-1", label: "इन्टेक (नाप–तौल/ग्रेडिङ)" },
       { key: "4-2", label: "वर्गीकरण/ग्रेडिङ अपडेट" },
       { key: "4-3", label: "पाइलिङ खाता" },
       { key: "4-4", label: "आन्तरिक ट्रान्सफर (प्लट/वर्ग/डिपो)" },

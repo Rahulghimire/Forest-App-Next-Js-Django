@@ -222,7 +222,11 @@ export default function Classification() {
             <AntButton
               htmlType="submit"
               icon={<SaveOutlined />}
-              loading={createMutation?.isPending || updateMutation?.isPending}
+              loading={
+                updateMutation.isPending ||
+                createMutation.isPending ||
+                deleteMutation.isPending
+              }
             >
               Save
             </AntButton>

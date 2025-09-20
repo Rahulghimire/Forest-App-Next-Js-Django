@@ -439,7 +439,15 @@ export default function Employee() {
               Cancel
             </AntButton>
 
-            <AntButton htmlType="submit" icon={<SaveOutlined />}>
+            <AntButton
+              htmlType="submit"
+              icon={<SaveOutlined />}
+              loading={
+                updateMutation.isPending ||
+                createMutation.isPending ||
+                deleteMutation.isPending
+              }
+            >
               Save
             </AntButton>
           </div>
