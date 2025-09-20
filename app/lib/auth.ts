@@ -74,7 +74,6 @@ export const authAPI = {
       {
         method: "POST",
         headers: {
-          // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
           "Content-Type": "application/json",
         },
