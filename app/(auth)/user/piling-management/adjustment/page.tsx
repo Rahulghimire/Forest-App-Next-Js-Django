@@ -221,7 +221,7 @@ export default function Adjustment() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add Internal Transfer
+        Add Adjustment
       </AntButton>
 
       <Table
@@ -241,7 +241,7 @@ export default function Adjustment() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Internal Transfer" : "Add Internal Transfer"}
+        title={editingUser ? "Edit Adjustment" : "Add Adjustment"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
