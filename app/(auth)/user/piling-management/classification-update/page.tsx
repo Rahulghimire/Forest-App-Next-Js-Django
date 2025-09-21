@@ -13,74 +13,86 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { AntInput } from "@/app/components/AntInput";
-import { AntSwitch } from "@/app/components/AntSwitch";
-import { AntInputNumber } from "@/app/components/AntInputNumber";
-import {
-  User,
-  fetchApi,
-  createApi,
-  updateApi,
-  deleteApi,
-} from "../../setup/api";
+import { fetchApi, createApi, updateApi, deleteApi } from "../../setup/api";
+import { AntSelect } from "@/app/components/AntSelect";
+import dayjs from "dayjs";
 
 export default function ClassificationUpdate() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["class"],
+    queryKey: ["classification-updates"],
+    queryFn: () => fetchApi(`pilling/classification-updates/`),
+  });
+
+  const { data: gradeData } = useQuery({
+    queryKey: ["grade-rules"],
+    queryFn: () => fetchApi(`forest/grade-rules/`),
+  });
+
+  const { data: intakeData } = useQuery({
+    queryKey: ["intakes"],
+    queryFn: () => fetchApi(`pilling/intakes/`),
+  });
+
+  const { data: classSetupData } = useQuery({
+    queryKey: ["class-setup"],
     queryFn: () => fetchApi(`forest/class-setup/`),
   });
 
   const columns = [
-    { title: "वर्ग नाम", dataIndex: "class_name", key: "class_name" },
     {
-      title: "न्यूनतम व्यास (इन्चमा)",
-      dataIndex: "min_diameter",
-      key: "min_diameter",
+      title: "पुरानो ग्रेड",
+      dataIndex: "previous_grade",
+      key: "previous_grade",
     },
     {
-      title: "अधिकतम व्यास (इन्चमा)",
-      dataIndex: "max_diameter",
-      key: "max_diameter",
+      title: "नयाँ ग्रेड",
+      dataIndex: "updated_grade",
+      key: "updated_grade",
     },
     {
-      title: "न्यूनतम लम्बाई (फिटमा)",
-      dataIndex: "min_length",
-      key: "min_length",
+      title: "अपडेटको आधार",
+      dataIndex: "basis_of_update",
+      key: "basis_of_update",
     },
     {
-      title: "अधिकतम लम्बाई (फिटमा)",
-      dataIndex: "max_length",
-      key: "max_length",
+      title: "कारण",
+      dataIndex: "update_reason",
+      key: "update_reason",
     },
     {
-      title: "मूल्य दर (प्रति घनफुट वा युनिट)",
-      dataIndex: "price_rate",
-      key: "price_rate",
+      title: "मिति",
+      dataIndex: "updated_at",
+      key: "updated_at",
     },
-    { title: "वर्ग नाम", dataIndex: "description", key: "description" },
-    { title: "स्थिति", dataIndex: "status", key: "status" },
-
+    {
+      title: "कैफियत",
+      dataIndex: "remarks",
+      key: "remarks",
+    },
     {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
               setEditingUser(record);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              form.setFieldsValue({
+                ...record,
+              });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
           ></Button>
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
+            onClick={() => deleteMutation.mutate(record.classification_id)}
             icon={<DeleteOutlined />}
           ></Button>
         </Space>
@@ -90,10 +102,13 @@ export default function ClassificationUpdate() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/class-setups/`, data),
+      createApi(
+        `${process.env.NEXT_PUBLIC_API_URL}pilling/classification-updates/`,
+        data
+      ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class created");
+      queryClient.invalidateQueries({ queryKey: ["classification-updates"] });
+      toast.success("Classification update created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -101,10 +116,14 @@ export default function ClassificationUpdate() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`forest/class-setups/`, user),
+    mutationFn: (user: any) =>
+      updateApi(`pilling/classification-updates/`, {
+        ...user,
+        id: user.classification_id,
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class updated");
+      queryClient.invalidateQueries({ queryKey: ["classification-updates"] });
+      toast.success("Classification update updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -112,10 +131,11 @@ export default function ClassificationUpdate() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`forest/class-setups/${id}/`),
+    mutationFn: (id: number) =>
+      deleteApi(`pilling/classification-updates/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class deleted");
+      queryClient.invalidateQueries({ queryKey: ["classification-updates"] });
+      toast.success("Classification update deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -123,11 +143,20 @@ export default function ClassificationUpdate() {
   });
 
   const handleFinish = async (values: any) => {
+    const payload = {
+      ...editingUser,
+      ...values,
+    };
+
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...payload,
+        id: editingUser.classification_id,
+      });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync(payload);
     }
+
     setIsModalOpen(false);
     form.resetFields();
     setEditingUser(null);
@@ -140,7 +169,7 @@ export default function ClassificationUpdate() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add Class
+        Add Classification Update
       </AntButton>
 
       <Table
@@ -155,12 +184,16 @@ export default function ClassificationUpdate() {
           updateMutation?.isPending
         }
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "1000px" }}
+        scroll={{ y: 300, x: "1600px" }}
       />
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Class" : "Add Class"}
+        title={
+          editingUser
+            ? "Edit Classification Update"
+            : "Add Classification Update"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -176,74 +209,87 @@ export default function ClassificationUpdate() {
           autoComplete="off"
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            <AntSelect
+              array={gradeData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "पुरानो ग्रेड" }],
+                label: "पुरानो ग्रेड",
+                name: "previous_grade",
+              }}
+            />
+
+            <AntSelect
+              array={gradeData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "नयाँ ग्रेड" }],
+                label: "नयाँ ग्रेड",
+                name: "updated_grade",
+              }}
+            />
+
+            <AntSelect
+              array={intakeData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "इन्टेक आईडी" }],
+                label: "इन्टेक आईडी",
+                name: "intake_id",
+              }}
+            />
+
+            <AntSelect
+              array={classSetupData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "पुरानो वर्ग" }],
+                label: "पुरानो वर्ग",
+                name: "previous_class_id",
+              }}
+            />
+
+            <AntSelect
+              array={classSetupData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "नयाँ वर्ग" }],
+                label: "नयाँ वर्ग",
+                name: "updated_class_id",
+              }}
+            />
+
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "class_name",
-                label: "वर्ग नाम",
+                rules: [{ required: true, message: "आधार (नियम अनुसार)" }],
+                name: "basis_of_update",
+                label: "आधार (नियम अनुसार)",
               }}
             />
 
-            <AntInputNumber
-              type="number"
+            <AntInput
               formProps={{
-                rules: [{ required: true, message: "न्यूनतम व्यास (इन्चमा)" }],
-                name: "min_diameter",
-                label: "न्यूनतम व्यास (इन्चमा)",
+                rules: [{ required: true, message: "अपडेट गर्ने कारण" }],
+                name: "update_reason",
+                label: "अपडेट गर्ने कारण",
               }}
             />
 
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_diameter",
-                label: "अधिकतम व्यास (इन्चमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [{ required: true, message: "न्यूनतम लम्बाई (फिटमा)" }],
-                name: "min_length",
-                label: "न्यूनतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_length",
-                label: "अधिकतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
+            <AntInput
               formProps={{
                 rules: [
                   {
                     required: true,
-                    message: "मूल्य दर (प्रति घनफुट वा युनिट)",
+                    message: "कैफियत",
                   },
                 ],
-                name: "price_rate",
-                label: "मूल्य दर (प्रति घनफुट वा युनिट)",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "description",
-                label: "वर्ग नाम",
-              }}
-            />
-
-            <AntSwitch
-              formProps={{
-                name: "status",
-                label: "स्थिति",
+                name: "remarks",
+                label: "कैफियत",
               }}
             />
           </div>
@@ -261,7 +307,15 @@ export default function ClassificationUpdate() {
               Cancel
             </AntButton>
 
-            <AntButton htmlType="submit" icon={<SaveOutlined />}>
+            <AntButton
+              htmlType="submit"
+              icon={<SaveOutlined />}
+              loading={
+                updateMutation.isPending ||
+                createMutation.isPending ||
+                deleteMutation.isPending
+              }
+            >
               Save
             </AntButton>
           </div>
