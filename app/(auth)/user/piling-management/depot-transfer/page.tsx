@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Modal, Space, Table } from "antd";
+import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 import { AntButton } from "@/app/components/AntButton";
 import {
@@ -13,74 +13,77 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { AntInput } from "@/app/components/AntInput";
-import { AntSwitch } from "@/app/components/AntSwitch";
-import { AntInputNumber } from "@/app/components/AntInputNumber";
-import {
-  User,
-  fetchApi,
-  createApi,
-  updateApi,
-  deleteApi,
-} from "../../setup/api";
+import { fetchApi, createApi, updateApi, deleteApi } from "../../setup/api";
+import { AntSelect } from "@/app/components/AntSelect";
+import dayjs from "dayjs";
 
-export default function DepotTransfer() {
+export default function Adjustment() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["class"],
+    queryKey: ["piling-depot-transfers"],
+    queryFn: () => fetchApi(`pilling/depot-transfers/`),
+  });
+
+  const { data: pilingAccountsData } = useQuery({
+    queryKey: ["pilling-accounts"],
+    queryFn: () => fetchApi(`pilling/pilling-accounts/`),
+  });
+
+  const { data: speciesData } = useQuery({
+    queryKey: ["species"],
+    queryFn: () => fetchApi(`forest/species/`),
+  });
+
+  const { data: classSetupData } = useQuery({
+    queryKey: ["class-setup"],
     queryFn: () => fetchApi(`forest/class-setup/`),
   });
 
-  const columns = [
-    { title: "वर्ग नाम", dataIndex: "class_name", key: "class_name" },
-    {
-      title: "न्यूनतम व्यास (इन्चमा)",
-      dataIndex: "min_diameter",
-      key: "min_diameter",
-    },
-    {
-      title: "अधिकतम व्यास (इन्चमा)",
-      dataIndex: "max_diameter",
-      key: "max_diameter",
-    },
-    {
-      title: "न्यूनतम लम्बाई (फिटमा)",
-      dataIndex: "min_length",
-      key: "min_length",
-    },
-    {
-      title: "अधिकतम लम्बाई (फिटमा)",
-      dataIndex: "max_length",
-      key: "max_length",
-    },
-    {
-      title: "मूल्य दर (प्रति घनफुट वा युनिट)",
-      dataIndex: "price_rate",
-      key: "price_rate",
-    },
-    { title: "वर्ग नाम", dataIndex: "description", key: "description" },
-    { title: "स्थिति", dataIndex: "status", key: "status" },
+  const { data: depotData } = useQuery({
+    queryKey: ["depot"],
+    queryFn: () => fetchApi(`forest/depot/`),
+  });
 
+  const columns = [
+    { title: "ट्रान्सफर आईडी", dataIndex: "from_depot_id" },
+    { title: "पुरानो Depot", dataIndex: "to_depot_id" },
+    { title: "पाइल आईडी", dataIndex: "pile_id" },
+    { title: "प्रजाति", dataIndex: "species_id" },
+    { title: "वर्ग", dataIndex: "class_id" },
+    { title: "ग्रेड", dataIndex: "grade" },
+    { title: "लम्बाई (फिट)", dataIndex: "length" },
+    { title: "गोलाई (इन्च)", dataIndex: "girth" },
+    { title: "परिमाण (CFT)", dataIndex: "volume_cft" },
+    { title: "ट्रान्सफर मिति", dataIndex: "transfer_date" },
+    { title: "कारण", dataIndex: "reason" },
+    { title: "कैफियत", dataIndex: "remarks" },
+    { title: "स्थिति", dataIndex: "status" },
     {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
               setEditingUser(record);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              form.setFieldsValue({
+                ...record,
+                transfer_date: record?.transfer_date
+                  ? dayjs(record?.transfer_date)
+                  : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
           ></Button>
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
+            onClick={() => deleteMutation.mutate(record.transfer_id)}
             icon={<DeleteOutlined />}
           ></Button>
         </Space>
@@ -90,10 +93,13 @@ export default function DepotTransfer() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/class-setups/`, data),
+      createApi(
+        `${process.env.NEXT_PUBLIC_API_URL}pilling/depot-transfers/`,
+        data
+      ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class created");
+      queryClient.invalidateQueries({ queryKey: ["piling-depot-transfers"] });
+      toast.success("Depot Transfer created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -101,10 +107,14 @@ export default function DepotTransfer() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`forest/class-setups/`, user),
+    mutationFn: (user: any) =>
+      updateApi(`pilling/depot-transfers/`, {
+        ...user,
+        id: user.transfer_id,
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class updated");
+      queryClient.invalidateQueries({ queryKey: ["piling-depot-transfers"] });
+      toast.success("Depot Transfer updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -112,10 +122,10 @@ export default function DepotTransfer() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`forest/class-setups/${id}/`),
+    mutationFn: (id: number) => deleteApi(`pilling/depot-transfers/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class deleted");
+      queryClient.invalidateQueries({ queryKey: ["piling-depot-transfers"] });
+      toast.success("Depot Transfer deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -123,11 +133,23 @@ export default function DepotTransfer() {
   });
 
   const handleFinish = async (values: any) => {
+    const payload = {
+      ...editingUser,
+      ...values,
+      transfer_date: values?.transfer_date
+        ? dayjs(values.transfer_date).format("YYYY-MM-DD")
+        : null,
+    };
+
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...payload,
+        id: editingUser.transfer_id,
+      });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync(payload);
     }
+
     setIsModalOpen(false);
     form.resetFields();
     setEditingUser(null);
@@ -140,7 +162,7 @@ export default function DepotTransfer() {
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add Class
+        Add Depot
       </AntButton>
 
       <Table
@@ -155,12 +177,12 @@ export default function DepotTransfer() {
           updateMutation?.isPending
         }
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "1000px" }}
+        scroll={{ y: 300, x: "1600px" }}
       />
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Class" : "Add Class"}
+        title={editingUser ? "Edit Depot" : "Add Depot"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -176,74 +198,154 @@ export default function DepotTransfer() {
           autoComplete="off"
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            <AntSelect
+              array={depotData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "ट्रान्सफर आईडी" }],
+                label: "ट्रान्सफर आईडी",
+                name: "from_depot_id",
+              }}
+            />
+            <AntSelect
+              array={depotData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              disabled
+              formProps={{
+                rules: [{ required: true, message: "पुरानो Depot" }],
+                label: "पुरानो Depot",
+                name: "to_depot_id",
+              }}
+            />
+            <AntSelect
+              array={pilingAccountsData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              onSelect={(_, option) => {
+                form.setFieldsValue({
+                  intake_id: option.intake_id,
+                  species_id: option.species_id,
+                  class_id: option.class_id,
+                  grade: option.grade,
+                  length: option.length,
+                  girth: option.girth,
+                  volume_cft: option.volume_cft,
+                });
+              }}
+              formProps={{
+                rules: [{ required: true, message: "पाइल आईडी" }],
+                label: "पाइल आईडी",
+                name: "pile_id",
+              }}
+            />
+
+            <AntSelect
+              array={speciesData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              disabled
+              formProps={{
+                rules: [{ required: true, message: "प्रजाति" }],
+                label: "प्रजाति",
+                name: "species_id",
+              }}
+            />
+
+            <AntSelect
+              array={classSetupData?.data || []}
+              renderKey={"name"}
+              valueKey={"id"}
+              disabled
+              formProps={{
+                rules: [{ required: true, message: "वर्ग" }],
+                label: "वर्ग",
+                name: "class_id",
+              }}
+            />
+            <AntInput
+              readOnly
+              formProps={{
+                rules: [{ required: true, message: "ग्रेड" }],
+                name: "grade",
+                label: "ग्रेड",
+              }}
+            />
+            <AntInput
+              readOnly
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "लम्बाई (फिट)" }],
+                name: "length",
+                label: "लम्बाई (फिट)",
+              }}
+            />
+            <AntInput
+              readOnly
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "गोलाई (इन्च)" }],
+                name: "girth",
+                label: "गोलाई (इन्च)",
+              }}
+            />
+            <AntInput
+              readOnly
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "परिमाण (CFT)" }],
+                name: "volume_cft",
+                label: "परिमाण (CFT)",
+              }}
+            />
+
+            <Form.Item
+              name={"transfer_date"}
+              label="ट्रान्सफर मिति"
+              initialValue={dayjs()}
+              rules={[{ required: true, message: "" }]}
+            >
+              <DatePicker style={{ width: "100%" }} />
+            </Form.Item>
+
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "class_name",
-                label: "वर्ग नाम",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [{ required: true, message: "न्यूनतम व्यास (इन्चमा)" }],
-                name: "min_diameter",
-                label: "न्यूनतम व्यास (इन्चमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_diameter",
-                label: "अधिकतम व्यास (इन्चमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [{ required: true, message: "न्यूनतम लम्बाई (फिटमा)" }],
-                name: "min_length",
-                label: "न्यूनतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_length",
-                label: "अधिकतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [
-                  {
-                    required: true,
-                    message: "मूल्य दर (प्रति घनफुट वा युनिट)",
-                  },
-                ],
-                name: "price_rate",
-                label: "मूल्य दर (प्रति घनफुट वा युनिट)",
+                rules: [{ required: true, message: "कारण" }],
+                name: "reason",
+                label: "कारण",
               }}
             />
 
             <AntInput
+              readOnly
               formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "description",
-                label: "वर्ग नाम",
+                name: "remarks",
+                label: "कैफियत",
               }}
             />
-
-            <AntSwitch
+            <AntSelect
+              array={[
+                {
+                  id: "Pending",
+                  name: "Pending",
+                },
+                {
+                  id: "Completed",
+                  name: "Completed",
+                },
+                {
+                  id: "Cancelled",
+                  name: "Cancelled",
+                },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              disabled
               formProps={{
-                name: "status",
+                rules: [{ required: true, message: "स्थिति" }],
                 label: "स्थिति",
+                name: "status",
               }}
             />
           </div>
@@ -261,7 +363,15 @@ export default function DepotTransfer() {
               Cancel
             </AntButton>
 
-            <AntButton htmlType="submit" icon={<SaveOutlined />}>
+            <AntButton
+              htmlType="submit"
+              icon={<SaveOutlined />}
+              loading={
+                updateMutation.isPending ||
+                createMutation.isPending ||
+                deleteMutation.isPending
+              }
+            >
               Save
             </AntButton>
           </div>

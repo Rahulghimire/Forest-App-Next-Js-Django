@@ -60,21 +60,6 @@ export default function InternalTransfer() {
 
   const columns = [
     {
-      title: "पाइल आईडी",
-      dataIndex: "pile_id",
-      key: "pile_id",
-    },
-    {
-      title: "प्रजाति",
-      dataIndex: "species_id",
-      key: "species_id",
-    },
-    {
-      title: "वर्ग",
-      dataIndex: "class_id",
-      key: "class_id",
-    },
-    {
       title: "ग्रेड",
       dataIndex: "grade",
       key: "grade",

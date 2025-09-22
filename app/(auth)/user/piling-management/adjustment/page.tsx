@@ -29,13 +29,8 @@ export default function Adjustment() {
   });
 
   const { data: pilingAccountsData } = useQuery({
-    queryKey: ["pilling-adjustments"],
-    queryFn: () => fetchApi(`pilling/adjustments/`),
-  });
-
-  const { data: pilingDepotData } = useQuery({
-    queryKey: ["intakes"],
-    queryFn: () => fetchApi(`pilling/depot-transfers/`),
+    queryKey: ["pilling-accounts"],
+    queryFn: () => fetchApi(`pilling/pilling-accounts/`),
   });
 
   const { data: speciesData } = useQuery({
@@ -43,87 +38,22 @@ export default function Adjustment() {
     queryFn: () => fetchApi(`forest/species/`),
   });
 
-  const { data: pilingIntakeData } = useQuery({
-    queryKey: ["intakes"],
-    queryFn: () => fetchApi(`pilling/intakes/`),
-  });
-
   const { data: classSetupData } = useQuery({
     queryKey: ["class-setup"],
     queryFn: () => fetchApi(`forest/class-setup/`),
   });
 
-  const { data: depotData } = useQuery({
-    queryKey: ["depot"],
-    queryFn: () => fetchApi(`forest/depot/`),
-  });
-
   const columns = [
-    {
-      title: "पाइल आईडी",
-      dataIndex: "pile_id",
-      key: "pile_id",
-    },
-    {
-      title: "प्रजाति",
-      dataIndex: "species_id",
-      key: "species_id",
-    },
-    {
-      title: "वर्ग",
-      dataIndex: "class_id",
-      key: "class_id",
-    },
-    {
-      title: "ग्रेड",
-      dataIndex: "grade",
-      key: "grade",
-    },
-    {
-      title: "लम्बाई (फिट)",
-      dataIndex: "length",
-      key: "length",
-    },
-    {
-      title: "गोलाई (इन्च)",
-      dataIndex: "girth",
-      key: "girth",
-    },
-    {
-      title: "परिमाण (घनफिट)",
-      dataIndex: "volume_cft",
-      key: "volume_cft",
-    },
-    {
-      title: "पुरानो स्थान/डेपो",
-      dataIndex: "from_location_id",
-      key: "from_location_id",
-    },
-    {
-      title: "नयाँ स्थान/डेपो",
-      dataIndex: "to_location_id",
-      key: "to_location_id",
-    },
-    {
-      title: "पाइल मिति",
-      dataIndex: "transfer_date",
-      key: "transfer_date",
-    },
-    {
-      title: "कारण",
-      dataIndex: "reason",
-      key: "reason",
-    },
-    {
-      title: "स्थिति",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "कैफियत",
-      dataIndex: "remarks",
-      key: "remarks",
-    },
+    { title: "ग्रेड", dataIndex: "grade" },
+    { title: "लम्बाई (फिट)", dataIndex: "length" },
+    { title: "गोलाई (इन्च)", dataIndex: "girth" },
+    { title: "अघिल्लो परिमाण (CFT)", dataIndex: "prev_volume_cft" },
+    { title: "समायोजन परिमाण (CFT)", dataIndex: "adjusted_volume_cft" },
+    { title: "Adjustment प्रकार", dataIndex: "adjustment_type" },
+    { title: "कारण", dataIndex: "reason" },
+    { title: "मिति", dataIndex: "adjustment_date" },
+    { title: "कैफियत", dataIndex: "remarks" },
+    { title: "स्थिति", dataIndex: "status" },
     {
       title: "Actions",
       key: "actions",
@@ -135,8 +65,8 @@ export default function Adjustment() {
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
-                transfer_date: record?.transfer_date
-                  ? dayjs(record?.transfer_date)
+                adjustment_date: record?.adjustment_date
+                  ? dayjs(record?.adjustment_date)
                   : null,
               });
               setIsModalOpen(true);
@@ -195,8 +125,8 @@ export default function Adjustment() {
     const payload = {
       ...editingUser,
       ...values,
-      transfer_date: values?.transfer_date
-        ? dayjs(values.transfer_date).format("YYYY-MM-DD")
+      adjustment_date: values?.adjustment_date
+        ? dayjs(values.adjustment_date).format("YYYY-MM-DD")
         : null,
     };
 
@@ -330,39 +260,47 @@ export default function Adjustment() {
               readOnly
               type="number"
               formProps={{
-                rules: [{ required: true, message: "परिमाण (घनफिट)" }],
+                rules: [{ required: true, message: "अघिल्लो परिमाण (CFT)" }],
                 name: "prev_volume_cft",
-                label: "परिमाण (घनफिट)",
+                label: "अघिल्लो परिमाण (CFT)",
+              }}
+            />
+
+            <AntInput
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "समायोजन परिमाण (CFT)" }],
+                name: "adjusted_volume_cft",
+                label: "समायोजन परिमाण (CFT)",
               }}
             />
 
             <AntSelect
-              array={depotData?.data || []}
+              array={[
+                { id: "Loss", name: "Loss" },
+                { id: "Gain", name: "Gain" },
+                { id: "Correction", name: "Correction" },
+              ]}
               renderKey={"name"}
               valueKey={"id"}
-              disabled
               formProps={{
-                rules: [{ required: true, message: "पुरानो स्थान/डेपो" }],
-                label: "पुरानो स्थान/डेपो",
-                name: "from_location_id",
+                rules: [{ required: true, message: "Adjustment प्रकार" }],
+                label: "Adjustment प्रकार",
+                name: "adjustment_type",
               }}
             />
 
-            <AntSelect
-              array={depotData?.data || []}
-              renderKey={"name"}
-              valueKey={"id"}
-              disabled
+            <AntInput
               formProps={{
-                rules: [{ required: true, message: "नयाँ स्थान/डेपो" }],
-                label: "नयाँ स्थान/डेपो",
-                name: "to_location_id",
+                rules: [{ required: true, message: "कारण" }],
+                name: "reason",
+                label: "कारण",
               }}
             />
 
             <Form.Item
-              name={"transfer_date"}
-              label="पाइल मिति"
+              name={"adjustment_date"}
+              label="मिति"
               initialValue={dayjs()}
               rules={[{ required: true, message: "" }]}
             >
@@ -372,25 +310,24 @@ export default function Adjustment() {
             <AntInput
               readOnly
               formProps={{
-                rules: [{ required: true, message: "कारण" }],
-                name: "reason",
-                label: "कारण",
+                name: "remarks",
+                label: "कैफियत",
               }}
             />
 
             <AntSelect
               array={[
                 {
-                  id: "Completed",
-                  name: "Completed",
-                },
-                {
                   id: "Pending",
                   name: "Pending",
                 },
                 {
-                  id: "Cancelled",
-                  name: "Cancelled",
+                  id: "Approved",
+                  name: "Approved",
+                },
+                {
+                  id: "Rejected",
+                  name: "Rejected",
                 },
               ]}
               renderKey={"name"}
@@ -400,18 +337,6 @@ export default function Adjustment() {
                 rules: [{ required: true, message: "स्थिति" }],
                 label: "स्थिति",
                 name: "status",
-              }}
-            />
-            <AntInput
-              formProps={{
-                rules: [
-                  {
-                    required: true,
-                    message: "कैफियत",
-                  },
-                ],
-                name: "remarks",
-                label: "कैफियत",
               }}
             />
           </div>
