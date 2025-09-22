@@ -107,6 +107,7 @@ export default function AdminLayout({
               router.push("/user/piling-management/adjustment");
             if (key === "4-6")
               router.push("/user/piling-management/internal-transfer");
+            if (key === "4-7") router.push("/user/piling-management/audit-log");
           }}
           items={items}
         />
@@ -210,6 +211,7 @@ const items = [
       { key: "4-4", label: "आन्तरिक ट्रान्सफर (प्लट/वर्ग/डिपो)" },
       { key: "4-5", label: "हास/समायोजन" },
       { key: "4-6", label: "वन पैदावार भण्डार ट्रान्सफर" },
+      { key: "4-7", label: "Audit Log (हर एक कार्यको इतिहास)" },
     ],
   },
   {

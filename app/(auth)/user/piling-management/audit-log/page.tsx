@@ -24,8 +24,8 @@ export default function AuditLog() {
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["piling-adjustments"],
-    queryFn: () => fetchApi(`pilling/adjustments/`),
+    queryKey: ["piling-audit-logs"],
+    queryFn: () => fetchApi(`pilling/audit-logs/`),
   });
 
   const { data: pilingAccountsData } = useQuery({
@@ -44,51 +44,107 @@ export default function AuditLog() {
   });
 
   const columns = [
-    { title: "ग्रेड", dataIndex: "grade" },
-    { title: "लम्बाई (फिट)", dataIndex: "length" },
-    { title: "गोलाई (इन्च)", dataIndex: "girth" },
-    { title: "अघिल्लो परिमाण (CFT)", dataIndex: "prev_volume_cft" },
-    { title: "समायोजन परिमाण (CFT)", dataIndex: "adjusted_volume_cft" },
-    { title: "Adjustment प्रकार", dataIndex: "adjustment_type" },
-    { title: "कारण", dataIndex: "reason" },
-    { title: "मिति", dataIndex: "adjustment_date" },
-    { title: "कैफियत", dataIndex: "remarks" },
-    { title: "स्थिति", dataIndex: "status" },
     {
-      title: "Actions",
-      key: "actions",
-      fixed: "right" as const,
-      render: (_: any, record: any) => (
-        <Space>
-          <Button
-            onClick={() => {
-              setEditingUser(record);
-              form.setFieldsValue({
-                ...record,
-                adjustment_date: record?.adjustment_date
-                  ? dayjs(record?.adjustment_date)
-                  : null,
-              });
-              setIsModalOpen(true);
-            }}
-            icon={<EditOutlined />}
-          ></Button>
-          <Button
-            danger
-            onClick={() => deleteMutation.mutate(record.adjustment_id)}
-            icon={<DeleteOutlined />}
-          ></Button>
-        </Space>
-      ),
+      title: "लग आईडी",
+      dataIndex: "log_id",
+      key: "log_id",
     },
+    {
+      title: "प्रयोगकर्ता",
+      dataIndex: "user_id",
+      key: "user_id",
+    },
+    {
+      title: "भूमिका",
+      dataIndex: "role",
+      key: "role",
+    },
+    {
+      title: "कार्य",
+      dataIndex: "action",
+      key: "action",
+    },
+    {
+      title: "Entity प्रकार",
+      dataIndex: "entity_type",
+      key: "entity_type",
+    },
+    {
+      title: "Entity आईडी",
+      dataIndex: "entity_id",
+      key: "entity_id",
+    },
+    {
+      title: "अघिल्लो डाटा",
+      dataIndex: "previous_data",
+      key: "previous_data",
+    },
+    {
+      title: "नयाँ डाटा",
+      dataIndex: "new_data",
+      key: "new_data",
+    },
+    {
+      title: "IP ठेगाना",
+      dataIndex: "ip_address",
+      key: "ip_address",
+    },
+    {
+      title: "Device/Browser Info",
+      dataIndex: "device_info",
+      key: "device_info",
+    },
+    {
+      title: "मिति/समय",
+      dataIndex: "timestamp",
+      key: "timestamp",
+    },
+    {
+      title: "स्थिति",
+      dataIndex: "status",
+      key: "status",
+    },
+    {
+      title: "कैफियत",
+      dataIndex: "remarks",
+      key: "remarks",
+    },
+
+    // {
+    //   title: "Actions",
+    //   key: "actions",
+    //   fixed: "right" as const,
+    //   render: (_: any, record: any) => (
+    //     <Space>
+    //       <Button
+    //         onClick={() => {
+    //           setEditingUser(record);
+    //           form.setFieldsValue({
+    //             ...record,
+    //             adjustment_date: record?.adjustment_date
+    //               ? dayjs(record?.adjustment_date)
+    //               : null,
+    //           });
+    //           setIsModalOpen(true);
+    //         }}
+    //         icon={<EditOutlined />}
+    //       ></Button>
+    //       <Button
+    //         danger
+    //         onClick={() => deleteMutation.mutate(record.log_id)}
+    //         icon={<DeleteOutlined />}
+    //       ></Button>
+    //     </Space>
+    //   ),
+    // },
   ];
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}pilling/adjustments/`, data),
+      createApi(`${process.env.NEXT_PUBLIC_API_URL}pilling/audit-logs/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["piling-adjustments"] });
-      toast.success("Adjustment created");
+      queryClient.invalidateQueries({ queryKey: ["piling-audit-logs"] });
+      toast.success("Audit Log created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -97,13 +153,13 @@ export default function AuditLog() {
 
   const updateMutation = useMutation({
     mutationFn: (user: any) =>
-      updateApi(`pilling/adjustments/`, {
+      updateApi(`pilling/audit-logs/`, {
         ...user,
-        id: user.adjustment_id,
+        id: user.log_id,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["piling-adjustments"] });
-      toast.success("Adjustment updated");
+      queryClient.invalidateQueries({ queryKey: ["piling-audit-logs"] });
+      toast.success("Audit Log updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -111,10 +167,10 @@ export default function AuditLog() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`pilling/adjustments/${id}/`),
+    mutationFn: (id: number) => deleteApi(`pilling/audit-logs/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["piling-adjustments"] });
-      toast.success("Adjustment deleted");
+      queryClient.invalidateQueries({ queryKey: ["piling-audit-logs"] });
+      toast.success("Audit Log deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -133,7 +189,7 @@ export default function AuditLog() {
     if (editingUser) {
       await updateMutation.mutateAsync({
         ...payload,
-        id: editingUser.adjustment_id,
+        id: editingUser.log_id,
       });
     } else {
       await createMutation.mutateAsync(payload);
@@ -146,13 +202,13 @@ export default function AuditLog() {
 
   return (
     <div>
-      <AntButton
+      {/* <AntButton
         type="primary"
         onClick={() => setIsModalOpen(true)}
         icon={<PlusCircleOutlined />}
       >
-        Add Adjustment
-      </AntButton>
+        Add Audit Log
+      </AntButton> */}
 
       <Table
         rowKey="id"
@@ -171,7 +227,7 @@ export default function AuditLog() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Adjustment" : "Add Adjustment"}
+        title={editingUser ? "Edit Audit Log" : "Add Audit Log"}
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -187,6 +243,54 @@ export default function AuditLog() {
           autoComplete="off"
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+            <AntSelect
+              array={[
+                { id: "Admin", name: "Admin" },
+                { id: "User", name: "User" },
+                { id: "SuperAdmin", name: "SuperAdmin" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              disabled
+              formProps={{
+                rules: [{ required: true, message: "भूमिका" }],
+                label: "भूमिका",
+                name: "role",
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "Admin", name: "Admin" },
+                { id: "User", name: "User" },
+                { id: "SuperAdmin", name: "SuperAdmin" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              disabled
+              formProps={{
+                rules: [{ required: true, message: "कार्य" }],
+                label: "कार्य",
+                name: "action",
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "Admin", name: "Admin" },
+                { id: "User", name: "User" },
+                { id: "SuperAdmin", name: "SuperAdmin" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              disabled
+              formProps={{
+                rules: [{ required: true, message: "Entity प्रकार" }],
+                label: "Entity प्रकार",
+                name: "entity_type",
+              }}
+            />
+
             <AntSelect
               array={pilingAccountsData?.data || []}
               renderKey={"name"}
