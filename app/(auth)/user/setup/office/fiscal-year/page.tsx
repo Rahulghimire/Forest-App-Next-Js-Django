@@ -122,13 +122,16 @@ export default function FiscalYear() {
   });
 
   const handleFinish = async (values: any) => {
+    const payload = {
+      ...values,
+      start_date: values.start_date ? dayjs(values.start_date) : null,
+      end_date: values.end_date ? dayjs(values.end_date) : null,
+    };
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({ ...editingUser, ...payload });
     } else {
       await createMutation.mutateAsync({
-        ...values,
-        start_date: values.start_date ? dayjs(values.start_date) : null,
-        end_date: values.end_date ? dayjs(values.end_date) : null,
+        ...payload,
       });
     }
     setIsModalOpen(false);

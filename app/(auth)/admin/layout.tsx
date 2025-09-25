@@ -107,15 +107,31 @@ export default function AdminLayout({
               <Dropdown
                 trigger={["click"]}
                 popupRender={() => (
-                  <Card className="w-64 shadow-md">
+                  <Card className="shadow-md">
                     <div className="flex items-center gap-3">
-                      <Avatar size="large">A</Avatar>
+                      <Avatar size={64}>A</Avatar>
                       <div>
-                        <p className="font-medium">{data?.name}</p>
-                        <p className="text-xs text-gray-500">
-                          john.doe@email.com
+                        <p className="text-lg font-medium">{data?.name}</p>
+                        <p className="text-lg text-gray-500">
+                          {data?.email || "john.doe@email.com"}
                         </p>
                       </div>
+                    </div>
+
+                    <div className="mt-5">
+                      <Tooltip title="Logout">
+                        <AntButton
+                          color="lightGreen"
+                          block
+                          icon={<LogoutOutlined />}
+                          onClick={() => {
+                            setIsModalOpen(true);
+                          }}
+                          loading={logoutMutation.isPending}
+                        >
+                          Logout
+                        </AntButton>
+                      </Tooltip>
                     </div>
                   </Card>
                 )}
@@ -124,17 +140,6 @@ export default function AdminLayout({
                   <Avatar>A</Avatar>
                 </Tooltip>
               </Dropdown>
-
-              <Tooltip title="Logout">
-                <AntButton
-                  color="lightGreen"
-                  icon={<LogoutOutlined />}
-                  onClick={() => {
-                    setIsModalOpen(true);
-                  }}
-                  loading={logoutMutation.isPending}
-                />
-              </Tooltip>
             </div>
           </Header>
 

@@ -31,7 +31,6 @@ export default function Plot() {
   });
 
   const columns = [
-    { title: "प्लट आईडी", dataIndex: "plot_id", key: "plot_id" },
     { title: "प्लट नाम", dataIndex: "plot_name", key: "plot_name" },
     {
       title: "क्षेत्रफल (हेक्टरमा)",
@@ -173,7 +172,6 @@ export default function Plot() {
           autoComplete="off"
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
-            <AntInput formProps={{ name: "plot_id", label: "प्लट आईडी" }} />
             <AntInput formProps={{ name: "plot_name", label: "प्लट नाम" }} />
             <AntInput
               formProps={{
