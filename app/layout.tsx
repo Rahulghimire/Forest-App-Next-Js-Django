@@ -42,6 +42,19 @@ export default function RootLayout({
                   Form: {
                     itemMarginBottom: 10,
                   },
+                  DatePicker: {},
+                  Upload: {
+                    controlHeightLG: 28,
+                  },
+                  Menu: {
+                    itemColor: "#343c46",
+                    itemBg: "rgb(237, 242, 248)",
+                    itemHoverBg: "#dfe6f1",
+                    itemSelectedBg: "#c7d4eb",
+                    subMenuItemBg: "#f5f7fa",
+                    fontSize: 16,
+                    fontWeightStrong: 800,
+                  },
                 },
               }}
             >

@@ -30,32 +30,32 @@ export default function Position() {
 
   const columns = [
     {
-      title: "Position Name",
+      title: "पदनाम",
       dataIndex: "position_name",
       key: "position_name",
     },
     {
-      title: "Level",
+      title: "पदको स्तर",
       dataIndex: "level",
       key: "level",
     },
     {
-      title: "Responsibilities",
+      title: "जिम्मेवारी विवरण",
       dataIndex: "responsibilities",
       key: "responsibilities",
     },
     {
-      title: "Qualification",
+      title: "आवश्यक योग्यता",
       dataIndex: "qualification",
       key: "qualification",
     },
     {
-      title: "Salary Scale",
+      title: "तलब स्केल",
       dataIndex: "salary_scale",
       key: "salary_scale",
     },
     {
-      title: "Department",
+      title: "विभाग",
       dataIndex: "department",
       key: "department",
     },
@@ -174,8 +174,8 @@ export default function Position() {
             <AntInput
               formProps={{
                 name: "position_name",
-                label: "Position Name",
-                rules: [{ required: true, message: "Position Name" }],
+                label: "पदनाम",
+                rules: [{ required: true, message: "पदनाम" }],
               }}
             />
 
@@ -188,25 +188,25 @@ export default function Position() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
-                rules: [{ required: true, message: "Level" }],
-                label: "Level",
+                rules: [{ required: true, message: "पदको स्तर" }],
+                label: "पदको स्तर",
                 name: "level",
               }}
             />
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "Responsibilities" }],
+                rules: [{ required: true, message: "जिम्मेवारी विवरण" }],
                 name: "responsibilities",
-                label: "Responsibilities",
+                label: "जिम्मेवारी विवरण",
               }}
             />
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "Qualification" }],
+                rules: [{ required: true, message: "आवश्यक योग्यता" }],
                 name: "qualification",
-                label: "Qualification",
+                label: "आवश्यक योग्यता",
               }}
             />
 
@@ -218,17 +218,17 @@ export default function Position() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
-                rules: [{ required: true, message: "Salary Scale" }],
-                label: "Salary Scale",
+                rules: [{ required: true, message: "तलब स्केल" }],
+                label: "तलब स्केल",
                 name: "salary_scale",
               }}
             />
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "Department" }],
+                rules: [{ required: true, message: "विभाग" }],
                 name: "department",
-                label: "Department",
+                label: "विभाग",
               }}
             />
           </div>

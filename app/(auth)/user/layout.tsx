@@ -26,6 +26,7 @@ import {
   Dropdown,
   Layout,
   Menu,
+  Modal,
   theme,
   Tooltip,
 } from "antd";
@@ -42,11 +43,13 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const logoutMutation = useUserLogout();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [data, setData] = useState<any>(null);
   useEffect(() => {
@@ -132,15 +135,30 @@ export default function AdminLayout({
             <Dropdown
               trigger={["click"]}
               popupRender={() => (
-                <Card className="w-64 shadow-md">
+                <Card className="shadow-md">
                   <div className="flex items-center gap-3">
-                    <Avatar size="large">U</Avatar>
+                    <Avatar size={64}>A</Avatar>
                     <div>
-                      <p className="font-medium">{data?.name}</p>
-                      <p className="text-xs text-gray-500">
-                        john.doe@email.com
+                      <p className="text-lg font-medium">{data?.name}</p>
+                      <p className="text-lg text-gray-500">
+                        {data?.email || "john.doe@email.com"}
                       </p>
                     </div>
+                  </div>
+                  <div className="mt-5">
+                    <Tooltip title="Logout">
+                      <AntButton
+                        color="lightGreen"
+                        block
+                        icon={<LogoutOutlined />}
+                        onClick={() => {
+                          setIsModalOpen(true);
+                        }}
+                        loading={logoutMutation.isPending}
+                      >
+                        Logout
+                      </AntButton>
+                    </Tooltip>
                   </div>
                 </Card>
               )}
@@ -149,19 +167,20 @@ export default function AdminLayout({
                 <Avatar>U</Avatar>
               </Tooltip>
             </Dropdown>
-            <AntButton
-              color="lightGreen"
-              icon={<LogoutOutlined />}
-              onClick={() => logoutMutation.mutate()}
-              loading={logoutMutation.isPending}
-            />
           </div>
         </Header>
+
+        <Modal
+          title="Are you sure you want to logout?"
+          open={isModalOpen}
+          loading={logoutMutation.isPending}
+          onOk={() => logoutMutation.mutate()}
+          onCancel={() => setIsModalOpen(false)}
+        />
 
         <Content
           style={{
             margin: "10px",
-            // margin: "10px 10px 0px 16px",
             padding: 10,
             minHeight: 280,
             background: colorBgContainer,

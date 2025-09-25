@@ -17,7 +17,7 @@ import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSelect } from "@/app/components/AntSelect";
 import { AntSwitch } from "@/app/components/AntSwitch";
-// import { fetchPermission, Permission } from "@/app/(auth)/admin/setup/api";
+import { fetchPermission, Permission } from "@/app/(auth)/admin/setup/api";
 
 export default function Member() {
   const queryClient = useQueryClient();
@@ -27,10 +27,10 @@ export default function Member() {
 
   const [selected, setSelected] = useState<string[]>([]);
 
-  // const { data: permissionData } = useQuery<Permission[]>({
-  //   queryKey: ["permissions"],
-  //   queryFn: fetchPermission,
-  // });
+  const { data: permissionData } = useQuery<Permission[]>({
+    queryKey: ["permissions"],
+    queryFn: fetchPermission,
+  });
 
   const { data: plots, isLoading } = useQuery({
     queryKey: ["roles"],
@@ -39,22 +39,27 @@ export default function Member() {
 
   const columns = [
     {
-      title: "Role Name",
+      title: "भूमिका कोड",
+      dataIndex: "role_code",
+      key: "role_code",
+    },
+    {
+      title: "भूमिका नाम",
       dataIndex: "role_name",
       key: "role_name",
     },
     {
-      title: "Description",
+      title: "विवरण",
       dataIndex: "description",
       key: "description",
     },
     {
-      title: "Access Level",
+      title: "पहुँच स्तर",
       dataIndex: "access_level",
       key: "access_level",
     },
     {
-      title: "Active",
+      title: "स्थिति",
       dataIndex: "active",
       key: "active",
       render: (value: boolean) => (value ? "Yes" : "No"),
@@ -178,16 +183,16 @@ export default function Member() {
             <AntInput
               formProps={{
                 name: "role_name",
-                label: "Role Name",
-                rules: [{ required: true, message: "Role Name" }],
+                label: "भूमिका नाम",
+                rules: [{ required: true, message: "भूमिका नाम" }],
               }}
             />
 
             <AntInput
               formProps={{
                 name: "description",
-                label: "Description",
-                rules: [{ required: true, message: "Description" }],
+                label: "विवरण",
+                rules: [{ required: true, message: "विवरण" }],
               }}
             />
 
@@ -196,8 +201,8 @@ export default function Member() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
-                rules: [{ required: true, message: "Level" }],
-                label: "Access Level",
+                rules: [{ required: true, message: "पहुँच स्तर" }],
+                label: "पहुँच स्तर",
                 name: "access_level",
               }}
             />
@@ -205,16 +210,16 @@ export default function Member() {
             <AntSwitch
               formProps={{
                 initialValue: false,
-                label: "Active",
+                label: "स्थिति",
                 name: "active",
               }}
             />
 
-            {/* <div className="col-span-full">
+            <div className="col-span-full">
               <Divider style={{ margin: "6px 0" }} />
 
               <div className="font-semibold text-gray-700 mb-3">
-                Permissions
+                अनुमति सूची
               </div>
               <Checkbox
                 indeterminate={
@@ -247,7 +252,7 @@ export default function Member() {
                   onChange={(vals) => setSelected(vals as string[])}
                 />
               </div>
-            </div> */}
+            </div>
           </div>
 
           <div className="flex justify-end gap-x-3 mt-3">

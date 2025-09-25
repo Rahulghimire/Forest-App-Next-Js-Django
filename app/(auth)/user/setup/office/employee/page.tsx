@@ -31,75 +31,97 @@ export default function Employee() {
     queryFn: () => fetchApi(`user/employee/`),
   });
 
+  const { data: positionData } = useQuery({
+    queryKey: ["position"],
+    queryFn: () => fetchApi(`user/position/`),
+  });
+
   const columns = [
-    { title: "Employee Id", dataIndex: "employee_id", key: "employee_id" },
     {
-      title: "Employee Code",
+      title: "कर्मचारी कोड",
       dataIndex: "employee_code",
       key: "employee_code",
     },
-    { title: "Employee Name", dataIndex: "name", key: "name" },
+    { title: "नाम", dataIndex: "name", key: "name" },
     {
-      title: "Employee Department",
+      title: "विभाग",
       dataIndex: "department",
       key: "department",
     },
-    { title: "Phone Number", dataIndex: "phone_number", key: "phone_number" },
-    { title: "Province", dataIndex: "province", key: "province" },
-    { title: "District", dataIndex: "district", key: "district" },
+
     {
-      title: "Local Level Type",
-      dataIndex: "local_level_type",
-      key: "local_level_type",
+      title: "पदनाम",
+      dataIndex: "designation",
+      key: "designation",
     },
+    { title: "फोन नम्बर", dataIndex: "phone_number", key: "phone_number" },
+    // { title: "प्रदेश", dataIndex: "province", key: "province" },
+    // { title: "जिला", dataIndex: "district", key: "district" },
+    // { title: "ठेगाना", dataIndex: "address", key: "address" },
+
+    // {
+    //   title: "स्थान क्रम प्रकार",
+    //   dataIndex: "local_level_type",
+    //   key: "local_level_type",
+    // },
+    // {
+    //   title: "Local Level Name",
+    //   dataIndex: "local_level_name",
+    //   key: "local_level_name",
+    // },
+    // { title: "Ward No.", dataIndex: "ward_no", key: "ward_no" },
+    // { title: "Tole", dataIndex: "tole", key: "tole" },
     {
-      title: "Local Level Name",
-      dataIndex: "local_level_name",
-      key: "local_level_name",
-    },
-    { title: "Ward No.", dataIndex: "ward_no", key: "ward_no" },
-    { title: "Tole", dataIndex: "tole", key: "tole" },
-    {
-      title: "Date of Birth",
+      title: "जन्म मिति",
       dataIndex: "date_of_birth",
       key: "date_of_birth",
     },
+
     {
-      title: "Appointment Date",
+      title: "ठेगाना",
+      dataIndex: "address",
+      key: "address",
+    },
+    {
+      title: "नियुक्ति मिति",
       dataIndex: "appointment_date",
       key: "appointment_date",
     },
     {
-      title: "Service Duration",
+      title: "सेवा अवधि",
       dataIndex: "service_duration",
       key: "service_duration",
     },
-    { title: "Status", dataIndex: "status", key: "status" },
+    { title: "स्थिति", dataIndex: "status", key: "status" },
     {
-      title: "Citizenship No.",
+      title: "नागरिकता नम्बर",
       dataIndex: "citizenship_no",
       key: "citizenship_no",
     },
-    { title: "Gender", dataIndex: "gender", key: "gender" },
+    { title: "लिंग", dataIndex: "gender", key: "gender" },
     {
-      title: "Emergency Contact",
+      title: "आपतकालीन सम्पर्क",
       dataIndex: "emergency_contact",
       key: "emergency_contact",
     },
     {
-      title: "Bank Account No.",
+      title: "बैंक खाता नम्बर",
       dataIndex: "bank_account_no",
       key: "bank_account_no",
     },
-    { title: "Bank Name", dataIndex: "bank_name", key: "bank_name" },
+    { title: "बैंक नाम", dataIndex: "bank_name", key: "bank_name" },
     {
-      title: "Employee Type",
+      title: "कर्मचारी प्रकार",
       dataIndex: "employment_type",
       key: "employment_type",
     },
-    { title: "Appointed By", dataIndex: "appointed_by", key: "appointed_by" },
     {
-      title: "Contract End Date",
+      title: "नियुक्त गर्ने निकाय",
+      dataIndex: "appointed_by",
+      key: "appointed_by",
+    },
+    {
+      title: "करार समाप्ति मिति",
       dataIndex: "contract_end_date",
       key: "contract_end_date",
     },
@@ -185,9 +207,20 @@ export default function Employee() {
 
   const handleFinish = async (values: any) => {
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        ...values,
+        date_of_birth: dayjs(values.date_of_birth).format("YYYY-MM-DD"),
+        appointment_date: dayjs(values.appointment_date).format("YYYY-MM-DD"),
+        contract_end_date: dayjs(values.contract_end_date).format("YYYY-MM-DD"),
+      });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync({
+        ...values,
+        date_of_birth: dayjs(values.date_of_birth).format("YYYY-MM-DD"),
+        appointment_date: dayjs(values.appointment_date).format("YYYY-MM-DD"),
+        contract_end_date: dayjs(values.contract_end_date).format("YYYY-MM-DD"),
+      });
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -231,48 +264,74 @@ export default function Employee() {
           onFinish={handleFinish}
           autoComplete="off"
         >
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-2">
-            <AntInput
-              formProps={{
-                name: "employee_id",
-                label: "Employee Id",
-                rules: [{ required: true, message: "Employee Id" }],
-              }}
-            />
+          <div className="font-semibold mb-2">Personal Details</div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput
               formProps={{
                 name: "employee_code",
-                label: "Employee Code",
-                rules: [{ required: true, message: "Employee Code" }],
+                label: "कर्मचारी कोड",
+                rules: [{ required: true, message: "कर्मचारी कोड" }],
               }}
             />
             <AntInput
               formProps={{
                 name: "name",
-                label: "Employee Name",
-                rules: [{ required: true, message: "Employee Name" }],
+                label: "नाम",
+                rules: [{ required: true, message: "नाम" }],
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "M", name: "Male" },
+                { id: "F", name: "Female" },
+                { id: "O", name: "Others" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "लिंग" }],
+                label: "लिंग",
+                name: "gender",
               }}
             />
 
             <AntInput
               formProps={{
                 name: "department",
-                label: "Employee Department",
-                rules: [{ required: true, message: "Employee Department" }],
+                label: "विभाग",
+                rules: [{ required: true, message: "विभाग" }],
               }}
             />
 
+            <AntSelect
+              array={positionData?.data || []}
+              renderKey={"position_name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "पदनाम" }],
+                label: "पदनाम",
+                name: "designation",
+              }}
+            />
             <AntInput
               min={10}
               max={10}
               formProps={{
                 name: "phone_number",
-                label: "Phone Number",
-                rules: [{ required: true, message: "Phone Number" }],
+                label: "फोन नम्बर",
+                rules: [{ required: true, message: "फोन नम्बर" }],
               }}
             />
-
             <AntInput
+              formProps={{
+                name: "address",
+                label: "ठेगाना",
+                rules: [{ required: true, message: "ठेगाना" }],
+              }}
+            />
+            {/* <AntInput
               formProps={{
                 name: "province",
                 label: "Province",
@@ -286,115 +345,87 @@ export default function Employee() {
                 label: "District",
                 rules: [{ required: true, message: "District" }],
               }}
-            />
-
-            <AntInput
+            /> */}
+            {/* <AntInput
               formProps={{
                 name: "local_level_type",
                 label: "Local Level Type",
                 rules: [{ required: true, message: "Local Level Type" }],
               }}
-            />
-
-            <AntInput
+            /> */}
+            {/* <AntInput
               formProps={{
                 name: "local_level_name",
                 label: "Local Level Name",
                 rules: [{ required: true, message: "Local Level Name" }],
               }}
-            />
-
-            <AntInputNumber
+            /> */}
+            {/* <AntInputNumber
               formProps={{
                 name: "ward_no",
                 label: "Ward No.",
                 rules: [{ required: true, message: "Ward No." }],
               }}
-            />
-
-            <AntInputNumber
+            /> */}
+            {/* <AntInputNumber
               formProps={{
                 name: "tole",
                 label: "Tole",
                 rules: [{ required: true, message: "Tole" }],
               }}
-            />
-
+            /> */}
             <Form.Item
               name={"date_of_birth"}
-              label="Date of Birth"
-              rules={[{ required: true, message: "Date of Birth" }]}
+              label="जन्म मिति"
+              rules={[{ required: true, message: "जन्म मिति" }]}
             >
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
-
             <Form.Item
               name={"appointment_date"}
-              label="Appointment Date"
-              rules={[{ required: true, message: "Appointment Date" }]}
+              label="नियुक्ति मिति"
+              rules={[{ required: true, message: "नियुक्ति मिति" }]}
             >
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
-
             <AntInputNumber
               type="number"
               formProps={{
                 name: "service_duration",
-                label: "Service Duration",
-                rules: [{ required: true, message: "Service Duration" }],
+                label: "सेवा अवधि",
+                rules: [{ required: true, message: "सेवा अवधि" }],
               }}
             />
-
             <AntSwitch
               formProps={{
                 name: "status",
-                label: "Status",
+                label: "स्थिति",
               }}
             />
+          </div>
+          <div className="font-semibold mb-2">Document Details</div>
 
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput
               formProps={{
                 name: "citizenship_no",
-                label: "Citizenship No.",
-                rules: [{ required: true, message: "Citizenship No" }],
-              }}
-            />
-
-            <AntSelect
-              array={[
-                { id: "M", name: "Male" },
-                { id: "F", name: "Female" },
-                { id: "O", name: "Others" },
-              ]}
-              renderKey={"name"}
-              valueKey={"id"}
-              formProps={{
-                rules: [{ required: true, message: "Gender" }],
-                label: "Gender",
-                name: "gender",
-              }}
-            />
-            <AntInput
-              formProps={{
-                name: "emergency_contact",
-                label: "Emergency Contact",
+                label: "नागरिकता नम्बर",
+                rules: [{ required: true, message: "नागरिकता नम्बर" }],
               }}
             />
 
             <AntInput
               formProps={{
                 name: "bank_account_no",
-                label: "Bank Account No.",
+                label: "बैंक खाता नम्बर",
               }}
             />
-
             <AntInput
               formProps={{
                 name: "bank_name",
-                label: "Bank Name",
+                label: "बैंक नाम",
               }}
             />
-
             <AntSelect
               array={[
                 { id: "Contract", name: "Contract" },
@@ -405,25 +436,29 @@ export default function Employee() {
               valueKey={"id"}
               formProps={{
                 rules: [{ required: true, message: "Employee Type" }],
-                label: "Employee Type",
+                label: "कर्मचारी प्रकार",
                 name: "employment_type",
               }}
             />
-
             <AntInput
               formProps={{
                 name: "appointed_by",
-                label: "Appointed By",
+                label: "नियुक्त गर्ने निकाय",
               }}
             />
-
             <Form.Item
               name={"contract_end_date"}
               label="Contract End Date"
-              rules={[{ required: true, message: "Contract End Date" }]}
+              rules={[{ required: true, message: "करार समाप्ति मिति" }]}
             >
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
+            <AntInput
+              formProps={{
+                name: "emergency_contact",
+                label: "आपतकालीन सम्पर्क",
+              }}
+            />
           </div>
 
           <div className="flex justify-end gap-x-3">

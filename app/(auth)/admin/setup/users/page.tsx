@@ -107,15 +107,18 @@ export default function Users() {
     },
   });
 
-  const handleFinish = (values: any) => {
+  const handleFinish = async (values: any) => {
     if (editingUser) {
-      updateMutation.mutate({
+      await updateMutation.mutateAsync({
         ...editingUser,
         permission_list: selected,
         ...values,
       });
     } else {
-      createMutation.mutate({ ...values, permission_list: selected });
+      await createMutation.mutateAsync({
+        ...values,
+        permission_list: selected,
+      });
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -227,20 +230,13 @@ export default function Users() {
               <Form.Item
                 name={["position_data", "position_name"]}
                 label="Position Name"
-                rules={[
-                  { required: true, message: "Please enter your position" },
-                ]}
               >
                 <Input placeholder="Enter position name" />
               </Form.Item>
             </div>
 
             <div>
-              <Form.Item
-                name={["position_data", "level"]}
-                label="Level"
-                rules={[{ required: true, message: "Please enter your level" }]}
-              >
+              <Form.Item name={["position_data", "level"]} label="Level">
                 <Select
                   options={[
                     { value: "Senior-level", label: "Senior-level" },
@@ -255,12 +251,12 @@ export default function Users() {
               <Form.Item
                 name={["position_data", "responsibilities"]}
                 label="Responsibilities"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your responsibilities",
-                  },
-                ]}
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: "Please enter your responsibilities",
+                //   },
+                // ]}
               >
                 <Input placeholder="Enter responsibilities" />
               </Form.Item>
@@ -270,12 +266,12 @@ export default function Users() {
               <Form.Item
                 name={["position_data", "qualification"]}
                 label="Qualification"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your qualification",
-                  },
-                ]}
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: "Please enter your qualification",
+                //   },
+                // ]}
               >
                 <Input placeholder="Enter qualification" />
               </Form.Item>
@@ -285,9 +281,9 @@ export default function Users() {
               <Form.Item
                 name={["position_data", "salary_scale"]}
                 label="Salary Scale"
-                rules={[
-                  { required: true, message: "Please enter your salary scale" },
-                ]}
+                // rules={[
+                //   { required: true, message: "Please enter your salary scale" },
+                // ]}
               >
                 <Select
                   options={[
@@ -302,12 +298,12 @@ export default function Users() {
               <Form.Item
                 name={["position_data", "department"]}
                 label="Department"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your department",
-                  },
-                ]}
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: "Please enter your department",
+                //   },
+                // ]}
               >
                 <Input placeholder="Enter department" />
               </Form.Item>
