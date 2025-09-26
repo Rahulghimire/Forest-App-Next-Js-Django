@@ -90,8 +90,7 @@ export default function Member() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}roles/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`roles/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
       toast.success("Role created");

@@ -172,8 +172,7 @@ export default function Employee() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<User, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/employee/`, data),
+    mutationFn: (data: Omit<User, "id">) => createApi(`user/employee/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       toast.success("Employee created");
@@ -446,11 +445,7 @@ export default function Employee() {
                 label: "नियुक्त गर्ने निकाय",
               }}
             />
-            <Form.Item
-              name={"contract_end_date"}
-              label="Contract End Date"
-              rules={[{ required: true, message: "करार समाप्ति मिति" }]}
-            >
+            <Form.Item name={"contract_end_date"} label="Contract End Date">
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
             <AntInput

@@ -85,8 +85,7 @@ export default function Plot() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/plots/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`forest/plots/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["plots"] });
       toast.success("Plot created");

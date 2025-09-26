@@ -88,8 +88,7 @@ export default function FiscalYear() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}finance/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`finance/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fiscal_year"] });
       toast.success("Fiscal Year created");

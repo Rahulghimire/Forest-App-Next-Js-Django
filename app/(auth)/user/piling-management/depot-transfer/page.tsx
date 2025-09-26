@@ -93,10 +93,7 @@ export default function Adjustment() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(
-        `${process.env.NEXT_PUBLIC_API_URL}pilling/depot-transfers/`,
-        data
-      ),
+      createApi(`pilling/depot-transfers/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["piling-depot-transfers"] });
       toast.success("Depot Transfer created");

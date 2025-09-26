@@ -140,10 +140,7 @@ export default function InternalTransfer() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(
-        `${process.env.NEXT_PUBLIC_API_URL}pilling/internal-transfers/`,
-        data
-      ),
+      createApi(`pilling/internal-transfers/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["piling-transfers"] });
       toast.success("Internal Transfer created");

@@ -73,7 +73,7 @@ export default function Classification() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/grade-rules/`, data),
+      createApi(`forest/grade-rules/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grade-rules"] });
       toast.success("Grade Rule created");

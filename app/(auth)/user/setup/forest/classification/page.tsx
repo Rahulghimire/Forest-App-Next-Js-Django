@@ -62,10 +62,7 @@ export default function Classification() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(
-        `${process.env.NEXT_PUBLIC_API_URL}forest/classifications/`,
-        data
-      ),
+      createApi(`forest/classifications/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classifications"] });
       toast.success("Classification Title created");
