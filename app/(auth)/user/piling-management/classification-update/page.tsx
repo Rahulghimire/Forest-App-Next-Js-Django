@@ -102,10 +102,7 @@ export default function ClassificationUpdate() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(
-        `${process.env.NEXT_PUBLIC_API_URL}pilling/classification-updates/`,
-        data
-      ),
+      createApi(`pilling/classification-updates/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classification-updates"] });
       toast.success("Classification update created");

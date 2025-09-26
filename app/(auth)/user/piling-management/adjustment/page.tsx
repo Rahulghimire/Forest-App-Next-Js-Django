@@ -85,7 +85,7 @@ export default function Adjustment() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}pilling/adjustments/`, data),
+      createApi(`pilling/adjustments/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["piling-adjustments"] });
       toast.success("Adjustment created");

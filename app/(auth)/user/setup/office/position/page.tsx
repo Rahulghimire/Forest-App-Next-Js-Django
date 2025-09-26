@@ -84,8 +84,7 @@ export default function Position() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}user/position/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`user/position/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["position"] });
       toast.success("Position created");

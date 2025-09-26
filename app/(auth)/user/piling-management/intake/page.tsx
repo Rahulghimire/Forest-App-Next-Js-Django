@@ -156,8 +156,7 @@ export default function Intake() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}pilling/intakes/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`pilling/intakes/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["intakes"] });
       toast.success("Intake created");

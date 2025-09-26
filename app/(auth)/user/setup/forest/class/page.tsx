@@ -84,7 +84,7 @@ export default function Class() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/class-setups/`, data),
+      createApi(`forest/class-setups/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["class"] });
       toast.success("Class created");

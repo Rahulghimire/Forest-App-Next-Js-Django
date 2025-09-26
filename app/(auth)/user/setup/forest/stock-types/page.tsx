@@ -64,8 +64,7 @@ export default function StockType() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/stocks/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`forest/stocks/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stocks"] });
       toast.success("Stock Type created");

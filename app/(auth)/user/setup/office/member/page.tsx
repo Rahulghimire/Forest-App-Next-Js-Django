@@ -43,11 +43,9 @@ export default function Member() {
 
   const [fileList2, setFileList2] = useState<any[]>([]);
 
-  console.log("dfsasfddsa", fileList);
-
   const { data: plots, isLoading } = useQuery({
     queryKey: ["member"],
-    queryFn: () => fetchApi(`member/`),
+    queryFn: () => fetchApi(`member/members/`),
   });
 
   const columns = [
@@ -193,8 +191,7 @@ export default function Member() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}member/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`member/members/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member"] });
       toast.success("Member created");
@@ -205,7 +202,7 @@ export default function Member() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`member/`, user),
+    mutationFn: (user: any) => updateApi(`member/members/`, user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member"] });
       toast.success("Member updated");
@@ -216,7 +213,7 @@ export default function Member() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`member/${id}/`),
+    mutationFn: (id: number) => deleteApi(`/members/${id}/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member"] });
       toast.success("Member deleted");

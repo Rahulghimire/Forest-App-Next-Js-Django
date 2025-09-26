@@ -63,8 +63,7 @@ export default function Depot() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<User, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/depot/`, data),
+    mutationFn: (data: Omit<User, "id">) => createApi(`forest/depot/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["depot"] });
       toast.success("Depot created");

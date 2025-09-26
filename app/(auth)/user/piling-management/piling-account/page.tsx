@@ -133,10 +133,7 @@ export default function PilingAccount() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(
-        `${process.env.NEXT_PUBLIC_API_URL}pilling/pilling-accounts/`,
-        data
-      ),
+      createApi(`pilling/pilling-accounts/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pilling-accounts"] });
       toast.success("Piling Account created");
