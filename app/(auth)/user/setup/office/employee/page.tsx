@@ -10,6 +10,8 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
+  FundViewOutlined,
   PlusCircleOutlined,
   PlusOutlined,
   SaveOutlined,
@@ -40,6 +42,7 @@ import { AntSelect } from "@/app/components/AntSelect";
 export default function Employee() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [fileList, setFileList] = useState<any[]>([]);
   const [fileList2, setFileList2] = useState<any[]>([]);
@@ -137,6 +140,7 @@ export default function Employee() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser({
                 ...record,
                 date_of_birth: record?.date_of_birth
@@ -162,12 +166,28 @@ export default function Employee() {
                   : null,
               });
               setIsModalOpen(true);
-              console.log(
-                "sfdadfsafds",
-                `${process.env.NEXT_PUBLIC_API_URL}${record?.profile_photo_url}`
-              );
             }}
             icon={<EditOutlined />}
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                date_of_birth: record?.date_of_birth
+                  ? dayjs(record?.date_of_birth)
+                  : null,
+                appointment_date: record?.appointment_date
+                  ? dayjs(record?.appointment_date)
+                  : null,
+                contract_end_date: record?.contract_end_date
+                  ? dayjs(record?.contract_end_date)
+                  : null,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
           ></Button>
           <Button
             danger
@@ -304,7 +324,10 @@ export default function Employee() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Employee
@@ -336,6 +359,7 @@ export default function Employee() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="font-semibold mb-2">Personal Details</div>
 
@@ -533,7 +557,12 @@ export default function Employee() {
             </Form.Item>
           </div>
 
-          <div className="flex justify-end gap-x-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}
