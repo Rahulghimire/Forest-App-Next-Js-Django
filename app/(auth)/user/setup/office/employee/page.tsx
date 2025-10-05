@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
+import { Button, DatePicker, Form, Modal, Space, Table, Upload } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
 
@@ -11,19 +11,38 @@ import {
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
+  PlusOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
+import {
+  createApi,
+  createApiFormData,
+  deleteApi,
+  fetchApi,
+  updateApiFormData,
+  User,
+} from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntInputNumber } from "@/app/components/AntInputNumber";
 import { AntSwitch } from "@/app/components/AntSwitch";
 import { AntSelect } from "@/app/components/AntSelect";
 
+//pan optional in employee
+//document upload-id proof
+//image-personal image
+//view option for all the setups
+//Chuttaune wala kaam
+//billing-tourism billing
+//nilami bikri-point no. 2
+//Payroll point no. 9
+
 export default function Employee() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [fileList2, setFileList2] = useState<any[]>([]);
   const [form] = Form.useForm();
 
   const { data: users, isLoading } = useQuery({
@@ -55,22 +74,7 @@ export default function Employee() {
       key: "designation",
     },
     { title: "फोन नम्बर", dataIndex: "phone_number", key: "phone_number" },
-    // { title: "प्रदेश", dataIndex: "province", key: "province" },
-    // { title: "जिला", dataIndex: "district", key: "district" },
-    // { title: "ठेगाना", dataIndex: "address", key: "address" },
 
-    // {
-    //   title: "स्थान क्रम प्रकार",
-    //   dataIndex: "local_level_type",
-    //   key: "local_level_type",
-    // },
-    // {
-    //   title: "Local Level Name",
-    //   dataIndex: "local_level_name",
-    //   key: "local_level_name",
-    // },
-    // { title: "Ward No.", dataIndex: "ward_no", key: "ward_no" },
-    // { title: "Tole", dataIndex: "tole", key: "tole" },
     {
       title: "जन्म मिति",
       dataIndex: "date_of_birth",
@@ -158,6 +162,10 @@ export default function Employee() {
                   : null,
               });
               setIsModalOpen(true);
+              console.log(
+                "sfdadfsafds",
+                `${process.env.NEXT_PUBLIC_API_URL}${record?.profile_photo_url}`
+              );
             }}
             icon={<EditOutlined />}
           ></Button>
@@ -171,8 +179,57 @@ export default function Employee() {
     },
   ];
 
+  const handleChange = ({ fileList }: { fileList: any[] }) => {
+    setFileList(fileList);
+  };
+
+  const handleChange2 = ({ fileList }: { fileList: any[] }) => {
+    setFileList2(fileList);
+  };
+
+  const handlePreview = async (file: any) => {
+    let src = file.url;
+    if (!src) {
+      src = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (err) => reject(err);
+      });
+    }
+    const imgWindow = window.open(src);
+    if (imgWindow) imgWindow.document.write(`<img src="${src}" />`);
+  };
+
+  const uploadButton = (
+    <button style={{ border: 0, background: "none" }} type="button">
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </button>
+  );
+
+  const beforeUpload = (file: File) => {
+    const isImage =
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/jpg";
+    if (!isImage) {
+      toast.error("Please upload an image file!");
+      return Upload.LIST_IGNORE;
+    }
+
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      toast.error("Image must smaller than 2MB!");
+      return Upload.LIST_IGNORE;
+    }
+
+    return false;
+  };
+
   const createMutation = useMutation({
-    mutationFn: (data: Omit<User, "id">) => createApi(`user/employee/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApiFormData(`user/employee/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       toast.success("Employee created");
@@ -183,7 +240,9 @@ export default function Employee() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: User) => updateApi(`user/employee/`, user),
+    // mutationFn: (user: any) => updateApi(`user/employee/${user.id}/`, user),
+    mutationFn: (user: any) =>
+      updateApiFormData(`user/employee/${user.get("id")}`, user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       toast.success("Employee updated");
@@ -205,21 +264,36 @@ export default function Employee() {
   });
 
   const handleFinish = async (values: any) => {
+    const formData = new FormData();
+
+    const payload = {
+      ...editingUser,
+      ...values,
+      date_of_birth: dayjs(values.date_of_birth).format("YYYY-MM-DD"),
+      appointment_date: dayjs(values.appointment_date).format("YYYY-MM-DD"),
+      contract_end_date: dayjs(values.contract_end_date).format("YYYY-MM-DD"),
+    };
+
+    Object.entries(payload).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) {
+        formData.append(
+          key,
+          typeof val === "string" || val instanceof Blob ? val : String(val)
+        );
+      }
+    });
+
+    if (fileList2[0]?.originFileObj) {
+      formData.append("document_url", fileList2[0].originFileObj);
+    }
+    if (fileList[0]?.originFileObj) {
+      formData.append("profile_photo_url", fileList[0].originFileObj);
+    }
+
     if (editingUser) {
-      await updateMutation.mutateAsync({
-        ...editingUser,
-        ...values,
-        date_of_birth: dayjs(values.date_of_birth).format("YYYY-MM-DD"),
-        appointment_date: dayjs(values.appointment_date).format("YYYY-MM-DD"),
-        contract_end_date: dayjs(values.contract_end_date).format("YYYY-MM-DD"),
-      });
+      await updateMutation.mutateAsync(formData);
     } else {
-      await createMutation.mutateAsync({
-        ...values,
-        date_of_birth: dayjs(values.date_of_birth).format("YYYY-MM-DD"),
-        appointment_date: dayjs(values.appointment_date).format("YYYY-MM-DD"),
-        contract_end_date: dayjs(values.contract_end_date).format("YYYY-MM-DD"),
-      });
+      await createMutation.mutateAsync(formData);
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -273,6 +347,7 @@ export default function Employee() {
                 rules: [{ required: true, message: "कर्मचारी कोड" }],
               }}
             />
+
             <AntInput
               formProps={{
                 name: "name",
@@ -330,49 +405,7 @@ export default function Employee() {
                 rules: [{ required: true, message: "ठेगाना" }],
               }}
             />
-            {/* <AntInput
-              formProps={{
-                name: "province",
-                label: "Province",
-                rules: [{ required: true, message: "Province" }],
-              }}
-            />
 
-            <AntInput
-              formProps={{
-                name: "district",
-                label: "District",
-                rules: [{ required: true, message: "District" }],
-              }}
-            /> */}
-            {/* <AntInput
-              formProps={{
-                name: "local_level_type",
-                label: "Local Level Type",
-                rules: [{ required: true, message: "Local Level Type" }],
-              }}
-            /> */}
-            {/* <AntInput
-              formProps={{
-                name: "local_level_name",
-                label: "Local Level Name",
-                rules: [{ required: true, message: "Local Level Name" }],
-              }}
-            /> */}
-            {/* <AntInputNumber
-              formProps={{
-                name: "ward_no",
-                label: "Ward No.",
-                rules: [{ required: true, message: "Ward No." }],
-              }}
-            /> */}
-            {/* <AntInputNumber
-              formProps={{
-                name: "tole",
-                label: "Tole",
-                rules: [{ required: true, message: "Tole" }],
-              }}
-            /> */}
             <Form.Item
               name={"date_of_birth"}
               label="जन्म मिति"
@@ -394,6 +427,14 @@ export default function Employee() {
                 label: "सेवा अवधि",
                 rules: [{ required: true, message: "सेवा अवधि" }],
               }}
+            />
+            <AntInput
+              formProps={{
+                name: "pan_no",
+                label: "पान नम्बर",
+              }}
+              max={10}
+              min={7}
             />
             <AntSwitch
               formProps={{
@@ -454,6 +495,42 @@ export default function Employee() {
                 label: "आपतकालीन सम्पर्क",
               }}
             />
+
+            <Form.Item name={"profile_photo_url"} label="प्रोफ़ाइल फोटो">
+              <Upload
+                name="avatar"
+                listType="picture-card"
+                maxCount={1}
+                showUploadList={{
+                  showPreviewIcon: true,
+                  showRemoveIcon: true,
+                }}
+                beforeUpload={beforeUpload}
+                onChange={handleChange}
+                onPreview={handlePreview}
+                accept=".jpg, .jpeg, .png"
+              >
+                {fileList.length >= 1 ? null : uploadButton}
+              </Upload>
+            </Form.Item>
+
+            <Form.Item name={"document_url"} label="प्रमाणपत्र/कागजात">
+              <Upload
+                name="avatar"
+                listType="picture-card"
+                maxCount={1}
+                showUploadList={{
+                  showPreviewIcon: true,
+                  showRemoveIcon: true,
+                }}
+                beforeUpload={beforeUpload}
+                onChange={handleChange2}
+                onPreview={handlePreview}
+                accept=".jpg, .jpeg, .png"
+              >
+                {fileList2.length >= 1 ? null : uploadButton}
+              </Upload>
+            </Form.Item>
           </div>
 
           <div className="flex justify-end gap-x-3">

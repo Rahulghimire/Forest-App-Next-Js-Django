@@ -57,6 +57,51 @@ export const createApi = async (url: string, data: Omit<any, "id">) => {
   return res.json();
 };
 
+export const createApiFormData = async (url: string, data: any) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${Cookies.get("user_access_token")}`,
+    },
+    body: data,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const message =
+      errorData?.message ||
+      errorData?.detail ||
+      JSON.stringify(errorData) ||
+      "Error creating data";
+    throw new Error(message);
+  }
+
+  return res.json();
+};
+
+export const updateApiFormData = async (url: string, data: any) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}/`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${Cookies.get("user_access_token")}`,
+    },
+    // body: JSON.stringify(user),
+    body: data,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const message =
+      errorData?.message ||
+      errorData?.detail ||
+      JSON.stringify(errorData) ||
+      "Error updating user";
+    throw new Error(message);
+  }
+
+  return res.json();
+};
+
 export const updateApi = async (url: string, user: any) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}${url}${user.id}/`,

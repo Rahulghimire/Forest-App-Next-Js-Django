@@ -26,7 +26,13 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
+import {
+  createApiFormData,
+  deleteApi,
+  fetchApi,
+  updateApiFormData,
+  User,
+} from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSelect } from "@/app/components/AntSelect";
 import { AntSwitch } from "@/app/components/AntSwitch";
@@ -191,7 +197,8 @@ export default function Member() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) => createApi(`member/members/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApiFormData(`member/members/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member"] });
       toast.success("Member created");
@@ -202,7 +209,8 @@ export default function Member() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`member/members/`, user),
+    mutationFn: (user: any) =>
+      updateApiFormData(`member/members/${user.get("id")}`, user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member"] });
       toast.success("Member updated");
@@ -314,13 +322,6 @@ export default function Member() {
   const handleChange2 = ({ fileList }: { fileList: any[] }) => {
     setFileList2(fileList);
   };
-
-  // const handlePreview = async (file: any) => {
-  //   const src = file.url || file.thumbUrl;
-  //   if (src) {
-  //     window.open(src, "_blank");
-  //   }
-  // };
 
   const handlePreview = async (file: any) => {
     let src = file.url;
