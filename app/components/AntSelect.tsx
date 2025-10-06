@@ -1,5 +1,6 @@
 import { FormItemProps, Select, SelectProps, Tooltip } from "antd";
 import { AntFormItem } from "./AntFormItem";
+import { DownCircleFilled, DownOutlined } from "@ant-design/icons";
 
 interface Props<T> extends Omit<SelectProps<T>, "options"> {
   isWYSIWYGMode?: boolean;
@@ -40,6 +41,7 @@ export const AntSelect = <T,>(props: Props<T>) => {
         {...formProps}
       >
         <Select
+          suffixIcon={<DownOutlined className=" !text-[#000000]" />}
           allowClear={true}
           showSearch={true}
           prefix={prefixName || null}

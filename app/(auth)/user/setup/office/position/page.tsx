@@ -9,6 +9,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -21,6 +22,8 @@ export default function Position() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
+
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
@@ -67,17 +70,29 @@ export default function Position() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({ ...record });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -131,7 +146,10 @@ export default function Position() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Position
@@ -154,7 +172,13 @@ export default function Position() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Position" : "Add Position"}
+        title={
+          viewingUser
+            ? "View Position"
+            : editingUser
+            ? "Edit Position"
+            : "Add Position"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -168,6 +192,7 @@ export default function Position() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput

@@ -75,7 +75,11 @@ export default function AdminLayout({
           <Menu
             mode="inline"
             // selectedKeys={[pathname]}
-            style={{ background: "rgb(237, 242, 248)", color: "#343c46" }}
+            style={{
+              background: "rgb(237, 242, 248)",
+              color: "#343c46",
+              fontWeight: 600,
+            }}
             defaultSelectedKeys={["1"]}
             onClick={({ key }) => {
               if (key === "1") router.push("/admin/dashboard");
@@ -94,8 +98,8 @@ export default function AdminLayout({
               background: "#10a96ff1",
               display: "flex",
               alignItems: "center",
+              padding: "0 10px 0 4px",
               justifyContent: "space-between",
-              paddingInlineEnd: "10px",
             }}
           >
             <Button

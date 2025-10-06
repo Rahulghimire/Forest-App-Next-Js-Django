@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -21,6 +22,8 @@ export default function Class() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
+
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
@@ -66,12 +69,21 @@ export default function Class() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({ ...record, email: record.user_email });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -131,7 +143,10 @@ export default function Class() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Class
@@ -154,7 +169,9 @@ export default function Class() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Class" : "Add Class"}
+        title={
+          viewingUser ? "View Class" : editingUser ? "Edit Class" : "Add Class"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -168,6 +185,7 @@ export default function Class() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput

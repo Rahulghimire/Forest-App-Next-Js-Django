@@ -21,6 +21,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   PlusOutlined,
   SaveOutlined,
@@ -44,6 +45,7 @@ export default function Member() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
 
   const [fileList, setFileList] = useState<any[]>([]);
 
@@ -171,6 +173,7 @@ export default function Member() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
@@ -185,12 +188,30 @@ export default function Member() {
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                status: record?.status ? true : false,
+                membership_date: record?.membership_date
+                  ? dayjs(record?.membership_date)
+                  : null,
+                membership_expiry_date: record?.membership_expiry_date
+                  ? record?.membership_expiry_date
+                  : null,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -341,7 +362,10 @@ export default function Member() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Member
@@ -364,7 +388,13 @@ export default function Member() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Member" : "Add Member"}
+        title={
+          viewingUser
+            ? "View Member"
+            : editingUser
+            ? "Edit Member"
+            : "Add Member"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {

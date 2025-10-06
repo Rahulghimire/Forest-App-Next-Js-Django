@@ -18,6 +18,7 @@ import {
   SolutionOutlined,
   TeamOutlined,
   TransactionOutlined,
+  EllipsisOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -80,7 +81,9 @@ export default function AdminLayout({
       >
         <Menu
           mode="inline"
-          style={{ background: "rgb(237, 242, 248)", color: "#343c46" }}
+          style={{
+            fontWeight: 600,
+          }}
           defaultSelectedKeys={["1"]}
           onClick={({ key }) => {
             if (key === "1") router.push("/user/dashboard");
@@ -121,9 +124,9 @@ export default function AdminLayout({
           style={{
             background: "#10a96ff1",
             display: "flex",
+            padding: "0 17px 0 4px",
             alignItems: "center",
             justifyContent: "space-between",
-            paddingInlineEnd: "17px",
           }}
         >
           <Button
