@@ -4,21 +4,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, DatePicker, Form, Modal, Space, Table, Upload } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
-
 import { AntButton } from "@/app/components/AntButton";
 import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
-  FundViewOutlined,
   PlusCircleOutlined,
   PlusOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import {
-  createApi,
   createApiFormData,
   deleteApi,
   fetchApi,
@@ -188,7 +185,7 @@ export default function Employee() {
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
-          ></Button>
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -345,7 +342,13 @@ export default function Employee() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Employee" : "Add Employee"}
+        title={
+          viewingUser
+            ? "View Employee"
+            : editingUser
+            ? "Edit Employee"
+            : "Add Employee"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {

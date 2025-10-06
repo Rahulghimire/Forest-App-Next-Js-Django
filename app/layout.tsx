@@ -42,9 +42,23 @@ export default function RootLayout({
                   Form: {
                     itemMarginBottom: 10,
                   },
-                  DatePicker: {},
+                  DatePicker: {
+                    colorTextDisabled: "#000000",
+                    colorText: "#000000",
+                    colorTextLabel: "#000000",
+                  },
                   Upload: {
                     controlHeightLG: 28,
+                  },
+                  Input: {
+                    colorTextDisabled: "#000000",
+                  },
+
+                  InputNumber: {
+                    colorTextDisabled: "#000000",
+                  },
+                  Select: {
+                    colorTextDisabled: "#000000",
                   },
                   Menu: {
                     itemColor: "#343c46",

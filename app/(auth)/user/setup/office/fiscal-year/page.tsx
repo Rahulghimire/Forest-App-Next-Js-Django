@@ -9,6 +9,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -23,6 +24,8 @@ export default function FiscalYear() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
+
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
@@ -65,6 +68,7 @@ export default function FiscalYear() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
@@ -76,12 +80,27 @@ export default function FiscalYear() {
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                start_date: record?.start_date
+                  ? dayjs(record?.start_date)
+                  : null,
+                end_date: record?.end_date ? dayjs(record?.end_date) : null,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -142,7 +161,10 @@ export default function FiscalYear() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Fiscal Year
@@ -165,7 +187,13 @@ export default function FiscalYear() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Fiscal Year" : "Add Fiscal Year"}
+        title={
+          viewingUser
+            ? "View Fiscal Year"
+            : editingUser
+            ? "Edit Fiscal Year"
+            : "Add Fiscal Year"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -179,6 +207,7 @@ export default function FiscalYear() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntSelect

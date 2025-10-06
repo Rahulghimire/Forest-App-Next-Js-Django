@@ -75,7 +75,6 @@ export default function AdminLayout({
           <Menu
             mode="inline"
             // selectedKeys={[pathname]}
-
             style={{
               background: "rgb(237, 242, 248)",
               color: "#343c46",
