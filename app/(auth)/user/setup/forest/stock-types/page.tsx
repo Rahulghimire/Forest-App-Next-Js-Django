@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -15,12 +16,12 @@ import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSelect } from "@/app/components/AntSelect";
-import { AntInputNumber } from "@/app/components/AntInputNumber";
 import { AntSwitch } from "@/app/components/AntSwitch";
 
 export default function StockType() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
@@ -47,12 +48,26 @@ export default function StockType() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                email: record.user_email,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
+
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -111,7 +126,10 @@ export default function StockType() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Stock Type
@@ -134,7 +152,13 @@ export default function StockType() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Stock Type" : "Add Stock Type"}
+        title={
+          viewingUser
+            ? "View Stock Type"
+            : editingUser
+            ? "Edit Stock Type"
+            : "Add Stock Type"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -148,6 +172,7 @@ export default function StockType() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntSelect

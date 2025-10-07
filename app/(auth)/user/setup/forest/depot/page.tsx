@@ -9,6 +9,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -19,6 +20,7 @@ import { AntInput } from "@/app/components/AntInput";
 export default function Depot() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
@@ -46,12 +48,24 @@ export default function Depot() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                email: record.user_email,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -110,7 +124,10 @@ export default function Depot() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Depot
@@ -128,7 +145,9 @@ export default function Depot() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Depot" : "Add Depot"}
+        title={
+          viewingUser ? "View Depot" : editingUser ? "Edit Depot" : "Add Depot"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -142,6 +161,7 @@ export default function Depot() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput
