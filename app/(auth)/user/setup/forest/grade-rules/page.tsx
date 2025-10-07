@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -20,6 +21,7 @@ export default function Classification() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
@@ -55,12 +57,25 @@ export default function Classification() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                email: record.user_email,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -120,7 +135,10 @@ export default function Classification() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Grade Rules
@@ -143,7 +161,13 @@ export default function Classification() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Grade Rules" : "Add Grade Rules"}
+        title={
+          viewingUser
+            ? "View Grade Rules"
+            : editingUser
+            ? "Edit Grade Rules"
+            : "Add Grade Rules"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -157,6 +181,7 @@ export default function Classification() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput

@@ -18,6 +18,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -31,6 +32,7 @@ import { AntSwitch } from "@/app/components/AntSwitch";
 export default function Species() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form] = Form.useForm();
 
@@ -78,12 +80,24 @@ export default function Species() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                email: record.user_email,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.id)}
@@ -142,7 +156,10 @@ export default function Species() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Species
@@ -160,7 +177,13 @@ export default function Species() {
 
       <Modal
         width={"90vw"}
-        title={editingUser ? "Edit Species" : "Add Species"}
+        title={
+          viewingUser
+            ? "View Species"
+            : editingUser
+            ? "Edit Species"
+            : "Add Species"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -174,6 +197,7 @@ export default function Species() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntInput formProps={{ name: "species_name", label: "प्लट नाम" }} />
