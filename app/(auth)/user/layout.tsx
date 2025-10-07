@@ -87,6 +87,11 @@ export default function AdminLayout({
           defaultSelectedKeys={["1"]}
           onClick={({ key }) => {
             if (key === "1") router.push("/user/dashboard");
+            if (key === "2-1") router.push("/user/auction/notice");
+            if (key === "2-2") router.push("/user/auction/registration");
+            if (key === "2-3") router.push("/user/auction/evaluation");
+            if (key === "2-4") router.push("/user/auction/payment");
+            if (key === "2-5") router.push("/user/auction/release");
             if (key === "2") router.push("/user");
             if (key === "11-1") router.push("/user/setup/office/employee");
             if (key === "11-2") router.push("/user/setup/office/position");
