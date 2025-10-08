@@ -1,6 +1,11 @@
 import { FormItemProps, Select, SelectProps, Tooltip } from "antd";
 import { AntFormItem } from "./AntFormItem";
-import { DownCircleFilled, DownOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  PlayCircleTwoTone,
+  PlusCircleFilled,
+} from "@ant-design/icons";
+import { AntButton } from "./AntButton";
 
 interface Props<T> extends Omit<SelectProps<T>, "options"> {
   isWYSIWYGMode?: boolean;
@@ -10,6 +15,9 @@ interface Props<T> extends Omit<SelectProps<T>, "options"> {
   renderKey: keyof T;
   valueKey: keyof T;
   children?: React.ReactNode;
+  AddButton?: React.ReactNode;
+  showAddButton?: boolean;
+  handleClick?: () => void;
 }
 
 /**
@@ -28,6 +36,8 @@ export const AntSelect = <T,>(props: Props<T>) => {
     placeholder = "Please select",
     valueKey,
     array = [],
+    handleClick = null,
+    showAddButton = false,
     isWYSIWYGMode = false,
     onChange,
     ...rest
@@ -55,6 +65,23 @@ export const AntSelect = <T,>(props: Props<T>) => {
               ?.startsWith(input.toLowerCase());
           }}
           mode={mode}
+          popupRender={(menu) => (
+            <>
+              {menu}
+              {/* {showAddButton && ( */}
+              <div className="pt-2">
+                <AntButton
+                  block
+                  onClick={() => {
+                    handleClick?.();
+                  }}
+                >
+                  Add New <PlayCircleTwoTone />
+                </AntButton>
+              </div>
+              {/* )} */}
+            </>
+          )}
           {...(mode === "multiple" && {
             maxTagCount: "responsive",
             maxTagPlaceholder: (omittedValues: any) => {
@@ -87,7 +114,6 @@ export const AntSelect = <T,>(props: Props<T>) => {
               )}
             </Select.Option>
           ))}
-
           {children}
         </Select>
       </AntFormItem>
