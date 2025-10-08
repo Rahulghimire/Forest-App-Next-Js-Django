@@ -45,13 +45,8 @@ export default function AuditLog() {
 
   const columns = [
     {
-      title: "लग आईडी",
-      dataIndex: "log_id",
-      key: "log_id",
-    },
-    {
       title: "प्रयोगकर्ता",
-      dataIndex: "user_id",
+      dataIndex: ["user", "email"],
       key: "user_id",
     },
     {
@@ -78,11 +73,27 @@ export default function AuditLog() {
       title: "अघिल्लो डाटा",
       dataIndex: "previous_data",
       key: "previous_data",
+      render: (data: Record<string, any>) =>
+        data
+          ? Object.entries(data).map(([k, v]) => (
+              <div key={k}>
+                <b>{k}:</b> {String(v)}
+              </div>
+            ))
+          : "-",
     },
     {
       title: "नयाँ डाटा",
       dataIndex: "new_data",
       key: "new_data",
+      render: (data: Record<string, any>) =>
+        data
+          ? Object.entries(data).map(([k, v]) => (
+              <div key={k}>
+                <b>{k}:</b> {String(v)}
+              </div>
+            ))
+          : "-",
     },
     {
       title: "IP ठेगाना",

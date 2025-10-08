@@ -33,7 +33,7 @@ export default function Species() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewingUser, setViewingUser] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [form] = Form.useForm();
 
   const { data: species, isLoading } = useQuery({
@@ -76,7 +76,7 @@ export default function Species() {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
@@ -100,7 +100,7 @@ export default function Species() {
           />
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
+            onClick={() => deleteMutation.mutate(record.species_id)}
             icon={<DeleteOutlined />}
           ></Button>
         </Space>
@@ -143,7 +143,11 @@ export default function Species() {
 
   const handleFinish = async (values: any) => {
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser.species_id,
+        ...values,
+      });
     } else {
       await createMutation.mutateAsync(values);
     }
@@ -289,7 +293,12 @@ export default function Species() {
             />
           </div>
 
-          <div className="flex justify-end gap-x-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

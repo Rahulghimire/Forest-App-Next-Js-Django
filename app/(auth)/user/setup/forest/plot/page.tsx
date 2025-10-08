@@ -23,7 +23,7 @@ import { AntSwitch } from "@/app/components/AntSwitch";
 export default function Plot() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [viewingUser, setViewingUser] = useState(false);
   const [form] = Form.useForm();
 
@@ -66,7 +66,7 @@ export default function Plot() {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
@@ -92,9 +92,9 @@ export default function Plot() {
 
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
+            onClick={() => deleteMutation.mutate(record?.plot_id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -135,7 +135,11 @@ export default function Plot() {
 
   const handleFinish = async (values: any) => {
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser.plot_id,
+        ...values,
+      });
     } else {
       await createMutation.mutateAsync(values);
     }
@@ -281,7 +285,12 @@ export default function Plot() {
             />
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3 mt-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

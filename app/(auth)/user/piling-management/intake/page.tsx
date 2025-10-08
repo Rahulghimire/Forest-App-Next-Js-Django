@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -23,6 +24,8 @@ export default function Intake() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
+
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
@@ -129,6 +132,7 @@ export default function Intake() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
@@ -144,12 +148,31 @@ export default function Intake() {
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                intake_date: record?.intake_date
+                  ? dayjs(record?.intake_date)
+                  : null,
+                species_id: record?.species?.id,
+                plot_id: record?.plot?.id,
+                class_id: record?.class_name?.id,
+                unit_id: record?.unit?.id,
+                entered_by: record?.entered_by?.email,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
+            onClick={() => deleteMutation.mutate(record.intake_id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -216,7 +239,10 @@ export default function Intake() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Intake
@@ -239,7 +265,13 @@ export default function Intake() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Intake" : "Add Intake"}
+        title={
+          viewingUser
+            ? "View Intake"
+            : editingUser
+            ? "Edit Intake"
+            : "Add Intake"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -253,6 +285,7 @@ export default function Intake() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntSelect

@@ -16,13 +16,19 @@ import { toast } from "react-toastify";
 import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSwitch } from "@/app/components/AntSwitch";
+import { AntSelect } from "@/app/components/AntSelect";
 
 export default function Classification() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewingUser, setViewingUser] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [form] = Form.useForm();
+
+  const { data: classData } = useQuery({
+    queryKey: ["class-setup"],
+    queryFn: () => fetchApi(`forest/class-setup/`),
+  });
 
   const { data: plots, isLoading } = useQuery({
     queryKey: ["classifications"],
@@ -42,7 +48,7 @@ export default function Classification() {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
@@ -66,7 +72,7 @@ export default function Classification() {
           />
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
+            onClick={() => deleteMutation.mutate(record.classification_id)}
             icon={<DeleteOutlined />}
           ></Button>
         </Space>
@@ -110,7 +116,11 @@ export default function Classification() {
 
   const handleFinish = async (values: any) => {
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser.classification_id,
+        ...values,
+      });
     } else {
       await createMutation.mutateAsync(values);
     }
@@ -172,11 +182,22 @@ export default function Classification() {
           disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
-            <AntInput
+            {/* <AntInput
               formProps={{
                 rules: [{ required: true, message: "वर्गीकरण नाम" }],
                 name: "classification_title",
                 label: "वर्गीकरण नाम",
+              }}
+            /> */}
+
+            <AntSelect
+              array={classData?.data || []}
+              renderKey={"class_name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "वर्गीकरण नाम" }],
+                label: "वर्गीकरण नाम",
+                name: "classification_title",
               }}
             />
             <AntInput formProps={{ name: "description", label: "विवरण" }} />
@@ -196,7 +217,12 @@ export default function Classification() {
             />
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3 mt-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

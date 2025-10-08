@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -15,12 +16,13 @@ import { toast } from "react-toastify";
 import { AntInput } from "@/app/components/AntInput";
 import { fetchApi, createApi, updateApi, deleteApi } from "../../setup/api";
 import { AntSelect } from "@/app/components/AntSelect";
-import dayjs from "dayjs";
 
 export default function ClassificationUpdate() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
+
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
@@ -82,6 +84,7 @@ export default function ClassificationUpdate() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
@@ -89,12 +92,24 @@ export default function ClassificationUpdate() {
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
+
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.classification_id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -163,7 +178,10 @@ export default function ClassificationUpdate() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Classification Update
@@ -187,7 +205,9 @@ export default function ClassificationUpdate() {
       <Modal
         width={"70vw"}
         title={
-          editingUser
+          viewingUser
+            ? "View Classification Update"
+            : editingUser
             ? "Edit Classification Update"
             : "Add Classification Update"
         }
@@ -204,12 +224,13 @@ export default function ClassificationUpdate() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
             <AntSelect
               array={gradeData?.data || []}
-              renderKey={"name"}
-              valueKey={"id"}
+              renderKey={"grade_name"}
+              valueKey={"gradeRules_id"}
               formProps={{
                 rules: [{ required: true, message: "पुरानो ग्रेड" }],
                 label: "पुरानो ग्रेड",
@@ -219,8 +240,8 @@ export default function ClassificationUpdate() {
 
             <AntSelect
               array={gradeData?.data || []}
-              renderKey={"name"}
-              valueKey={"id"}
+              renderKey={"grade_name"}
+              valueKey={"gradeRules_id"}
               formProps={{
                 rules: [{ required: true, message: "नयाँ ग्रेड" }],
                 label: "नयाँ ग्रेड",
@@ -229,7 +250,11 @@ export default function ClassificationUpdate() {
             />
 
             <AntSelect
-              array={intakeData?.data || []}
+              array={
+                intakeData?.data?.map((item: any) => {
+                  return { ...item, name: item?.species?.species_name };
+                }) || []
+              }
               renderKey={"name"}
               valueKey={"id"}
               formProps={{

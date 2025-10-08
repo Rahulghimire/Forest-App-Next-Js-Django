@@ -260,7 +260,12 @@ export default function Class() {
             />
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3 mt-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

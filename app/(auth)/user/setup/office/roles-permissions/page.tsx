@@ -236,7 +236,12 @@ export default function Member() {
               }}
             />
 
-            <div className="col-span-full">
+            <div
+              className="col-span-full"
+              style={{
+                display: (permissionData?.length ?? 0) > 0 ? "block" : "none",
+              }}
+            >
               <Divider style={{ margin: "6px 0" }} />
 
               <div className="font-semibold text-gray-700 mb-3">
@@ -276,7 +281,12 @@ export default function Member() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            className="flex justify-end gap-x-3 mt-3"
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

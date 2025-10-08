@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -20,6 +21,7 @@ import dayjs from "dayjs";
 export default function InternalTransfer() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [form] = Form.useForm();
 
@@ -117,6 +119,7 @@ export default function InternalTransfer() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
@@ -127,7 +130,21 @@ export default function InternalTransfer() {
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                transfer_date: record?.transfer_date
+                  ? dayjs(record?.transfer_date)
+                  : null,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.transfer_id)}
@@ -203,7 +220,10 @@ export default function InternalTransfer() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Internal Transfer
@@ -226,7 +246,13 @@ export default function InternalTransfer() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Internal Transfer" : "Add Internal Transfer"}
+        title={
+          viewingUser
+            ? "View Internal Transfer"
+            : editingUser
+            ? "Edit Internal Transfer"
+            : "Add Internal Transfer"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -240,11 +266,23 @@ export default function InternalTransfer() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
             <AntSelect
-              array={pilingAccountsData?.data || []}
-              renderKey={"name"}
+              array={
+                pilingAccountsData?.data?.map((item: any) => {
+                  return {
+                    ...item,
+                    name: item?.species?.species_name,
+                    species_id: item?.species?.species_id,
+                    class_id: item?.classes?.class_id,
+                    from_location_id: item?.pile_location?.depot_id,
+                    to_location_id: item?.pile_location?.depot_id,
+                  };
+                }) || []
+              }
+              renderKey={"pile_number"}
               onSelect={(_, option) => {
                 form.setFieldsValue({
                   intake_id: option.intake_id,
@@ -252,11 +290,13 @@ export default function InternalTransfer() {
                   class_id: option.class_id,
                   grade: option.grade,
                   length: option.length,
+                  from_location_id: option.from_location_id,
+                  to_location_id: option.to_location_id,
                   girth: option.girth,
                   volume_cft: option.volume_cft,
                 });
               }}
-              valueKey={"id"}
+              valueKey={"pile_id"}
               formProps={{
                 rules: [{ required: true, message: "पाइल आईडी" }],
                 label: "पाइल आईडी",
@@ -271,7 +311,7 @@ export default function InternalTransfer() {
               formProps={{
                 rules: [{ required: true, message: "प्रजाति" }],
                 label: "प्रजाति",
-                name: "species_id ",
+                name: "species_id",
               }}
             />
             <AntSelect
@@ -322,7 +362,13 @@ export default function InternalTransfer() {
             />
 
             <AntSelect
-              array={depotData?.data || []}
+              array={
+                depotData?.data?.map((item: any) => ({
+                  ...item,
+                  name: item?.from_depot?.depot_name,
+                  id: item?.from_depot?.depot_id,
+                })) || []
+              }
               renderKey={"name"}
               valueKey={"id"}
               disabled
@@ -334,7 +380,13 @@ export default function InternalTransfer() {
             />
 
             <AntSelect
-              array={depotData?.data || []}
+              array={
+                depotData?.data?.map((item: any) => ({
+                  ...item,
+                  name: item?.to_depot?.depot_name,
+                  id: item?.from_depot?.depot_id,
+                })) || []
+              }
               renderKey={"name"}
               valueKey={"id"}
               disabled

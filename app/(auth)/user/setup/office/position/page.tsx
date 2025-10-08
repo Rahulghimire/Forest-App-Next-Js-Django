@@ -257,7 +257,12 @@ export default function Position() {
             />
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            className="flex justify-end gap-x-3 mt-3"
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

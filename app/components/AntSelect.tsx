@@ -25,6 +25,7 @@ export const AntSelect = <T,>(props: Props<T>) => {
     mode,
     children,
     renderKey,
+    placeholder = "Please select",
     valueKey,
     array = [],
     isWYSIWYGMode = false,
@@ -42,8 +43,9 @@ export const AntSelect = <T,>(props: Props<T>) => {
       >
         <Select
           suffixIcon={<DownOutlined className=" !text-[#000000]" />}
-          allowClear={true}
+          // allowClear={true}
           showSearch={true}
+          placeholder={placeholder}
           prefix={prefixName || null}
           className={`!tw-w-full  ${className}`}
           optionFilterProp="children"

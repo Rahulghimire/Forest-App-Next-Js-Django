@@ -174,15 +174,26 @@ export default function Member() {
           <Button
             onClick={() => {
               setViewingUser(false);
-              setEditingUser(record);
+              setEditingUser({
+                ...record,
+                date_of_birth: record?.date_of_birth
+                  ? dayjs(record?.date_of_birth)
+                  : null,
+                membership_expiry_date: record?.membership_expiry_date
+                  ? dayjs(record?.membership_expiry_date)
+                  : null,
+              });
               form.setFieldsValue({
                 ...record,
                 status: record?.status ? true : false,
+                date_of_birth: record?.date_of_birth
+                  ? dayjs(record?.date_of_birth)
+                  : null,
                 membership_date: record?.membership_date
                   ? dayjs(record?.membership_date)
                   : null,
                 membership_expiry_date: record?.membership_expiry_date
-                  ? record?.membership_expiry_date
+                  ? dayjs(record?.membership_expiry_date)
                   : null,
               });
               setIsModalOpen(true);
@@ -196,11 +207,14 @@ export default function Member() {
               form.setFieldsValue({
                 ...record,
                 status: record?.status ? true : false,
+                date_of_birth: record?.date_of_birth
+                  ? dayjs(record?.date_of_birth)
+                  : null,
                 membership_date: record?.membership_date
                   ? dayjs(record?.membership_date)
                   : null,
                 membership_expiry_date: record?.membership_expiry_date
-                  ? record?.membership_expiry_date
+                  ? dayjs(record?.membership_expiry_date)
                   : null,
               });
               setIsModalOpen(true);
@@ -231,7 +245,7 @@ export default function Member() {
 
   const updateMutation = useMutation({
     mutationFn: (user: any) =>
-      updateApiFormData(`member/members/${user.get("id")}`, user),
+      updateApiFormData(`member/members/${user.get("member_id")}`, user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member"] });
       toast.success("Member updated");
@@ -256,9 +270,12 @@ export default function Member() {
     const formData = new FormData();
 
     const payload = {
+      ...editingUser,
       ...values,
-      membership_date: dayjs(values.membership_date).format("YYYY-MM-DD"),
-      membership_expiry_date: dayjs(values.membership_expiry_date).format(
+      // status: values?.status ? "1" : "0",
+      date_of_birth: dayjs(values?.date_of_birth).format("YYYY-MM-DD"),
+      membership_date: dayjs(values?.membership_date).format("YYYY-MM-DD"),
+      membership_expiry_date: dayjs(values?.membership_expiry_date).format(
         "YYYY-MM-DD"
       ),
     };
@@ -372,7 +389,7 @@ export default function Member() {
       </AntButton>
 
       <Table
-        rowKey="id"
+        rowKey="member_id"
         columns={columns || []}
         bordered
         dataSource={plots?.data || []}
@@ -408,6 +425,7 @@ export default function Member() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
             <AntInput
@@ -599,7 +617,12 @@ export default function Member() {
             </Form.Item>
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            className="flex justify-end gap-x-3 mt-3"
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

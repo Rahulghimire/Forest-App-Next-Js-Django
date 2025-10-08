@@ -7,7 +7,12 @@ interface Props extends Omit<InputProps, "name"> {
 }
 
 export const AntInput: React.FC<Props> = (props) => {
-  const { formProps = {}, allowClear = true, ...rest } = props;
+  const {
+    formProps = {},
+    placeholder = "Please enter",
+    allowClear = true,
+    ...rest
+  } = props;
 
   const isRuleRequired = (rule: Rule): boolean => {
     return "required" in rule && !!rule.required;
@@ -32,6 +37,7 @@ export const AntInput: React.FC<Props> = (props) => {
       <Input
         {...rest}
         allowClear={allowClear}
+        placeholder={placeholder}
         data-cy={formProps?.name}
         addonBefore={addonBefore}
       />
