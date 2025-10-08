@@ -23,7 +23,7 @@ import dayjs from "dayjs";
 export default function FiscalYear() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [viewingUser, setViewingUser] = useState(false);
 
   const [form] = Form.useForm();
@@ -98,7 +98,7 @@ export default function FiscalYear() {
           />
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
+            onClick={() => deleteMutation.mutate(record.fiscal_id)}
             icon={<DeleteOutlined />}
           />
         </Space>
@@ -142,11 +142,19 @@ export default function FiscalYear() {
   const handleFinish = async (values: any) => {
     const payload = {
       ...values,
-      start_date: values.start_date ? dayjs(values.start_date) : null,
-      end_date: values.end_date ? dayjs(values.end_date) : null,
+      start_date: values.start_date
+        ? dayjs(values.start_date)?.format("YYYY-MM-DD")
+        : null,
+      end_date: values.end_date
+        ? dayjs(values.end_date)?.format("YYYY-MM-DD")
+        : null,
     };
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...payload });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        ...payload,
+        id: editingUser.fiscal_id,
+      });
     } else {
       await createMutation.mutateAsync({
         ...payload,
@@ -258,7 +266,12 @@ export default function FiscalYear() {
             />
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            className="flex justify-end gap-x-3 mt-3"
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

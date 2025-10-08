@@ -224,7 +224,12 @@ export default function Depot() {
             />
           </div>
 
-          <div className="flex justify-end gap-x-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

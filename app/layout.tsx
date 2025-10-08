@@ -52,6 +52,7 @@ export default function RootLayout({
                   },
                   Input: {
                     colorTextDisabled: "#000000",
+                    // colorBorder: "#595959",
                   },
 
                   InputNumber: {

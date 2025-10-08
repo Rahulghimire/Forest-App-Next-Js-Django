@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -20,6 +21,7 @@ import dayjs from "dayjs";
 export default function PilingAccount() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [form] = Form.useForm();
 
@@ -34,7 +36,7 @@ export default function PilingAccount() {
   });
 
   const { data: pilingIntakeData } = useQuery({
-    queryKey: ["intakes"],
+    queryKey: ["intake-data"],
     queryFn: () => fetchApi(`pilling/intakes/`),
   });
 
@@ -86,7 +88,7 @@ export default function PilingAccount() {
     },
     {
       title: "पाइल स्थान/डेपो",
-      dataIndex: "pile_location_id",
+      dataIndex: ["pile_location", "depot_name"],
       key: "pile_location_id",
     },
     {
@@ -112,6 +114,7 @@ export default function PilingAccount() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
@@ -120,12 +123,25 @@ export default function PilingAccount() {
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                pile_date: record?.pile_date ? dayjs(record?.pile_date) : null,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
+
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.pile_id)}
             icon={<DeleteOutlined />}
-          ></Button>
+          />
         </Space>
       ),
     },
@@ -186,7 +202,6 @@ export default function PilingAccount() {
     } else {
       await createMutation.mutateAsync(payload);
     }
-
     setIsModalOpen(false);
     form.resetFields();
     setEditingUser(null);
@@ -196,7 +211,10 @@ export default function PilingAccount() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Piling Account
@@ -219,7 +237,13 @@ export default function PilingAccount() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Piling Account" : "Add Piling Account"}
+        title={
+          viewingUser
+            ? "View Piling Account"
+            : editingUser
+            ? "Edit Piling Account"
+            : "Add Piling Account"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -236,19 +260,33 @@ export default function PilingAccount() {
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
             <AntSelect
-              array={pilingIntakeData?.data || []}
+              array={
+                pilingIntakeData?.data?.map((item: any) => {
+                  return {
+                    ...item,
+                    name: item?.species?.species_name,
+                    species_id: item?.species?.species_id,
+                    class_id: item?.class_name?.class_id,
+                    grade: item?.grade,
+                    girth: item?.measurement_girth,
+                    length: item?.measurement_length,
+                  };
+                }) || []
+              }
               renderKey={"name"}
               onSelect={(value, option) => {
                 form.setFieldsValue({
                   species_id: option.species_id,
                   updated_class_id: option.class_id,
                   grade: option.grade,
-                  length: option.length,
-                  girth: option.girth,
-                  volume_cft: option.volume_cft,
+                  length: Number(option.length || 0),
+                  girth: Number(option.girth || 0),
+                  volume_cft: Number(
+                    parseFloat(option.volume_cft || 0).toFixed(2)
+                  ),
                 });
               }}
-              valueKey={"id"}
+              valueKey={"intake_id"}
               formProps={{
                 rules: [{ required: true, message: "इन्टेक" }],
                 label: "इन्टेक",
@@ -258,8 +296,8 @@ export default function PilingAccount() {
 
             <AntSelect
               array={speciesData?.data || []}
-              renderKey={"name"}
-              valueKey={"id"}
+              renderKey={"species_name"}
+              valueKey={"species_id"}
               disabled
               formProps={{
                 rules: [{ required: true, message: "प्रजाति" }],
@@ -325,9 +363,15 @@ export default function PilingAccount() {
             />
 
             <AntSelect
-              array={pilingDepotData?.data || []}
+              array={
+                pilingDepotData?.data?.map((item: any) => ({
+                  ...item,
+                  depot_id: item?.pile?.pile_location?.depot_id,
+                  name: item?.pile?.pile_location?.depot_name,
+                })) || []
+              }
               renderKey={"name"}
-              valueKey={"id"}
+              valueKey={"depot_id"}
               formProps={{
                 rules: [{ required: true, message: "पाइल स्थान/डेपो" }],
                 label: "पाइल स्थान/डेपो",

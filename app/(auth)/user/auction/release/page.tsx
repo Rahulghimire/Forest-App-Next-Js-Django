@@ -13,38 +13,65 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { createApi, deleteApi, fetchApi, updateApi, User } from "../../api";
 import { AntInput } from "@/app/components/AntInput";
-import { AntSelect } from "@/app/components/AntSelect";
 import { AntSwitch } from "@/app/components/AntSwitch";
+import { AntInputNumber } from "@/app/components/AntInputNumber";
+import {
+  createApi,
+  deleteApi,
+  fetchApi,
+  updateApi,
+  User,
+} from "../../setup/api";
 
-export default function StockType() {
+export default function Release() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [viewingUser, setViewingUser] = useState(false);
-  const [editingUser, setEditingUser] = useState<any | null>(null);
+
   const [form] = Form.useForm();
 
-  const { data: stock, isLoading } = useQuery({
-    queryKey: ["stocks"],
-    queryFn: () => fetchApi(`forest/stocks/`),
+  const { data: plots, isLoading } = useQuery({
+    queryKey: ["class"],
+    queryFn: () => fetchApi(`forest/class-setup/`),
   });
 
   const columns = [
-    { title: "स्टक प्रकार", dataIndex: "stock_type", key: "stock_type" },
-    { title: "उपप्रकार", dataIndex: "sub_type", key: "sub_type" },
+    { title: "वर्ग नाम", dataIndex: "class_name", key: "class_name" },
     {
-      title: "मापन एकाइ",
-      dataIndex: "measurement_unit",
-      key: "measurement_unit",
+      title: "न्यूनतम व्यास (इन्चमा)",
+      dataIndex: "min_diameter",
+      key: "min_diameter",
     },
-    { title: "विवरण", dataIndex: "description", key: "description" },
+    {
+      title: "अधिकतम व्यास (इन्चमा)",
+      dataIndex: "max_diameter",
+      key: "max_diameter",
+    },
+    {
+      title: "न्यूनतम लम्बाई (फिटमा)",
+      dataIndex: "min_length",
+      key: "min_length",
+    },
+    {
+      title: "अधिकतम लम्बाई (फिटमा)",
+      dataIndex: "max_length",
+      key: "max_length",
+    },
+    {
+      title: "मूल्य दर (प्रति घनफुट वा युनिट)",
+      dataIndex: "price_rate",
+      key: "price_rate",
+    },
+    { title: "वर्ग नाम", dataIndex: "description", key: "description" },
     { title: "स्थिति", dataIndex: "status", key: "status" },
+
     {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: any) => (
+      render: (_: any, record: User) => (
         <Space>
           <Button
             onClick={() => {
@@ -55,22 +82,17 @@ export default function StockType() {
             }}
             icon={<EditOutlined />}
           />
-
           <Button
             onClick={() => {
               setViewingUser(true);
-              form.setFieldsValue({
-                ...record,
-                email: record.user_email,
-              });
+              form.setFieldsValue({ ...record, email: record.user_email });
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
           />
-
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.stock_id)}
+            onClick={() => deleteMutation.mutate(record.id)}
             icon={<DeleteOutlined />}
           ></Button>
         </Space>
@@ -79,10 +101,11 @@ export default function StockType() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) => createApi(`forest/stocks/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`forest/class-setups/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stocks"] });
-      toast.success("Stock Type created");
+      queryClient.invalidateQueries({ queryKey: ["class"] });
+      toast.success("Class created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -90,10 +113,10 @@ export default function StockType() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`forest/stocks/`, user),
+    mutationFn: (user: any) => updateApi(`forest/class-setups/`, user),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stocks"] });
-      toast.success("Stock Type updated");
+      queryClient.invalidateQueries({ queryKey: ["class"] });
+      toast.success("Class updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -101,10 +124,10 @@ export default function StockType() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`forest/stocks/${id}/`),
+    mutationFn: (id: number) => deleteApi(`forest/class-setups/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stocks"] });
-      toast.success("Stock Type deleted");
+      queryClient.invalidateQueries({ queryKey: ["class"] });
+      toast.success("Class deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -113,11 +136,7 @@ export default function StockType() {
 
   const handleFinish = async (values: any) => {
     if (editingUser) {
-      await updateMutation.mutateAsync({
-        ...editingUser,
-        id: editingUser.stock_id,
-        ...values,
-      });
+      await updateMutation.mutateAsync({ ...editingUser, ...values });
     } else {
       await createMutation.mutateAsync(values);
     }
@@ -136,14 +155,14 @@ export default function StockType() {
         }}
         icon={<PlusCircleOutlined />}
       >
-        Add Stock Type
+        Add Class
       </AntButton>
 
       <Table
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={stock?.data || []}
+        dataSource={plots?.data || []}
         loading={
           isLoading ||
           deleteMutation?.isPending ||
@@ -151,17 +170,13 @@ export default function StockType() {
           updateMutation?.isPending
         }
         style={{ marginTop: 16 }}
-        scroll={{ y: 300, x: "800px" }}
+        scroll={{ y: 300, x: "1000px" }}
       />
 
       <Modal
-        width={"90vw"}
+        width={"70vw"}
         title={
-          viewingUser
-            ? "View Stock Type"
-            : editingUser
-            ? "Edit Stock Type"
-            : "Add Stock Type"
+          viewingUser ? "View Class" : editingUser ? "Edit Class" : "Add Class"
         }
         open={isModalOpen}
         footer={null}
@@ -179,57 +194,70 @@ export default function StockType() {
           disabled={viewingUser}
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
-            <AntSelect
-              array={[
-                { id: "काठ", name: "काठ" },
-                { id: "दाउरा", name: "दाउरा" },
-                { id: "अन्य", name: "अन्य" },
-              ]}
-              renderKey={"name"}
-              valueKey={"id"}
+            <AntInput
               formProps={{
-                rules: [{ required: true, message: "स्टक प्रका" }],
-                label: "स्टक प्रका",
-                name: "stock_type",
+                rules: [{ required: true, message: "वर्ग नाम" }],
+                name: "class_name",
+                label: "वर्ग नाम",
               }}
             />
 
-            <AntSelect
-              array={[
-                { id: "पोल", name: "पोल" },
-                { id: "बल्लाबल्ली", name: "बल्लाबल्ली" },
-                { id: "जडीबुटी", name: "जडीबुटी" },
-              ]}
-              renderKey={"name"}
-              valueKey={"id"}
+            <AntInputNumber
+              type="number"
               formProps={{
-                rules: [{ required: true, message: "उपप्रकार" }],
-                label: "उपप्रकार",
-                name: "sub_type",
+                rules: [{ required: true, message: "न्यूनतम व्यास (इन्चमा)" }],
+                name: "min_diameter",
+                label: "न्यूनतम व्यास (इन्चमा)",
               }}
             />
 
-            <AntSelect
-              array={[
-                { id: "घनफिट", name: "घनफिट" },
-                { id: "किलोग्राम", name: "किलोग्राम" },
-              ]}
-              renderKey={"name"}
-              valueKey={"id"}
+            <AntInputNumber
+              type="number"
               formProps={{
-                rules: [{ required: true, message: "मापन एकाइ" }],
-                label: "मापन एकाइ",
-                name: "measurement_unit",
+                name: "max_diameter",
+                label: "अधिकतम व्यास (इन्चमा)",
+              }}
+            />
+
+            <AntInputNumber
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "न्यूनतम लम्बाई (फिटमा)" }],
+                name: "min_length",
+                label: "न्यूनतम लम्बाई (फिटमा)",
+              }}
+            />
+
+            <AntInputNumber
+              type="number"
+              formProps={{
+                name: "max_length",
+                label: "अधिकतम लम्बाई (फिटमा)",
+              }}
+            />
+
+            <AntInputNumber
+              type="number"
+              formProps={{
+                rules: [
+                  {
+                    required: true,
+                    message: "मूल्य दर (प्रति घनफुट वा युनिट)",
+                  },
+                ],
+                name: "price_rate",
+                label: "मूल्य दर (प्रति घनफुट वा युनिट)",
               }}
             />
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "विवरण" }],
+                rules: [{ required: true, message: "वर्ग नाम" }],
                 name: "description",
-                label: "विवरण",
+                label: "वर्ग नाम",
               }}
             />
+
             <AntSwitch
               formProps={{
                 name: "status",
@@ -238,12 +266,7 @@ export default function StockType() {
             />
           </div>
 
-          <div
-            style={{
-              display: viewingUser ? "none" : "flex",
-            }}
-            className="flex justify-end gap-x-3 mt-3"
-          >
+          <div className="flex justify-end gap-x-3 mt-3">
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

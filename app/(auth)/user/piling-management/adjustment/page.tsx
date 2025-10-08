@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusCircleOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
@@ -21,6 +22,8 @@ export default function Adjustment() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [viewingUser, setViewingUser] = useState(false);
+
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
@@ -62,6 +65,7 @@ export default function Adjustment() {
         <Space>
           <Button
             onClick={() => {
+              setViewingUser(false);
               setEditingUser(record);
               form.setFieldsValue({
                 ...record,
@@ -72,7 +76,21 @@ export default function Adjustment() {
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
-          ></Button>
+          />
+
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                adjustment_date: record?.adjustment_date
+                  ? dayjs(record?.adjustment_date)
+                  : null,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.adjustment_id)}
@@ -148,7 +166,10 @@ export default function Adjustment() {
     <div>
       <AntButton
         type="primary"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
         icon={<PlusCircleOutlined />}
       >
         Add Adjustment
@@ -171,7 +192,13 @@ export default function Adjustment() {
 
       <Modal
         width={"70vw"}
-        title={editingUser ? "Edit Adjustment" : "Add Adjustment"}
+        title={
+          viewingUser
+            ? "View Adjustment"
+            : editingUser
+            ? "Edit Adjustment"
+            : "Add Adjustment"
+        }
         open={isModalOpen}
         footer={null}
         onCancel={() => {
@@ -185,11 +212,22 @@ export default function Adjustment() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
+          disabled={viewingUser}
         >
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
             <AntSelect
-              array={pilingAccountsData?.data || []}
-              renderKey={"name"}
+              array={
+                pilingAccountsData?.data?.map((item: any) => {
+                  return {
+                    ...item,
+                    name: item?.species?.species_name,
+                    species_id: item?.species?.species_id,
+                    class_id: item?.classes?.class_id,
+                    from_location_id: item?.pile_location?.depot_id,
+                    to_location_id: item?.pile_location?.depot_id,
+                  };
+                }) || []
+              }
               onSelect={(_, option) => {
                 form.setFieldsValue({
                   intake_id: option.intake_id,
@@ -197,11 +235,14 @@ export default function Adjustment() {
                   class_id: option.class_id,
                   grade: option.grade,
                   length: option.length,
+                  from_location_id: option.from_location_id,
+                  to_location_id: option.to_location_id,
                   girth: option.girth,
-                  prev_volume_cft: option.volume_cft,
+                  volume_cft: option.volume_cft,
                 });
               }}
-              valueKey={"id"}
+              renderKey={"pile_number"}
+              valueKey={"pile_id"}
               formProps={{
                 rules: [{ required: true, message: "पाइल आईडी" }],
                 label: "पाइल आईडी",
@@ -210,13 +251,13 @@ export default function Adjustment() {
             />
             <AntSelect
               array={speciesData?.data || []}
-              renderKey={"name"}
-              valueKey={"id"}
+              renderKey={"species_name"}
+              valueKey={"species_id"}
               disabled
               formProps={{
                 rules: [{ required: true, message: "प्रजाति" }],
                 label: "प्रजाति",
-                name: "species_id ",
+                name: "species_id",
               }}
             />
             <AntSelect
