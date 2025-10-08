@@ -1,7 +1,9 @@
+"use client";
+
 import { FormItemProps, Input, InputProps } from "antd";
 import { Rule } from "rc-field-form/lib/interface";
 import { AntFormItem } from "./AntFormItem";
-import { getNepaliFromEnglish, mappings } from "nepali-input-react";
+import { getNepaliFromEnglish } from "nepali-input-react";
 
 interface Props extends Omit<InputProps, "name"> {
   formProps?: FormItemProps;
