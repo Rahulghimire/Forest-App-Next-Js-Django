@@ -18,7 +18,6 @@ import {
   SolutionOutlined,
   TeamOutlined,
   TransactionOutlined,
-  EllipsisOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -38,7 +37,7 @@ import { useUserLogout } from "@/app/hooks/useAuthUser";
 
 const { Header, Sider, Content } = Layout;
 
-export default function AdminLayout({
+export default function UserLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -79,6 +78,14 @@ export default function AdminLayout({
           bottom: 0,
         }}
       >
+        <div className="px-2 py-3 flex justify-center items-center gap-x-2">
+          <Avatar>F</Avatar>
+          {!collapsed && (
+            <div className="text-base font-semibold">
+              Forest Management System
+            </div>
+          )}
+        </div>
         <Menu
           mode="inline"
           style={{
