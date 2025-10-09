@@ -23,6 +23,7 @@ import {
   Avatar,
   Button,
   Card,
+  Divider,
   Dropdown,
   Layout,
   Menu,
@@ -32,7 +33,7 @@ import {
 } from "antd";
 import type { MenuProps } from "antd";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AntButton } from "@/app/components/AntButton";
 import { useUserLogout } from "@/app/hooks/useAuthUser";
 
@@ -44,6 +45,9 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+
+  const pathname = usePathname();
+
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -79,18 +83,31 @@ export default function UserLayout({
           bottom: 0,
         }}
       >
-        <div className="px-2 py-3 flex justify-center items-center gap-x-2">
-          <Avatar>F</Avatar>
+        <div className="py-3 flex items-center gap-x-2">
+          <Avatar
+            style={{
+              margin: "0 0 0 20px",
+            }}
+          >
+            F
+          </Avatar>
           {!collapsed && (
             <div className="text-base font-semibold">Forest System</div>
           )}
         </div>
+
+        <Divider
+          style={{
+            margin: "0 0",
+          }}
+        />
         <Menu
           mode="inline"
           style={{
             fontWeight: 600,
           }}
           defaultSelectedKeys={["1"]}
+          selectedKeys={[pathToKey?.[pathname] ?? ""]}
           onClick={({ key }) => {
             if (key === "1") router.push("/user/dashboard");
             if (key === "2-1") router.push("/user/auction/notice");
@@ -403,3 +420,30 @@ const items: MenuProps["items"] = [
   },
   { type: "divider" },
 ];
+
+const pathToKey: Record<string, string> = {
+  "/user/dashboard": "1",
+  "/user/auction/notice": "2-1",
+  "/user/auction/registration": "2-2",
+  "/user/auction/evaluation": "2-3",
+  "/user/auction/payment": "2-4",
+  "/user/auction/release": "2-5",
+  "/user/setup/office/employee": "11-1",
+  "/user/setup/office/position": "11-2",
+  "/user/setup/office/member": "11-3",
+  "/user/setup/office/roles-permissions": "11-4",
+  "/user/setup/office/fiscal-year": "11-5",
+  "/user/setup/forest/plot": "12-1",
+  "/user/setup/forest/species": "12-2",
+  "/user/setup/forest/stock-types": "12-3",
+  "/user/setup/forest/classification": "12-4",
+  "/user/setup/forest/class": "12-5",
+  "/user/setup/forest/grade-rules": "12-6",
+  "/user/setup/forest/unit": "12-7",
+  "/user/piling-management/intake": "4-1",
+  "/user/piling-management/classification-update": "4-2",
+  "/user/piling-management/piling-account": "4-3",
+  "/user/piling-management/internal-transfer": "4-4",
+  "/user/piling-management/adjustment": "4-5",
+  "/user/piling-management/audit-log": "4-7",
+};

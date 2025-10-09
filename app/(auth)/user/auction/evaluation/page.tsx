@@ -33,8 +33,8 @@ export default function Evaluation() {
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["auctions"],
-    queryFn: () => fetchApi(`auction/notices/`),
+    queryKey: ["evaluation"],
+    queryFn: () => fetchApi(`auction/evaluation/`),
   });
 
   const { data: stockData } = useQuery({
@@ -119,7 +119,7 @@ export default function Evaluation() {
           />
           <Button
             danger
-            onClick={() => closeMutation.mutate(record.notice_id)}
+            onClick={() => deleteMutation.mutate(record.notice_id)}
             icon={<CloseCircleOutlined />}
           ></Button>
         </Space>
@@ -128,10 +128,11 @@ export default function Evaluation() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) => createApi(`auction/notices/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/evaluation/`, data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success(data?.message || "Notice created");
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success(data?.message || "Evaluation created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -139,21 +140,21 @@ export default function Evaluation() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`auction/notices/`, user),
+    mutationFn: (user: any) => updateApi(`auction/evaluation/`, user),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success(data?.message || "Notice updated");
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success(data?.message || "Evaluation updated");
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
-  const closeMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`auction/notices/${id}/`),
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteApi(`auction/evaluation/${id}/`),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success(data?.message || "Notice closed");
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success(data?.message || "Evaluation deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -194,7 +195,7 @@ export default function Evaluation() {
         }}
         icon={<PlusCircleOutlined />}
       >
-        Add Notice/Invitation
+        Add Bid Evaluation/Approval
       </AntButton>
 
       <Table
@@ -204,7 +205,7 @@ export default function Evaluation() {
         dataSource={plots?.data || []}
         loading={
           isLoading ||
-          closeMutation?.isPending ||
+          deleteMutation?.isPending ||
           createMutation?.isPending ||
           updateMutation?.isPending
         }
@@ -328,7 +329,7 @@ export default function Evaluation() {
               loading={
                 updateMutation.isPending ||
                 createMutation.isPending ||
-                closeMutation.isPending
+                deleteMutation.isPending
               }
             >
               Save
