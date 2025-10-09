@@ -30,6 +30,7 @@ import {
   theme,
   Tooltip,
 } from "antd";
+import type { MenuProps } from "antd";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AntButton } from "@/app/components/AntButton";
@@ -81,9 +82,7 @@ export default function UserLayout({
         <div className="px-2 py-3 flex justify-center items-center gap-x-2">
           <Avatar>F</Avatar>
           {!collapsed && (
-            <div className="text-base font-semibold">
-              Forest Management System
-            </div>
+            <div className="text-base font-semibold">Forest System</div>
           )}
         </div>
         <Menu
@@ -209,8 +208,10 @@ export default function UserLayout({
   );
 }
 
-const items = [
+const items: MenuProps["items"] = [
   { key: "1", icon: <AppstoreOutlined />, label: "Dashboard" },
+  { type: "divider" },
+
   {
     key: "2",
     icon: <FileSearchOutlined />,
@@ -223,6 +224,8 @@ const items = [
       { key: "2-5", label: "छूटपूर्जा जारी" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "3",
     icon: <ShopOutlined />,
@@ -234,6 +237,8 @@ const items = [
       { key: "3-4", label: "भुक्तानी रसीद" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "4",
     icon: <FolderOpenOutlined />,
@@ -248,6 +253,8 @@ const items = [
       { key: "4-7", label: "Audit Log (हर एक कार्यको इतिहास)" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "5",
     icon: <TransactionOutlined />,
@@ -258,6 +265,8 @@ const items = [
       { key: "5-3", label: "मार्ग–सूचना/गन्तव्य पुष्टि" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "6",
     icon: <SolutionOutlined />,
@@ -268,6 +277,9 @@ const items = [
       { key: "6-3", label: "दर्ता–चलानी संयुक्त रजिस्टर" },
     ],
   },
+  { type: "divider" },
+  { type: "group", label: "ACCOUNTING & PAYROLL" },
+
   {
     key: "7",
     icon: <FileTextOutlined />,
@@ -288,6 +300,8 @@ const items = [
       },
     ],
   },
+  { type: "divider" },
+
   {
     key: "8",
     icon: <SnippetsOutlined />,
@@ -297,6 +311,8 @@ const items = [
       { key: "8-2", label: "भौचर स्वीकृति/प्रिन्ट" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "9",
     icon: <MoneyCollectOutlined />,
@@ -307,6 +323,8 @@ const items = [
       { key: "9-3", label: "पेरोल रिपोर्ट" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "10",
     icon: <FileDoneOutlined />,
@@ -327,6 +345,8 @@ const items = [
       { key: "10-13", label: "जम्मा पाइलिङ रिपोर्ट" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "11",
     icon: <TeamOutlined />,
@@ -339,6 +359,8 @@ const items = [
       { key: "11-5", label: "आर्थिक वर्ष सेटअप" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "12",
     icon: <ClusterOutlined />,
@@ -353,6 +375,8 @@ const items = [
       { key: "12-7", label: "एकाई" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "13",
     icon: <AuditOutlined />,
@@ -365,6 +389,8 @@ const items = [
       { key: "13-5", label: "खर्च उप–शीर्षक" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "14",
     icon: <SettingOutlined />,
@@ -375,4 +401,5 @@ const items = [
       { key: "14-3", label: "क्यालेन्डर/अङ्क ढाँचा (वि.सं./नेपाली)" },
     ],
   },
+  { type: "divider" },
 ];
