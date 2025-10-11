@@ -5,6 +5,7 @@ import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 import { AntButton } from "@/app/components/AntButton";
 import {
+  CheckCircleFilled,
   CloseCircleOutlined,
   EditOutlined,
   EyeOutlined,
@@ -24,7 +25,7 @@ import {
 } from "../../setup/api";
 import { AntSelect } from "@/app/components/AntSelect";
 
-export default function Evaluation() {
+export default function BidEvaluation() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
@@ -37,35 +38,59 @@ export default function Evaluation() {
     queryFn: () => fetchApi(`auction/evaluation/`),
   });
 
-  const { data: stockData } = useQuery({
-    queryKey: ["forest-stock-types"],
-    queryFn: () => fetchApi(`forest/stocks/`),
+  const { data: bidData, isLoading: isLoadingBid } = useQuery({
+    queryKey: ["bid-registration"],
+    queryFn: () => fetchApi(`auction/registration/`),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/evaluation/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success("Bid / Evaluation approved");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/evaluation/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success("Bid / Evaluation rejected");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const columns = [
-    { title: "शीर्षक", dataIndex: "title", key: "title" },
     {
-      title: "विवरण",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "प्रकाशित मिति",
-      dataIndex: "publish_date",
-      key: "publish_date",
-    },
-    {
-      title: "अन्तिम मिति",
-      dataIndex: "deadline_date",
-      key: "deadline_date",
-    },
-    {
-      title: "स्थान",
-      dataIndex: "location",
-      key: "location",
+      title: "Bidder Name",
+      dataIndex: ["bid", "bidder_name"],
+      key: "bidder_name",
     },
 
-    { title: "स्थिति", dataIndex: "status", key: "status" },
+    {
+      title: "User",
+      dataIndex: ["user", "email"],
+      key: "email",
+    },
+
+    {
+      title: "Remark",
+      dataIndex: "remark",
+      key: "remark",
+    },
+
+    {
+      title: "Decision मिति",
+      dataIndex: "decision_date",
+      key: "decision_date",
+    },
 
     {
       title: "Actions",
@@ -78,22 +103,16 @@ export default function Evaluation() {
               setViewingUser(false);
               setEditingUser({
                 ...record,
-                stock_id: record?.stock?.stock_id,
-                publish_date: record?.publish_date
-                  ? dayjs(record?.publish_date)
-                  : null,
-                deadline_date: record?.deadline_date
-                  ? dayjs(record?.deadline_date)
+                bid_id: record?.stock?.bid_id,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
                   : null,
               });
               form.setFieldsValue({
                 ...record,
-                stock_id: record?.stock?.stock_id,
-                publish_date: record?.publish_date
-                  ? dayjs(record?.publish_date)
-                  : null,
-                deadline_date: record?.deadline_date
-                  ? dayjs(record?.deadline_date)
+                bid_id: record?.bid?.bid_id,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
                   : null,
               });
               setIsModalOpen(true);
@@ -105,23 +124,42 @@ export default function Evaluation() {
               setViewingUser(true);
               form.setFieldsValue({
                 ...record,
-                stock_id: record?.stock?.stock_id,
-                publish_date: record?.publish_date
-                  ? dayjs(record?.publish_date)
-                  : null,
-                deadline_date: record?.deadline_date
-                  ? dayjs(record?.deadline_date)
+                bid_id: record?.bid?.bid_id,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
                   : null,
               });
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
           />
+
+          <Button
+            onClick={() => approveMutation.mutate(record.evaluation_id)}
+            icon={
+              <CheckCircleFilled
+                style={{
+                  color: "green",
+                }}
+              />
+            }
+          >
+            Approve
+          </Button>
+
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.notice_id)}
+            onClick={() => deleteMutation.mutate(record.evaluation_id)}
             icon={<CloseCircleOutlined />}
-          ></Button>
+          >
+            Reject
+          </Button>
+
+          {/* <Button
+            danger
+            onClick={() => deleteMutation.mutate(record.evaluation_id)}
+            icon={<CloseCircleOutlined />}
+          /> */}
         </Space>
       ),
     },
@@ -164,17 +202,14 @@ export default function Evaluation() {
   const handleFinish = async (values: any) => {
     const payload = {
       ...values,
-      publish_date: values?.publish_date
-        ? dayjs(values.publish_date).format("YYYY-MM-DD")
-        : null,
-      deadline_date: values?.deadline_date
-        ? dayjs(values.deadline_date).format("YYYY-MM-DD")
+      decision_date: values?.decision_date
+        ? dayjs(values.decision_date).format("YYYY-MM-DD")
         : null,
     };
     if (editingUser) {
       await updateMutation.mutateAsync({
         ...editingUser,
-        id: editingUser?.notice_id,
+        id: editingUser?.evaluation_id,
         ...payload,
       });
     } else {
@@ -202,7 +237,7 @@ export default function Evaluation() {
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={plots?.data || []}
+        dataSource={plots || []}
         loading={
           isLoading ||
           deleteMutation?.isPending ||
@@ -217,10 +252,10 @@ export default function Evaluation() {
         width={"70vw"}
         title={
           viewingUser
-            ? "View Notice"
+            ? "View Evaluation / Approval"
             : editingUser
-            ? "Edit Notice"
-            : "Add Notice"
+            ? "Edit Evaluation / Approval"
+            : "Add Evaluation / Approval"
         }
         open={isModalOpen}
         footer={null}
@@ -237,70 +272,39 @@ export default function Evaluation() {
           autoComplete="off"
           disabled={viewingUser}
         >
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "शीर्षक" }],
-                name: "title",
-                label: "शीर्षक",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "विवरण" }],
-                name: "description",
-                label: "विवरण",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "description",
-                label: "वर्ग नाम",
-              }}
-            />
-
-            <Form.Item
-              name={"publish_date"}
-              label="प्रकाशित मिति"
-              rules={[{ required: true, message: "प्रकाशित मिति" }]}
-            >
-              <DatePicker style={{ width: "100%" }} />
-            </Form.Item>
-
-            <Form.Item
-              name={"deadline_date"}
-              label="अन्तिम मिति"
-              rules={[{ required: true, message: "अन्तिम मिति" }]}
-            >
-              <DatePicker style={{ width: "100%" }} />
-            </Form.Item>
-
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "स्थान" }],
-                name: "location",
-                label: "स्थान",
-              }}
-            />
-
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
             <AntSelect
-              array={stockData?.data || []}
-              renderKey={"stock_type"}
-              valueKey={"stock_id"}
+              array={
+                bidData?.data?.map((item: any) => {
+                  return {
+                    ...item,
+                    bidder_name: item?.bidder_name + "-" + item?.notice?.title,
+                  };
+                }) || []
+              }
+              renderKey={"bidder_name"}
+              loading={isLoadingBid}
+              valueKey={"bid_id"}
               formProps={{
-                rules: [{ required: true, message: "स्टक" }],
-                label: "स्टक",
-                name: "stock_id",
+                rules: [{ required: true, message: "Bid" }],
+                label: "Bid",
+                name: "bid_id",
               }}
             />
 
-            <AntSwitch
+            <Form.Item
+              name={"decision_date"}
+              label="Decision Date"
+              rules={[{ required: true, message: "Decision Date" }]}
+            >
+              <DatePicker style={{ width: "100%" }} />
+            </Form.Item>
+
+            <AntInput
               formProps={{
-                name: "status",
-                label: "स्थिति",
+                rules: [{ required: true, message: "Remark" }],
+                name: "remark",
+                label: "Remark",
               }}
             />
           </div>
