@@ -5,6 +5,7 @@ import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 import { AntButton } from "@/app/components/AntButton";
 import {
+  CheckCircleFilled,
   CloseCircleOutlined,
   EditOutlined,
   EyeOutlined,
@@ -13,8 +14,15 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { AntInput } from "@/app/components/AntInput";
+import { AntSwitch } from "@/app/components/AntSwitch";
 import dayjs from "dayjs";
-import { createApi, deleteApi, fetchApi, updateApi } from "../../setup/api";
+import {
+  createApi,
+  deleteApi,
+  fetchApi,
+  updateApi,
+  User,
+} from "../../setup/api";
 import { AntSelect } from "@/app/components/AntSelect";
 
 export default function Release() {
@@ -26,43 +34,50 @@ export default function Release() {
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["evaluation"],
-    queryFn: () => fetchApi(`auction/evaluation/`),
+    queryKey: ["delivery"],
+    queryFn: () => fetchApi(`auction/delivery/`),
   });
 
-  const { data: stockData } = useQuery({
-    queryKey: ["forest-stock-types"],
-    queryFn: () => fetchApi(`forest/stocks/`),
-  });
-
-  const { data: bidData, isLoading: isLoadingBid } = useQuery({
-    queryKey: ["bid-registration"],
-    queryFn: () => fetchApi(`auction/registration/`),
+  const { data: paidBills, isLoading: isLoadingBid } = useQuery({
+    queryKey: ["paid-bills"],
+    queryFn: () => fetchApi(`auction/link/`),
   });
 
   const columns = [
     {
-      title: "Bidder Name",
-      dataIndex: ["bid", "bidder_name"],
-      key: "bidder_name",
+      title: "Customer Name",
+      dataIndex: "customer_name",
+      key: "customer_name",
     },
 
     {
-      title: "User",
-      dataIndex: ["user", "email"],
-      key: "email",
+      title: "Material Detail",
+      dataIndex: "product_detail",
+      key: "product_detail",
     },
 
     {
-      title: "remark",
-      dataIndex: "remark",
-      key: "remark",
+      title: "Quantity",
+      dataIndex: "quantity",
+      key: "quantity",
     },
 
     {
-      title: "Decision मिति",
-      dataIndex: "decision_date",
-      key: "decision_date",
+      title: "Unit",
+      dataIndex: "unit",
+      key: "unit",
+    },
+
+    {
+      title: "Issue Date",
+      dataIndex: "issue_date",
+      key: "issue_date",
+    },
+
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
     },
 
     {
@@ -76,14 +91,12 @@ export default function Release() {
               setViewingUser(false);
               setEditingUser({
                 ...record,
-                bid_id: record?.stock?.bid_id,
                 decision_date: record?.decision_date
                   ? dayjs(record?.decision_date)
                   : null,
               });
               form.setFieldsValue({
                 ...record,
-                bid_id: record?.bid?.bid_id,
                 decision_date: record?.decision_date
                   ? dayjs(record?.decision_date)
                   : null,
@@ -97,7 +110,6 @@ export default function Release() {
               setViewingUser(true);
               form.setFieldsValue({
                 ...record,
-                bid_id: record?.bid?.bid_id,
                 decision_date: record?.decision_date
                   ? dayjs(record?.decision_date)
                   : null,
@@ -106,22 +118,16 @@ export default function Release() {
             }}
             icon={<EyeOutlined />}
           />
-          <Button
-            danger
-            onClick={() => deleteMutation.mutate(record.evaluation_id)}
-            icon={<CloseCircleOutlined />}
-          ></Button>
         </Space>
       ),
     },
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`auction/evaluation/`, data),
+    mutationFn: (data: Omit<any, "id">) => createApi(`auction/delivery/`, data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
-      toast.success(data?.message || "Evaluation created");
+      queryClient.invalidateQueries({ queryKey: ["delivery"] });
+      toast.success(data?.message || "Release created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -129,10 +135,10 @@ export default function Release() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`auction/evaluation/`, user),
+    mutationFn: (user: any) => updateApi(`auction/delivery/`, user),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
-      toast.success(data?.message || "Evaluation updated");
+      queryClient.invalidateQueries({ queryKey: ["delivery"] });
+      toast.success(data?.message || "Release updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -140,10 +146,10 @@ export default function Release() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`auction/evaluation/${id}/`),
+    mutationFn: (id: number) => deleteApi(`auction/delivery/${id}/`),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
-      toast.success(data?.message || "Evaluation deleted");
+      queryClient.invalidateQueries({ queryKey: ["delivery"] });
+      toast.success(data?.message || "Release deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -160,7 +166,7 @@ export default function Release() {
     if (editingUser) {
       await updateMutation.mutateAsync({
         ...editingUser,
-        id: editingUser?.evaluation_id,
+        id: editingUser?.order_id,
         ...payload,
       });
     } else {
@@ -181,7 +187,7 @@ export default function Release() {
         }}
         icon={<PlusCircleOutlined />}
       >
-        Add Bid Evaluation/Approval
+        Add छोिपुर्जी जारी
       </AntButton>
 
       <Table
@@ -203,10 +209,10 @@ export default function Release() {
         width={"70vw"}
         title={
           viewingUser
-            ? "View Evaluation / Approval"
+            ? "View Delivery Order Issue"
             : editingUser
-            ? "Edit Evaluation / Approval"
-            : "Add Evaluation / Approval"
+            ? "Edit Delivery Order Issue"
+            : "Add Delivery Order Issue"
         }
         open={isModalOpen}
         footer={null}
@@ -226,13 +232,17 @@ export default function Release() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
             <AntSelect
               array={
-                bidData?.data?.map((item: any) => {
+                paidBills?.data?.map((item: any) => {
                   return {
                     ...item,
-                    bidder_name: item?.bidder_name + "-" + item?.notice?.title,
                   };
                 }) || []
               }
+              onSelect={(_, option) => {
+                form.setFieldsValue({
+                  ...option,
+                });
+              }}
               renderKey={"bidder_name"}
               loading={isLoadingBid}
               valueKey={"bid_id"}
@@ -243,19 +253,56 @@ export default function Release() {
               }}
             />
 
-            <Form.Item
-              name={"decision_date"}
-              label="Decision Date"
-              rules={[{ required: true, message: "Decision Date" }]}
-            >
-              <DatePicker style={{ width: "100%" }} />
-            </Form.Item>
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Customer Name" }],
+                name: "customer_name",
+                label: "Customer Name",
+              }}
+              readOnly
+            />
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "Remark" }],
-                name: "remark",
-                label: "Remark",
+                rules: [{ required: true, message: "Material Detail" }],
+                name: "product_detail",
+                label: "Material Detail",
+              }}
+              readOnly
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Quantity" }],
+                name: "quantity",
+                label: "Quantity",
+              }}
+              readOnly
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Unit" }],
+                name: "unit",
+                label: "Unit",
+              }}
+              readOnly
+            />
+
+            <Form.Item
+              name={"issue_date"}
+              label="Issue Date"
+              rules={[{ required: true, message: "Issue Date" }]}
+            >
+              <DatePicker style={{ width: "100%" }} readOnly />
+            </Form.Item>
+
+            <AntInput
+              readOnly
+              formProps={{
+                rules: [{ required: true, message: "Status" }],
+                name: "status",
+                label: "Status",
               }}
             />
           </div>
