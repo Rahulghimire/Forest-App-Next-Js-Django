@@ -27,7 +27,7 @@ import { AntSelect } from "@/app/components/AntSelect";
 export default function Notice() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [viewingUser, setViewingUser] = useState(false);
 
   const [form] = Form.useForm();
@@ -78,6 +78,7 @@ export default function Notice() {
               setViewingUser(false);
               setEditingUser({
                 ...record,
+                stock_id: record?.stock?.stock_id,
                 publish_date: record?.publish_date
                   ? dayjs(record?.publish_date)
                   : null,
@@ -87,6 +88,7 @@ export default function Notice() {
               });
               form.setFieldsValue({
                 ...record,
+                stock_id: record?.stock?.stock_id,
                 publish_date: record?.publish_date
                   ? dayjs(record?.publish_date)
                   : null,
@@ -101,14 +103,23 @@ export default function Notice() {
           <Button
             onClick={() => {
               setViewingUser(true);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              form.setFieldsValue({
+                ...record,
+                stock_id: record?.stock?.stock_id,
+                publish_date: record?.publish_date
+                  ? dayjs(record?.publish_date)
+                  : null,
+                deadline_date: record?.deadline_date
+                  ? dayjs(record?.deadline_date)
+                  : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
           />
           <Button
             danger
-            onClick={() => closeMutation.mutate(record.id)}
+            onClick={() => closeMutation.mutate(record.notice_id)}
             icon={<CloseCircleOutlined />}
           ></Button>
         </Space>
@@ -118,9 +129,9 @@ export default function Notice() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) => createApi(`auction/notices/`, data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction created");
+      toast.success(data?.message || "Notice created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -129,9 +140,9 @@ export default function Notice() {
 
   const updateMutation = useMutation({
     mutationFn: (user: any) => updateApi(`auction/notices/`, user),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction updated");
+      toast.success(data?.message || "Notice updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -140,9 +151,9 @@ export default function Notice() {
 
   const closeMutation = useMutation({
     mutationFn: (id: number) => deleteApi(`auction/notices/${id}/`),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction closed");
+      toast.success(data?.message || "Notice closed");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -160,7 +171,11 @@ export default function Notice() {
         : null,
     };
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...payload });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser?.notice_id,
+        ...payload,
+      });
     } else {
       await createMutation.mutateAsync(payload);
     }
@@ -179,7 +194,7 @@ export default function Notice() {
         }}
         icon={<PlusCircleOutlined />}
       >
-        Add Auction Notice/Invitation
+        Add Notice/Invitation
       </AntButton>
 
       <Table
@@ -201,10 +216,10 @@ export default function Notice() {
         width={"70vw"}
         title={
           viewingUser
-            ? "View Auction"
+            ? "View Notice"
             : editingUser
-            ? "Edit Auction"
-            : "Add Auction"
+            ? "Edit Notice"
+            : "Add Notice"
         }
         open={isModalOpen}
         footer={null}
@@ -273,7 +288,7 @@ export default function Notice() {
             <AntSelect
               array={stockData?.data || []}
               renderKey={"stock_type"}
-              valueKey={"id"}
+              valueKey={"stock_id"}
               formProps={{
                 rules: [{ required: true, message: "स्टक" }],
                 label: "स्टक",

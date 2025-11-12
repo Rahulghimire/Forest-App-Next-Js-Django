@@ -1,12 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Modal, Space, Table } from "antd";
+import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 import { AntButton } from "@/app/components/AntButton";
 import {
+  CheckCircleFilled,
   CloseCircleOutlined,
-  DeleteOutlined,
   EditOutlined,
   EyeOutlined,
   PlusCircleOutlined,
@@ -15,7 +15,7 @@ import {
 import { toast } from "react-toastify";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSwitch } from "@/app/components/AntSwitch";
-import { AntInputNumber } from "@/app/components/AntInputNumber";
+import dayjs from "dayjs";
 import {
   createApi,
   deleteApi,
@@ -23,61 +23,84 @@ import {
   updateApi,
   User,
 } from "../../setup/api";
+import { AntSelect } from "@/app/components/AntSelect";
 
 export default function Release() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [viewingUser, setViewingUser] = useState(false);
 
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["class"],
-    queryFn: () => fetchApi(`forest/class-setup/`),
+    queryKey: ["delivery"],
+    queryFn: () => fetchApi(`auction/delivery/`),
+  });
+
+  const { data: paidBills, isLoading: isLoadingBid } = useQuery({
+    queryKey: ["paid-bills"],
+    queryFn: () => fetchApi(`auction/link/`),
   });
 
   const columns = [
-    { title: "वर्ग नाम", dataIndex: "class_name", key: "class_name" },
     {
-      title: "न्यूनतम व्यास (इन्चमा)",
-      dataIndex: "min_diameter",
-      key: "min_diameter",
+      title: "Customer Name",
+      dataIndex: "customer_name",
+      key: "customer_name",
     },
+
     {
-      title: "अधिकतम व्यास (इन्चमा)",
-      dataIndex: "max_diameter",
-      key: "max_diameter",
+      title: "Material Detail",
+      dataIndex: "product_detail",
+      key: "product_detail",
     },
+
     {
-      title: "न्यूनतम लम्बाई (फिटमा)",
-      dataIndex: "min_length",
-      key: "min_length",
+      title: "Quantity",
+      dataIndex: "quantity",
+      key: "quantity",
     },
+
     {
-      title: "अधिकतम लम्बाई (फिटमा)",
-      dataIndex: "max_length",
-      key: "max_length",
+      title: "Unit",
+      dataIndex: "unit",
+      key: "unit",
     },
+
     {
-      title: "मूल्य दर (प्रति घनफुट वा युनिट)",
-      dataIndex: "price_rate",
-      key: "price_rate",
+      title: "Issue Date",
+      dataIndex: "issue_date",
+      key: "issue_date",
     },
-    { title: "वर्ग नाम", dataIndex: "description", key: "description" },
-    { title: "स्थिति", dataIndex: "status", key: "status" },
+
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+    },
 
     {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
               setViewingUser(false);
-              setEditingUser(record);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              setEditingUser({
+                ...record,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
+                  : null,
+              });
+              form.setFieldsValue({
+                ...record,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
+                  : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
@@ -85,27 +108,26 @@ export default function Release() {
           <Button
             onClick={() => {
               setViewingUser(true);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              form.setFieldsValue({
+                ...record,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
+                  : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
           />
-          <Button
-            danger
-            onClick={() => deleteMutation.mutate(record.id)}
-            icon={<DeleteOutlined />}
-          ></Button>
         </Space>
       ),
     },
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) =>
-      createApi(`forest/class-setups/`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class created");
+    mutationFn: (data: Omit<any, "id">) => createApi(`auction/delivery/`, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["delivery"] });
+      toast.success(data?.message || "Release created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -113,10 +135,10 @@ export default function Release() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`forest/class-setups/`, user),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class updated");
+    mutationFn: (user: any) => updateApi(`auction/delivery/`, user),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["delivery"] });
+      toast.success(data?.message || "Release updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -124,10 +146,10 @@ export default function Release() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`forest/class-setups/${id}/`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class deleted");
+    mutationFn: (id: number) => deleteApi(`auction/delivery/${id}/`),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["delivery"] });
+      toast.success(data?.message || "Release deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -135,10 +157,20 @@ export default function Release() {
   });
 
   const handleFinish = async (values: any) => {
+    const payload = {
+      ...values,
+      decision_date: values?.decision_date
+        ? dayjs(values.decision_date).format("YYYY-MM-DD")
+        : null,
+    };
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser?.order_id,
+        ...payload,
+      });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync(payload);
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -155,14 +187,14 @@ export default function Release() {
         }}
         icon={<PlusCircleOutlined />}
       >
-        Add Class
+        Add छोिपुर्जी जारी
       </AntButton>
 
       <Table
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={plots?.data || []}
+        dataSource={plots || []}
         loading={
           isLoading ||
           deleteMutation?.isPending ||
@@ -176,7 +208,11 @@ export default function Release() {
       <Modal
         width={"70vw"}
         title={
-          viewingUser ? "View Class" : editingUser ? "Edit Class" : "Add Class"
+          viewingUser
+            ? "View Delivery Order Issue"
+            : editingUser
+            ? "Edit Delivery Order Issue"
+            : "Add Delivery Order Issue"
         }
         open={isModalOpen}
         footer={null}
@@ -193,80 +229,90 @@ export default function Release() {
           autoComplete="off"
           disabled={viewingUser}
         >
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
-            <AntInput
-              formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "class_name",
-                label: "वर्ग नाम",
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <AntSelect
+              array={
+                paidBills?.data?.map((item: any) => {
+                  return {
+                    ...item,
+                  };
+                }) || []
+              }
+              onSelect={(_, option) => {
+                form.setFieldsValue({
+                  ...option,
+                });
               }}
-            />
-
-            <AntInputNumber
-              type="number"
+              renderKey={"bidder_name"}
+              loading={isLoadingBid}
+              valueKey={"bid_id"}
               formProps={{
-                rules: [{ required: true, message: "न्यूनतम व्यास (इन्चमा)" }],
-                name: "min_diameter",
-                label: "न्यूनतम व्यास (इन्चमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_diameter",
-                label: "अधिकतम व्यास (इन्चमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [{ required: true, message: "न्यूनतम लम्बाई (फिटमा)" }],
-                name: "min_length",
-                label: "न्यूनतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_length",
-                label: "अधिकतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [
-                  {
-                    required: true,
-                    message: "मूल्य दर (प्रति घनफुट वा युनिट)",
-                  },
-                ],
-                name: "price_rate",
-                label: "मूल्य दर (प्रति घनफुट वा युनिट)",
+                rules: [{ required: true, message: "Bid" }],
+                label: "Bid",
+                name: "bid_id",
               }}
             />
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "description",
-                label: "वर्ग नाम",
+                rules: [{ required: true, message: "Customer Name" }],
+                name: "customer_name",
+                label: "Customer Name",
               }}
+              readOnly
             />
 
-            <AntSwitch
+            <AntInput
               formProps={{
+                rules: [{ required: true, message: "Material Detail" }],
+                name: "product_detail",
+                label: "Material Detail",
+              }}
+              readOnly
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Quantity" }],
+                name: "quantity",
+                label: "Quantity",
+              }}
+              readOnly
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "Unit" }],
+                name: "unit",
+                label: "Unit",
+              }}
+              readOnly
+            />
+
+            <Form.Item
+              name={"issue_date"}
+              label="Issue Date"
+              rules={[{ required: true, message: "Issue Date" }]}
+            >
+              <DatePicker style={{ width: "100%" }} readOnly />
+            </Form.Item>
+
+            <AntInput
+              readOnly
+              formProps={{
+                rules: [{ required: true, message: "Status" }],
                 name: "status",
-                label: "स्थिति",
+                label: "Status",
               }}
             />
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3 mt-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

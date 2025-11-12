@@ -1,12 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Modal, Space, Table } from "antd";
+import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 import { AntButton } from "@/app/components/AntButton";
 import {
+  CheckCircleFilled,
   CloseCircleOutlined,
-  DeleteOutlined,
   EditOutlined,
   EyeOutlined,
   PlusCircleOutlined,
@@ -15,7 +15,7 @@ import {
 import { toast } from "react-toastify";
 import { AntInput } from "@/app/components/AntInput";
 import { AntSwitch } from "@/app/components/AntSwitch";
-import { AntInputNumber } from "@/app/components/AntInputNumber";
+import dayjs from "dayjs";
 import {
   createApi,
   deleteApi,
@@ -23,60 +23,98 @@ import {
   updateApi,
   User,
 } from "../../setup/api";
+import { AntSelect } from "@/app/components/AntSelect";
 
-export default function Evaluation() {
-  const [form] = Form.useForm();
+export default function BidEvaluation() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [viewingUser, setViewingUser] = useState(false);
 
+  const [form] = Form.useForm();
+
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["class"],
-    queryFn: () => fetchApi(`forest/class-setup/`),
+    queryKey: ["evaluation"],
+    queryFn: () => fetchApi(`auction/evaluation/`),
+  });
+
+  const { data: bidData, isLoading: isLoadingBid } = useQuery({
+    queryKey: ["bid-registration"],
+    queryFn: () => fetchApi(`auction/registration/`),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/evaluation/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success("Bid / Evaluation approved");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/evaluation/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success("Bid / Evaluation rejected");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
   const columns = [
-    { title: "वर्ग नाम", dataIndex: "class_name", key: "class_name" },
     {
-      title: "न्यूनतम व्यास (इन्चमा)",
-      dataIndex: "min_diameter",
-      key: "min_diameter",
+      title: "Bidder Name",
+      dataIndex: ["bid", "bidder_name"],
+      key: "bidder_name",
     },
+
     {
-      title: "अधिकतम व्यास (इन्चमा)",
-      dataIndex: "max_diameter",
-      key: "max_diameter",
+      title: "User",
+      dataIndex: ["user", "email"],
+      key: "email",
     },
+
     {
-      title: "न्यूनतम लम्बाई (फिटमा)",
-      dataIndex: "min_length",
-      key: "min_length",
+      title: "Remark",
+      dataIndex: "remark",
+      key: "remark",
     },
+
     {
-      title: "अधिकतम लम्बाई (फिटमा)",
-      dataIndex: "max_length",
-      key: "max_length",
+      title: "Decision मिति",
+      dataIndex: "decision_date",
+      key: "decision_date",
     },
-    {
-      title: "मूल्य दर (प्रति घनफुट वा युनिट)",
-      dataIndex: "price_rate",
-      key: "price_rate",
-    },
-    { title: "वर्ग नाम", dataIndex: "description", key: "description" },
-    { title: "स्थिति", dataIndex: "status", key: "status" },
 
     {
       title: "Actions",
       key: "actions",
       fixed: "right" as const,
-      render: (_: any, record: User) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             onClick={() => {
               setViewingUser(false);
-              setEditingUser(record);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              setEditingUser({
+                ...record,
+                bid_id: record?.stock?.bid_id,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
+                  : null,
+              });
+              form.setFieldsValue({
+                ...record,
+                bid_id: record?.bid?.bid_id,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
+                  : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
@@ -84,16 +122,44 @@ export default function Evaluation() {
           <Button
             onClick={() => {
               setViewingUser(true);
-              form.setFieldsValue({ ...record, email: record.user_email });
+              form.setFieldsValue({
+                ...record,
+                bid_id: record?.bid?.bid_id,
+                decision_date: record?.decision_date
+                  ? dayjs(record?.decision_date)
+                  : null,
+              });
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
           />
+
+          <Button
+            onClick={() => approveMutation.mutate(record.evaluation_id)}
+            icon={
+              <CheckCircleFilled
+                style={{
+                  color: "green",
+                }}
+              />
+            }
+          >
+            Approve
+          </Button>
+
           <Button
             danger
-            onClick={() => deleteMutation.mutate(record.id)}
-            icon={<DeleteOutlined />}
-          ></Button>
+            onClick={() => deleteMutation.mutate(record.evaluation_id)}
+            icon={<CloseCircleOutlined />}
+          >
+            Reject
+          </Button>
+
+          {/* <Button
+            danger
+            onClick={() => deleteMutation.mutate(record.evaluation_id)}
+            icon={<CloseCircleOutlined />}
+          /> */}
         </Space>
       ),
     },
@@ -101,10 +167,10 @@ export default function Evaluation() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`forest/class-setups/`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class created");
+      createApi(`auction/evaluation/`, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success(data?.message || "Evaluation created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -112,10 +178,10 @@ export default function Evaluation() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`forest/class-setups/`, user),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class updated");
+    mutationFn: (user: any) => updateApi(`auction/evaluation/`, user),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success(data?.message || "Evaluation updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -123,10 +189,10 @@ export default function Evaluation() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`forest/class-setups/${id}/`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class"] });
-      toast.success("Class deleted");
+    mutationFn: (id: number) => deleteApi(`auction/evaluation/${id}/`),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+      toast.success(data?.message || "Evaluation deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -134,10 +200,20 @@ export default function Evaluation() {
   });
 
   const handleFinish = async (values: any) => {
+    const payload = {
+      ...values,
+      decision_date: values?.decision_date
+        ? dayjs(values.decision_date).format("YYYY-MM-DD")
+        : null,
+    };
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...values });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser?.evaluation_id,
+        ...payload,
+      });
     } else {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync(payload);
     }
     setIsModalOpen(false);
     form.resetFields();
@@ -154,14 +230,14 @@ export default function Evaluation() {
         }}
         icon={<PlusCircleOutlined />}
       >
-        Add Class
+        Add Bid Evaluation/Approval
       </AntButton>
 
       <Table
         rowKey="id"
         columns={columns || []}
         bordered
-        dataSource={plots?.data || []}
+        dataSource={plots || []}
         loading={
           isLoading ||
           deleteMutation?.isPending ||
@@ -175,7 +251,11 @@ export default function Evaluation() {
       <Modal
         width={"70vw"}
         title={
-          viewingUser ? "View Class" : editingUser ? "Edit Class" : "Add Class"
+          viewingUser
+            ? "View Evaluation / Approval"
+            : editingUser
+            ? "Edit Evaluation / Approval"
+            : "Add Evaluation / Approval"
         }
         open={isModalOpen}
         footer={null}
@@ -192,80 +272,49 @@ export default function Evaluation() {
           autoComplete="off"
           disabled={viewingUser}
         >
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-2">
-            <AntInput
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <AntSelect
+              array={
+                bidData?.data?.map((item: any) => {
+                  return {
+                    ...item,
+                    bidder_name: item?.bidder_name + "-" + item?.notice?.title,
+                  };
+                }) || []
+              }
+              renderKey={"bidder_name"}
+              loading={isLoadingBid}
+              valueKey={"bid_id"}
               formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "class_name",
-                label: "वर्ग नाम",
+                rules: [{ required: true, message: "Bid" }],
+                label: "Bid",
+                name: "bid_id",
               }}
             />
 
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [{ required: true, message: "न्यूनतम व्यास (इन्चमा)" }],
-                name: "min_diameter",
-                label: "न्यूनतम व्यास (इन्चमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_diameter",
-                label: "अधिकतम व्यास (इन्चमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [{ required: true, message: "न्यूनतम लम्बाई (फिटमा)" }],
-                name: "min_length",
-                label: "न्यूनतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                name: "max_length",
-                label: "अधिकतम लम्बाई (फिटमा)",
-              }}
-            />
-
-            <AntInputNumber
-              type="number"
-              formProps={{
-                rules: [
-                  {
-                    required: true,
-                    message: "मूल्य दर (प्रति घनफुट वा युनिट)",
-                  },
-                ],
-                name: "price_rate",
-                label: "मूल्य दर (प्रति घनफुट वा युनिट)",
-              }}
-            />
+            <Form.Item
+              name={"decision_date"}
+              label="Decision Date"
+              rules={[{ required: true, message: "Decision Date" }]}
+            >
+              <DatePicker style={{ width: "100%" }} />
+            </Form.Item>
 
             <AntInput
               formProps={{
-                rules: [{ required: true, message: "वर्ग नाम" }],
-                name: "description",
-                label: "वर्ग नाम",
-              }}
-            />
-
-            <AntSwitch
-              formProps={{
-                name: "status",
-                label: "स्थिति",
+                rules: [{ required: true, message: "Remark" }],
+                name: "remark",
+                label: "Remark",
               }}
             />
           </div>
 
-          <div className="flex justify-end gap-x-3 mt-3">
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3 mt-3"
+          >
             <AntButton
               color="red"
               icon={<CloseCircleOutlined />}

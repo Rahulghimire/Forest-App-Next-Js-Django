@@ -29,23 +29,23 @@ import dayjs from "dayjs";
 export default function Registration() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [viewingUser, setViewingUser] = useState(false);
 
   const [form] = Form.useForm();
 
   const { data: plots, isLoading } = useQuery({
-    queryKey: ["auctions"],
-    queryFn: () => fetchApi(`sales/auctions`),
+    queryKey: ["registration"],
+    queryFn: () => fetchApi(`auction/registration/`),
   });
 
-  const { data: auctionData } = useQuery({
+  const { data: noticeData } = useQuery({
     queryKey: ["auctions"],
-    queryFn: () => fetchApi(`sales/auctions`),
+    queryFn: () => fetchApi(`auction/notices/`),
   });
 
   const columns = [
-    { title: "सूचना", dataIndex: "notice_id", key: "notice_id" },
+    { title: "सूचना", dataIndex: ["notice", "title"], key: "notice_id" },
     { title: "Bidder Name", dataIndex: "bidder_name", key: "bidder_name" },
     { title: "ठेगाना", dataIndex: "address", key: "address" },
     { title: "फोन", dataIndex: "phone", key: "phone" },
@@ -70,9 +70,11 @@ export default function Registration() {
               setEditingUser({
                 ...record,
                 bid_date: record?.bid_date ? dayjs(record?.bid_date) : null,
+                notice_id: record?.notice?.notice_id,
               });
               form.setFieldsValue({
                 ...record,
+                notice_id: record?.notice?.notice_id,
                 bid_date: record?.bid_date ? dayjs(record?.bid_date) : null,
               });
               setIsModalOpen(true);
@@ -82,17 +84,33 @@ export default function Registration() {
           <Button
             onClick={() => {
               setViewingUser(true);
-              form.setFieldsValue({ ...record });
+              form.setFieldsValue({
+                ...record,
+                bid_date: record?.bid_date ? dayjs(record?.bid_date) : null,
+                notice_id: record?.notice?.notice_id,
+              });
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
           />
           <Button
-            danger
-            onClick={() => closeMutation.mutate(record.id)}
-            icon={<CheckCircleFilled />}
+            onClick={() => closeMutation.mutate(record.bid_id)}
+            icon={
+              <CheckCircleFilled
+                style={{
+                  color: "green",
+                }}
+              />
+            }
           >
             Approve
+          </Button>
+          <Button
+            danger
+            onClick={() => closeMutation.mutate(record.bid_id)}
+            icon={<CloseCircleOutlined />}
+          >
+            Reject
           </Button>
           {/* <Button
             danger
@@ -105,10 +123,11 @@ export default function Registration() {
   ];
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) => createApi(`sales/auctions/`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction created");
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/registration/`, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["registration"] });
+      toast.success("Bid Registration created");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -116,10 +135,11 @@ export default function Registration() {
   });
 
   const approveMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) => createApi(`sales/approve/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/registration/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction created");
+      queryClient.invalidateQueries({ queryKey: ["registration"] });
+      toast.success("Bid Registration approved");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -127,10 +147,11 @@ export default function Registration() {
   });
 
   const rejectMutation = useMutation({
-    mutationFn: (data: Omit<any, "id">) => createApi(`sales/reject/`, data),
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`auction/registration/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction created");
+      queryClient.invalidateQueries({ queryKey: ["registration"] });
+      toast.success("Bid Registration rejected");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -138,10 +159,10 @@ export default function Registration() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (user: any) => updateApi(`sales/auctions/`, user),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction updated");
+    mutationFn: (user: any) => updateApi(`auction/registration/`, user),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["registration"] });
+      toast.success(data?.message || "Bid Registration updated");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -149,10 +170,10 @@ export default function Registration() {
   });
 
   const closeMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`sales/auctions/${id}/`),
+    mutationFn: (id: number) => deleteApi(`auction/registration/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"] });
-      toast.success("Auction closed");
+      queryClient.invalidateQueries({ queryKey: ["registration"] });
+      toast.success("Bid Registration closed");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -167,7 +188,11 @@ export default function Registration() {
         : null,
     };
     if (editingUser) {
-      await updateMutation.mutateAsync({ ...editingUser, ...payload });
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser.bid_id,
+        ...payload,
+      });
     } else {
       await createMutation.mutateAsync(payload);
     }
@@ -230,9 +255,9 @@ export default function Registration() {
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
             <AntSelect
-              array={auctionData?.data || []}
-              renderKey={"stock_type"}
-              valueKey={"id"}
+              array={noticeData?.data || []}
+              renderKey={"title"}
+              valueKey={"notice_id"}
               formProps={{
                 rules: [{ required: true, message: "सूचना" }],
                 label: "सूचना ",
@@ -257,7 +282,6 @@ export default function Registration() {
             />
 
             <AntInputNumber
-              type="number"
               formProps={{
                 rules: [{ required: true, message: "फोन" }],
                 name: "phone",

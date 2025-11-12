@@ -1,6 +1,9 @@
+"use client";
+
 import { FormItemProps, Input, InputProps } from "antd";
 import { Rule } from "rc-field-form/lib/interface";
 import { AntFormItem } from "./AntFormItem";
+import { getNepaliFromEnglish } from "nepali-input-react";
 
 interface Props extends Omit<InputProps, "name"> {
   formProps?: FormItemProps;
@@ -39,6 +42,10 @@ export const AntInput: React.FC<Props> = (props) => {
         allowClear={allowClear}
         placeholder={placeholder}
         data-cy={formProps?.name}
+        onInput={(e) => {
+          const target = e.target as HTMLInputElement;
+          target.value = getNepaliFromEnglish(target.value);
+        }}
         addonBefore={addonBefore}
       />
     </AntFormItem>

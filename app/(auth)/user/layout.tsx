@@ -18,12 +18,12 @@ import {
   SolutionOutlined,
   TeamOutlined,
   TransactionOutlined,
-  EllipsisOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
   Button,
   Card,
+  Divider,
   Dropdown,
   Layout,
   Menu,
@@ -31,19 +31,23 @@ import {
   theme,
   Tooltip,
 } from "antd";
+import type { MenuProps } from "antd";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AntButton } from "@/app/components/AntButton";
 import { useUserLogout } from "@/app/hooks/useAuthUser";
 
 const { Header, Sider, Content } = Layout;
 
-export default function AdminLayout({
+export default function UserLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
+
+  const pathname = usePathname();
+
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -79,12 +83,31 @@ export default function AdminLayout({
           bottom: 0,
         }}
       >
+        <div className="py-3 flex items-center gap-x-2">
+          <Avatar
+            style={{
+              margin: "0 0 0 20px",
+            }}
+          >
+            F
+          </Avatar>
+          {!collapsed && (
+            <div className="text-base font-semibold">Forest System</div>
+          )}
+        </div>
+
+        <Divider
+          style={{
+            margin: "0 0",
+          }}
+        />
         <Menu
           mode="inline"
           style={{
             fontWeight: 600,
           }}
           defaultSelectedKeys={["1"]}
+          selectedKeys={[pathToKey?.[pathname] ?? ""]}
           onClick={({ key }) => {
             if (key === "1") router.push("/user/dashboard");
             if (key === "2-1") router.push("/user/auction/notice");
@@ -202,8 +225,10 @@ export default function AdminLayout({
   );
 }
 
-const items = [
+const items: MenuProps["items"] = [
   { key: "1", icon: <AppstoreOutlined />, label: "Dashboard" },
+  { type: "divider" },
+
   {
     key: "2",
     icon: <FileSearchOutlined />,
@@ -216,6 +241,8 @@ const items = [
       { key: "2-5", label: "छूटपूर्जा जारी" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "3",
     icon: <ShopOutlined />,
@@ -227,6 +254,8 @@ const items = [
       { key: "3-4", label: "भुक्तानी रसीद" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "4",
     icon: <FolderOpenOutlined />,
@@ -241,6 +270,8 @@ const items = [
       { key: "4-7", label: "Audit Log (हर एक कार्यको इतिहास)" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "5",
     icon: <TransactionOutlined />,
@@ -251,6 +282,8 @@ const items = [
       { key: "5-3", label: "मार्ग–सूचना/गन्तव्य पुष्टि" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "6",
     icon: <SolutionOutlined />,
@@ -261,6 +294,9 @@ const items = [
       { key: "6-3", label: "दर्ता–चलानी संयुक्त रजिस्टर" },
     ],
   },
+  { type: "divider" },
+  { type: "group", label: "ACCOUNTING & PAYROLL" },
+
   {
     key: "7",
     icon: <FileTextOutlined />,
@@ -281,6 +317,8 @@ const items = [
       },
     ],
   },
+  { type: "divider" },
+
   {
     key: "8",
     icon: <SnippetsOutlined />,
@@ -290,6 +328,8 @@ const items = [
       { key: "8-2", label: "भौचर स्वीकृति/प्रिन्ट" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "9",
     icon: <MoneyCollectOutlined />,
@@ -300,6 +340,8 @@ const items = [
       { key: "9-3", label: "पेरोल रिपोर्ट" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "10",
     icon: <FileDoneOutlined />,
@@ -320,6 +362,8 @@ const items = [
       { key: "10-13", label: "जम्मा पाइलिङ रिपोर्ट" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "11",
     icon: <TeamOutlined />,
@@ -332,6 +376,8 @@ const items = [
       { key: "11-5", label: "आर्थिक वर्ष सेटअप" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "12",
     icon: <ClusterOutlined />,
@@ -346,6 +392,8 @@ const items = [
       { key: "12-7", label: "एकाई" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "13",
     icon: <AuditOutlined />,
@@ -358,6 +406,8 @@ const items = [
       { key: "13-5", label: "खर्च उप–शीर्षक" },
     ],
   },
+  { type: "divider" },
+
   {
     key: "14",
     icon: <SettingOutlined />,
@@ -368,4 +418,32 @@ const items = [
       { key: "14-3", label: "क्यालेन्डर/अङ्क ढाँचा (वि.सं./नेपाली)" },
     ],
   },
+  { type: "divider" },
 ];
+
+const pathToKey: Record<string, string> = {
+  "/user/dashboard": "1",
+  "/user/auction/notice": "2-1",
+  "/user/auction/registration": "2-2",
+  "/user/auction/evaluation": "2-3",
+  "/user/auction/payment": "2-4",
+  "/user/auction/release": "2-5",
+  "/user/setup/office/employee": "11-1",
+  "/user/setup/office/position": "11-2",
+  "/user/setup/office/member": "11-3",
+  "/user/setup/office/roles-permissions": "11-4",
+  "/user/setup/office/fiscal-year": "11-5",
+  "/user/setup/forest/plot": "12-1",
+  "/user/setup/forest/species": "12-2",
+  "/user/setup/forest/stock-types": "12-3",
+  "/user/setup/forest/classification": "12-4",
+  "/user/setup/forest/class": "12-5",
+  "/user/setup/forest/grade-rules": "12-6",
+  "/user/setup/forest/unit": "12-7",
+  "/user/piling-management/intake": "4-1",
+  "/user/piling-management/classification-update": "4-2",
+  "/user/piling-management/piling-account": "4-3",
+  "/user/piling-management/internal-transfer": "4-4",
+  "/user/piling-management/adjustment": "4-5",
+  "/user/piling-management/audit-log": "4-7",
+};
