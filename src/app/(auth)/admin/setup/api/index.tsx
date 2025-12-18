@@ -20,10 +20,11 @@ export interface Permission {
   id: number;
 }
 
+import { Env } from "@/core/constants/env";
 import Cookies from "js-cookie";
 
 export const fetchUsers = async (): Promise<UserList> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/`, {
+  const res = await fetch(`${Env.baseApiUrl}user/`, {
     headers: {
       Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
     },
@@ -33,20 +34,17 @@ export const fetchUsers = async (): Promise<UserList> => {
 };
 
 export const fetchPermission = async (): Promise<Permission[]> => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}user/permission/`,
-    {
-      headers: {
-        Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
-      },
-    }
-  );
+  const res = await fetch(`${Env.baseApiUrl}user/permission/`, {
+    headers: {
+      Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
+    },
+  });
   if (!res.ok) throw new Error("Error fetching users");
   return res.json();
 };
 
 export const createUser = async (data: Omit<User, "id">) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/create/`, {
+  const res = await fetch(`${Env.baseApiUrl}user/create/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -60,24 +58,21 @@ export const createUser = async (data: Omit<User, "id">) => {
 };
 
 export const updateUser = async (user: User) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}user/${user.id}/`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
-        // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: JSON.stringify(user),
-    }
-  );
+  const res = await fetch(`${Env.baseApiUrl}user/${user.id}/`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
+      // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+    body: JSON.stringify(user),
+  });
   if (!res.ok) throw new Error("Error updating user");
   return res.json();
 };
 
 export const deleteUser = async (id: number) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user/${id}/`, {
+  const res = await fetch(`${Env.baseApiUrl}user/${id}/`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

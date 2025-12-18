@@ -5,6 +5,7 @@ import { AntInput } from "@/components/AntInput";
 import { AntInputNumber } from "@/components/AntInputNumber";
 import { AntSelect } from "@/components/AntSelect";
 import { AntSwitch } from "@/components/AntSwitch";
+import { Env } from "@/core/constants/env";
 import {
   CloseCircleOutlined,
   DeleteOutlined,
@@ -81,7 +82,7 @@ export default function Classification() {
 
   const createMutation = useMutation({
     mutationFn: (data: Omit<any, "id">) =>
-      createApi(`${process.env.NEXT_PUBLIC_API_URL}forest/units/`, data),
+      createApi(`${Env.baseApiUrl}forest/units/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["units"] });
       toast.success("Unit created");

@@ -9,6 +9,7 @@ export interface PasswordCredentials {
   confirm_password: string;
 }
 
+import { Env } from "@/core/constants/env";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
@@ -39,16 +40,13 @@ export const authAPI = {
     credentials: LoginCredentials,
     router: any
   ): Promise<LoginResponse> => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}user/login/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      }
-    );
+    const response = await fetch(`${Env.baseApiUrl}user/login/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(credentials),
+    });
 
     const resData = await response.json();
 
@@ -70,7 +68,7 @@ export const authAPI = {
 
   changePassword: async (credentials: PasswordCredentials): Promise<void> => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}user/change-password/`,
+      `${Env.baseApiUrl}user/change-password/`,
 
       {
         method: "POST",
@@ -91,17 +89,14 @@ export const authAPI = {
   logout: async (): Promise<void> => {
     const formData = new FormData();
     formData.append("refresh", Cookies.get("user_refresh_token") || "");
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}user/logout/`,
-      {
-        method: "POST",
-        headers: {
-          // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          Authorization: `Bearer  ${Cookies.get("user_access_token")}`,
-        },
-        body: formData,
-      }
-    );
+    const response = await fetch(`${Env.baseApiUrl}user/logout/`, {
+      method: "POST",
+      headers: {
+        // Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        Authorization: `Bearer  ${Cookies.get("user_access_token")}`,
+      },
+      body: formData,
+    });
 
     if (!response.ok) {
       toast.error("Logout failed");

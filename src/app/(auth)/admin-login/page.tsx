@@ -1,7 +1,6 @@
 "use client";
 import { AntButton } from "@/components/AntButton";
 import { AuthForm } from "@/components/AuthForm";
-import { adminLoginAction } from "@/core/auth/auth-actions";
 import { useLogin } from "@/hooks/useAuth";
 import { Card, Form } from "antd";
 import { useEffect } from "react";
@@ -12,12 +11,10 @@ export default function Login() {
   const loginMutation = useLogin();
 
   const handleSubmit = async (values: any) => {
-    try {
-      adminLoginAction(values);
-    } catch (e) {
-      console.log(e.message, "login error");
-    }
-    // loginMutation.mutate(values);
+    // const res = await adminLoginAction(values);
+    // if (res.error) return toast.error(res.error);
+
+    loginMutation.mutate(values);
     if (typeof window !== "undefined") {
       localStorage.setItem("user_email", values?.email);
     }
@@ -25,8 +22,8 @@ export default function Login() {
 
   useEffect(() => {
     form.setFieldsValue({
-      email: "test@gmail.com",
-      password: "test123",
+      email: "testing123@gmail.com",
+      password: "test@123",
     });
   }, [form]);
 

@@ -1,3 +1,4 @@
+import { Env } from "@/core/constants/env";
 import Cookies from "js-cookie";
 export interface User {
   id: number;
@@ -16,7 +17,7 @@ export interface UserList {
 }
 
 export const fetchApi = async (url: string): Promise<any> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+  const res = await fetch(`${Env.baseApiUrl}${url}`, {
     headers: {
       Authorization: `Bearer ${Cookies.get("user_access_token")}`,
     },
@@ -35,7 +36,7 @@ export const fetchApi = async (url: string): Promise<any> => {
   return res.json();
 };
 export const createApi = async (url: string, data: Omit<any, "id">) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+  const res = await fetch(`${Env.baseApiUrl}${url}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export const createApi = async (url: string, data: Omit<any, "id">) => {
 };
 
 export const createApiFormData = async (url: string, data: any) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+  const res = await fetch(`${Env.baseApiUrl}${url}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${Cookies.get("user_access_token")}`,
@@ -80,7 +81,7 @@ export const createApiFormData = async (url: string, data: any) => {
 };
 
 export const updateApiFormData = async (url: string, data: any) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}/`, {
+  const res = await fetch(`${Env.baseApiUrl}${url}/`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${Cookies.get("user_access_token")}`,
@@ -103,17 +104,14 @@ export const updateApiFormData = async (url: string, data: any) => {
 };
 
 export const updateApi = async (url: string, user: any) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}${url}${user.id}/`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Cookies.get("user_access_token")}`,
-      },
-      body: JSON.stringify(user),
-    }
-  );
+  const res = await fetch(`${Env.baseApiUrl}${url}${user.id}/`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${Cookies.get("user_access_token")}`,
+    },
+    body: JSON.stringify(user),
+  });
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
@@ -129,7 +127,7 @@ export const updateApi = async (url: string, user: any) => {
 };
 
 export const deleteApi = async (url: string) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+  const res = await fetch(`${Env.baseApiUrl}${url}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

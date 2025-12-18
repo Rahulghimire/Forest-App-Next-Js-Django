@@ -1,3 +1,5 @@
+import { adminLoginAction } from "@/core/auth/auth-actions";
+import { Env } from "@/core/constants/env";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
@@ -14,14 +16,14 @@ export interface PasswordCredentials {
 
 export interface LoginResponse {
   access_token: string;
-  expires_in: number;
+  // expires_in: number;
   refresh_token: string;
   token_type: string;
   user: {
     password_changed: boolean;
     id: string;
-    email: string;
     name: string;
+    email: string;
     role: string;
     permissions: string[];
   };
@@ -34,42 +36,22 @@ export interface ApiError {
 }
 
 export const authAPI = {
-  login: async (
-    credentials: LoginCredentials,
-    router: any
-  ): Promise<LoginResponse> => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}user/login/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      }
-    );
-
-    const resData = await response.json();
-
-    if (resData?.detail?.toLowerCase() === "password change required") {
+  login: async (credentials: LoginCredentials, router: any) => {
+    const resData = await adminLoginAction(credentials);
+    if (resData.error) {
+      toast.error(resData.error || "Login failed");
+      return;
+    }
+    if (!resData.data?.password_changed) {
       router.push("/admin-login/change-password");
     }
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      toast.error(errorData.message || "Login failed");
-      throw {
-        message: errorData.message || "Login failed",
-        status: response.status,
-      } as ApiError;
-    }
-
-    return resData;
+    return resData.data;
   },
 
   changePassword: async (credentials: PasswordCredentials): Promise<void> => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}user/change-password/`,
+      `${Env.baseApiUrl}user/change-password/`,
 
       {
         method: "POST",
@@ -91,16 +73,13 @@ export const authAPI = {
     const formData = new FormData();
     formData.append("refresh", Cookies.get("admin_refresh_token") || "");
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}user/logout/`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
-        },
-        body: formData,
-      }
-    );
+    const response = await fetch(`${Env.baseApiUrl}user/logout/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer  ${Cookies.get("admin_access_token")}`,
+      },
+      body: formData,
+    });
 
     if (!response.ok) {
       toast.error("Logout failed");
