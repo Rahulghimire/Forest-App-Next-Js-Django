@@ -1,0 +1,274 @@
+"use client";
+
+import { AntButton } from "@/components/AntButton";
+import { AntInput } from "@/components/AntInput";
+import { AntInputNumber } from "@/components/AntInputNumber";
+import { AntSelect } from "@/components/AntSelect";
+import { AntSwitch } from "@/components/AntSwitch";
+import { Env } from "@/core/constants/env";
+import {
+  CloseCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusCircleOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Form, Modal, Space, Table } from "antd";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { createApi, deleteApi, fetchApi, updateApi } from "../../api";
+
+export default function Classification() {
+  const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [form] = Form.useForm();
+
+  const { data: plots, isLoading } = useQuery({
+    queryKey: ["units"],
+    queryFn: () => fetchApi(`forest/units/`),
+  });
+
+  const columns = [
+    { title: "एकाइ नाम", dataIndex: "unit_name", key: "unit_name" },
+    {
+      title: "रूपान्तरण फ्याक्टर",
+      dataIndex: "conversion_factor",
+      key: "conversion_factor",
+    },
+    { title: "आधार एकाइ", dataIndex: "base_unit", key: "base_unit" },
+    { title: "प्रयोग क्षेत्र", dataIndex: "usage_area", key: "usage_area" },
+    { title: "विवरण", dataIndex: "description", key: "description" },
+    { title: "स्थिति", dataIndex: "status", key: "status" },
+
+    {
+      title: "Actions",
+      key: "actions",
+      fixed: "right" as const,
+      render: (_: any, record: any) => (
+        <Space>
+          <Button
+            onClick={() => {
+              setViewingUser(false);
+              setEditingUser(record);
+              form.setFieldsValue({ ...record, email: record.user_email });
+              setIsModalOpen(true);
+            }}
+            icon={<EditOutlined />}
+          />
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                email: record.user_email,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
+          <Button
+            danger
+            onClick={() => deleteMutation.mutate(record.unit_id)}
+            icon={<DeleteOutlined />}
+          ></Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<any, "id">) =>
+      createApi(`${Env.baseApiUrl}forest/units/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["units"] });
+      toast.success("Unit created");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (user: any) => updateApi(`forest/units/`, user),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["units"] });
+      toast.success("Unit updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteApi(`forest/units/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["units"] });
+      toast.success("Unit deleted");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleFinish = async (values: any) => {
+    if (editingUser) {
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser.unit_id,
+        ...values,
+      });
+    } else {
+      await createMutation.mutateAsync(values);
+    }
+    setIsModalOpen(false);
+    form.resetFields();
+    setEditingUser(null);
+  };
+
+  return (
+    <div>
+      <AntButton
+        type="primary"
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
+        icon={<PlusCircleOutlined />}
+      >
+        Add Unit
+      </AntButton>
+
+      <Table
+        rowKey="id"
+        columns={columns || []}
+        bordered
+        dataSource={plots?.data || []}
+        loading={
+          isLoading ||
+          deleteMutation?.isPending ||
+          createMutation?.isPending ||
+          updateMutation?.isPending
+        }
+        style={{ marginTop: 16 }}
+        scroll={{ y: 300, x: "1000px" }}
+      />
+
+      <Modal
+        width={"70vw"}
+        title={
+          viewingUser ? "View Unit" : editingUser ? "Edit Unit" : "Add Unit"
+        }
+        open={isModalOpen}
+        footer={null}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingUser(null);
+          form.resetFields();
+        }}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          autoComplete="off"
+          disabled={viewingUser}
+        >
+          <div className="gap-x-2 grid md:grid-cols-2 lg:grid-cols-4">
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "एकाइ नाम" }],
+                name: "unit_name",
+                label: "एकाइ नाम",
+              }}
+            />
+            <AntInputNumber
+              formProps={{
+                rules: [{ required: true, message: "रूपान्तरण फ्याक्टर" }],
+                name: "conversion_factor",
+                label: "रूपान्तरण फ्याक्टर",
+              }}
+            />
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "base_unit" }],
+                name: "base_unit",
+                label: "आधार एकाइ",
+              }}
+            />
+
+            <AntSelect
+              array={[
+                { id: "काठ", name: "काठ" },
+                { id: "दाउरा", name: "दाउरा" },
+                { id: "जडीबुटी", name: "जडीबुटी" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "प्रयोग क्षेत्र" }],
+                label: "प्रयोग क्षेत्र",
+                name: "usage_area",
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                rules: [{ required: true, message: "विवरण" }],
+                name: "description",
+                label: "विवरण",
+              }}
+            />
+
+            <AntSwitch
+              formProps={{
+                name: "status",
+                label: "स्थिति",
+                initialValue: "Inactive",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3 mt-3"
+          >
+            <AntButton
+              color="red"
+              icon={<CloseCircleOutlined />}
+              onClick={() => {
+                setIsModalOpen(false);
+                setEditingUser(null);
+                form.resetFields();
+              }}
+            >
+              Cancel
+            </AntButton>
+
+            <AntButton
+              htmlType="submit"
+              icon={<SaveOutlined />}
+              loading={
+                updateMutation.isPending ||
+                createMutation.isPending ||
+                deleteMutation.isPending
+              }
+            >
+              Save
+            </AntButton>
+          </div>
+        </Form>
+      </Modal>
+    </div>
+  );
+}

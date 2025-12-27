@@ -1,0 +1,329 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Form, Modal, Space, Table } from "antd";
+import { useState } from "react";
+
+import { AntButton } from "@/components/AntButton";
+import { AntInput } from "@/components/AntInput";
+import { AntInputNumber } from "@/components/AntInputNumber";
+import { AntSelect } from "@/components/AntSelect";
+import { AntSwitch } from "@/components/AntSwitch";
+import {
+  CloseCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusCircleOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
+import { toast } from "react-toastify";
+import { createApi, deleteApi, fetchApi, updateApi } from "../../api";
+
+export default function Species() {
+  const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState(false);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [form] = Form.useForm();
+
+  const { data: species, isLoading } = useQuery({
+    queryKey: ["species"],
+    queryFn: () => fetchApi(`forest/species/`),
+  });
+
+  const columns = [
+    { title: "प्लट नाम", dataIndex: "species_name", key: "species_name" },
+    {
+      title: "प्रजाति नाम",
+      dataIndex: "species_name",
+      key: "species_name_local",
+    },
+    {
+      title: "वैज्ञानिक नाम",
+      dataIndex: "scientific_name",
+      key: "scientific_name",
+    },
+    { title: "प्रकार", dataIndex: "type", key: "type" },
+    {
+      title: "उत्पादन क्षमता",
+      dataIndex: "production_capacity",
+      key: "production_capacity",
+    },
+    {
+      title: "संरक्षण स्थिति",
+      dataIndex: "conservation_status",
+      key: "conservation_status",
+    },
+    {
+      title: "औसत वृक्ष आयु",
+      dataIndex: "avg_lifespan_years",
+      key: "avg_lifespan_years",
+    },
+    { title: "औसत उचाइ", dataIndex: "avg_height_m", key: "avg_height_m" },
+    { title: "विज्ञानमूर्ति", dataIndex: "usage", key: "usage" },
+    { title: "नोट्स/कैफियत", dataIndex: "notes", key: "notes" },
+    { title: "स्थिति", dataIndex: "status", key: "status" },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: any) => (
+        <Space>
+          <Button
+            onClick={() => {
+              setViewingUser(false);
+              setEditingUser(record);
+              form.setFieldsValue({ ...record, email: record.user_email });
+              setIsModalOpen(true);
+            }}
+            icon={<EditOutlined />}
+          />
+          <Button
+            onClick={() => {
+              setViewingUser(true);
+              form.setFieldsValue({
+                ...record,
+                email: record.user_email,
+              });
+              setIsModalOpen(true);
+            }}
+            icon={<EyeOutlined />}
+          />
+          <Button
+            danger
+            onClick={() => deleteMutation.mutate(record.species_id)}
+            icon={<DeleteOutlined />}
+          ></Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<any, "id">) => createApi(`forest/species/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["species"] });
+      toast.success("Species created");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (user: any) => updateApi(`forest/species/`, user),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["species"] });
+      toast.success("Species updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteApi(`forest/species/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["species"] });
+      toast.success("Species deleted");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleFinish = async (values: any) => {
+    if (editingUser) {
+      await updateMutation.mutateAsync({
+        ...editingUser,
+        id: editingUser.species_id,
+        ...values,
+      });
+    } else {
+      await createMutation.mutateAsync(values);
+    }
+    setIsModalOpen(false);
+    form.resetFields();
+    setEditingUser(null);
+  };
+
+  return (
+    <div>
+      <AntButton
+        type="primary"
+        onClick={() => {
+          setViewingUser(false);
+          setIsModalOpen(true);
+        }}
+        icon={<PlusCircleOutlined />}
+      >
+        Add Species
+      </AntButton>
+
+      <Table
+        rowKey="id"
+        columns={columns || []}
+        bordered
+        dataSource={species?.data || []}
+        loading={isLoading}
+        style={{ marginTop: 16 }}
+        scroll={{ y: 300, x: "800px" }}
+      />
+
+      <Modal
+        width={"90vw"}
+        title={
+          viewingUser
+            ? "View Species"
+            : editingUser
+            ? "Edit Species"
+            : "Add Species"
+        }
+        open={isModalOpen}
+        footer={null}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingUser(null);
+          form.resetFields();
+        }}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          autoComplete="off"
+          disabled={viewingUser}
+        >
+          <div className="gap-x-2 grid md:grid-cols-2 lg:grid-cols-4">
+            {/* <AntInput formProps={{ name: "species_name", label: "प्लट नाम" }} /> */}
+            <AntInput
+              formProps={{
+                name: "species_name",
+                label: "प्रजाति नाम",
+                rules: [{ required: true, message: "प्रजाति नाम" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "scientific_name",
+                label: "वैज्ञानिक नाम",
+                rules: [{ required: true, message: "वैज्ञानिक नाम" }],
+              }}
+              useEnglish
+            />
+
+            <AntSelect
+              array={[
+                { id: "काठ", name: "काठ" },
+                { id: "दाउरा", name: "दाउरा" },
+                { id: "जडीबुटी", name: "जडीबुटी" },
+                { id: "अन्य", name: "अन्य" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                label: "प्रकार",
+                name: "type",
+                rules: [{ required: true, message: "प्रकार" }],
+              }}
+            />
+
+            <AntInput
+              placeholder="15 m³/ha/year"
+              formProps={{
+                name: "production_capacity",
+                label: "उत्पादन क्षमता",
+                rules: [{ required: true, message: "उत्पादन क्षमता" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "conservation_status",
+                label: "संरक्षण स्थिति",
+                rules: [{ required: true, message: "संरक्षण स्थिति" }],
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "avg_lifespan_years",
+                label: "औसत वृक्ष आयु",
+                rules: [{ required: true, message: "औसत वृक्ष आयु" }],
+              }}
+            />
+
+            <AntInputNumber
+              formProps={{
+                name: "avg_height_m",
+                label: "औसत उचाइ",
+                rules: [{ required: true, message: "औसत उचाइ" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "usage",
+                label: "विज्ञानमूर्ति",
+                rules: [{ required: true, message: "विज्ञानमूर्ति" }],
+              }}
+            />
+
+            <AntInput
+              formProps={{
+                name: "notes",
+                label: "नोट्स/कैफियत",
+                rules: [{ required: true, message: "नोट्स/कैफियत" }],
+              }}
+            />
+
+            <AntSwitch
+              formProps={{
+                name: "status",
+                label: "स्थिति",
+                initialValue: "Inactive",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: viewingUser ? "none" : "flex",
+            }}
+            className="flex justify-end gap-x-3"
+          >
+            <AntButton
+              color="red"
+              icon={<CloseCircleOutlined />}
+              onClick={() => {
+                setIsModalOpen(false);
+                setEditingUser(null);
+                form.resetFields();
+              }}
+            >
+              Cancel
+            </AntButton>
+
+            <AntButton
+              htmlType="submit"
+              icon={<SaveOutlined />}
+              loading={
+                updateMutation.isPending ||
+                createMutation.isPending ||
+                deleteMutation.isPending
+              }
+            >
+              Save
+            </AntButton>
+          </div>
+        </Form>
+      </Modal>
+    </div>
+  );
+}
