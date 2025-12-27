@@ -1,11 +1,7 @@
+import { DownOutlined, PlayCircleTwoTone } from "@ant-design/icons";
 import { FormItemProps, Select, SelectProps, Tooltip } from "antd";
-import { AntFormItem } from "./AntFormItem";
-import {
-  DownOutlined,
-  PlayCircleTwoTone,
-  PlusCircleFilled,
-} from "@ant-design/icons";
 import { AntButton } from "./AntButton";
+import { AntFormItem } from "./AntFormItem";
 
 interface Props<T> extends Omit<SelectProps<T>, "options"> {
   isWYSIWYGMode?: boolean;
@@ -52,7 +48,7 @@ export const AntSelect = <T,>(props: Props<T>) => {
         {...formProps}
       >
         <Select
-          suffixIcon={<DownOutlined className=" !text-[#000000]" />}
+          suffixIcon={<DownOutlined className="!text-[#000000]" />}
           // allowClear={true}
           showSearch={true}
           placeholder={placeholder}
@@ -69,16 +65,19 @@ export const AntSelect = <T,>(props: Props<T>) => {
             <>
               {menu}
               {/* {showAddButton && ( */}
-              <div className="pt-2">
-                <AntButton
-                  block
-                  onClick={() => {
-                    handleClick?.();
-                  }}
-                >
-                  Add New <PlayCircleTwoTone />
-                </AntButton>
-              </div>
+              {/* Don't know where this is used so made this conditional this handleClick && is added later */}
+              {handleClick && (
+                <div className="pt-2">
+                  <AntButton
+                    block
+                    onClick={() => {
+                      handleClick?.();
+                    }}
+                  >
+                    Add New <PlayCircleTwoTone />
+                  </AntButton>
+                </div>
+              )}
               {/* )} */}
             </>
           )}

@@ -28,7 +28,7 @@ export default function Class() {
 
   const { data: plots, isLoading } = useQuery({
     queryKey: ["class"],
-    queryFn: () => fetchApi(`forest/class-setup/`),
+    queryFn: () => fetchApi(`forest/class-setups/`),
   });
 
   const columns = [
@@ -256,6 +256,12 @@ export default function Class() {
               formProps={{
                 name: "status",
                 label: "स्थिति",
+                initialValue: "Inactive",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
               }}
             />
           </div>

@@ -14,21 +14,6 @@ export interface PasswordCredentials {
   confirm_password: string;
 }
 
-export interface LoginResponse {
-  access_token: string;
-  // expires_in: number;
-  refresh_token: string;
-  token_type: string;
-  user: {
-    password_changed: boolean;
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    permissions: string[];
-  };
-  message: string;
-}
 
 export interface ApiError {
   message: string;
@@ -39,7 +24,7 @@ export const authAPI = {
   login: async (credentials: LoginCredentials, router: any) => {
     const resData = await adminLoginAction(credentials);
     if (resData.error) {
-      toast.error(resData.error || "Login failed");
+      toast.error(resData.error.message || "Login failed");
       return;
     }
     if (!resData.data?.password_changed) {

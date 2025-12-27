@@ -182,15 +182,15 @@ export default function Classification() {
           disabled={viewingUser}
         >
           <div className="gap-x-2 grid md:grid-cols-2 lg:grid-cols-4">
-            {/* <AntInput
+            <AntInput
               formProps={{
                 rules: [{ required: true, message: "वर्गीकरण नाम" }],
                 name: "classification_title",
                 label: "वर्गीकरण नाम",
               }}
-            /> */}
+            />
 
-            <AntSelect
+            {/* <AntSelect
               array={classData?.data || []}
               renderKey={"class_name"}
               valueKey={"id"}
@@ -199,20 +199,41 @@ export default function Classification() {
                 label: "वर्गीकरण नाम",
                 name: "classification_title",
               }}
-            />
+            /> */}
             <AntInput formProps={{ name: "description", label: "विवरण" }} />
-            <AntInput
+
+            <AntSelect
+              array={[
+                { id: "Shape", label: "Shape" },
+                { id: "Quality", label: "Quality" },
+                { id: "Application", label: "Application" },
+              ]}
+              renderKey={"label"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "आधार" }],
+                label: "आधार",
+                name: "basis",
+              }}
+            />
+            {/* <AntInput
               formProps={{
                 rules: [{ required: true, message: "आधार" }],
                 name: "basis",
                 label: "आधार ",
               }}
-            />
+            /> */}
 
             <AntSwitch
               formProps={{
                 name: "status",
                 label: "स्थिति",
+                initialValue: "Inactive",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
               }}
             />
           </div>

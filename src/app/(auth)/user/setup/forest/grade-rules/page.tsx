@@ -2,6 +2,7 @@
 
 import { AntButton } from "@/components/AntButton";
 import { AntInput } from "@/components/AntInput";
+import { AntInputNumber } from "@/components/AntInputNumber";
 import { AntSwitch } from "@/components/AntSwitch";
 import {
   CloseCircleOutlined,
@@ -195,7 +196,8 @@ export default function Classification() {
                 label: "ग्रेड नाम",
               }}
             />
-            <AntInput
+            <AntInputNumber
+              type="number"
               formProps={{ name: "cutting_limit", label: "कटान सीमा" }}
             />
             <AntInput
@@ -234,6 +236,12 @@ export default function Classification() {
               formProps={{
                 name: "status",
                 label: "स्थिति",
+                initialValue: "Inactive",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
               }}
             />
           </div>

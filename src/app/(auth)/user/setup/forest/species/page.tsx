@@ -195,7 +195,7 @@ export default function Species() {
           disabled={viewingUser}
         >
           <div className="gap-x-2 grid md:grid-cols-2 lg:grid-cols-4">
-            <AntInput formProps={{ name: "species_name", label: "प्लट नाम" }} />
+            {/* <AntInput formProps={{ name: "species_name", label: "प्लट नाम" }} /> */}
             <AntInput
               formProps={{
                 name: "species_name",
@@ -210,6 +210,7 @@ export default function Species() {
                 label: "वैज्ञानिक नाम",
                 rules: [{ required: true, message: "वैज्ञानिक नाम" }],
               }}
+              useEnglish
             />
 
             <AntSelect
@@ -229,6 +230,7 @@ export default function Species() {
             />
 
             <AntInput
+              placeholder="15 m³/ha/year"
               formProps={{
                 name: "production_capacity",
                 label: "उत्पादन क्षमता",
@@ -280,6 +282,12 @@ export default function Species() {
               formProps={{
                 name: "status",
                 label: "स्थिति",
+                initialValue: "Inactive",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
               }}
             />
           </div>

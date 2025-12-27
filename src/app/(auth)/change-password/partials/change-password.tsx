@@ -1,7 +1,7 @@
 "use client";
 
 import { AntButton } from "@/components/AntButton";
-import { useChangePassword } from "@/hooks/useAuth";
+import { useUserChangePassword } from "@/hooks/useAuthUser";
 import {
   CloseCircleOutlined,
   EyeInvisibleOutlined,
@@ -11,15 +11,17 @@ import {
 import { Card, Form, Input, Space } from "antd";
 import { useRouter } from "next/navigation";
 
-export default function ChangePassword() {
+export default function ChangePassword({ userEmail }: { userEmail?: string }) {
   const router = useRouter();
+  console.log(userEmail);
 
-  const changePasswordMutation = useChangePassword();
+  const changePasswordMutation = useUserChangePassword();
 
   const onFinish = (values: any) => {
     const email =
-      typeof window !== "undefined" ? localStorage.getItem("user_email") : "";
-
+      userEmail ||
+      (typeof window !== "undefined" ? localStorage.getItem("user_email") : "");
+    console.log(email);
     changePasswordMutation.mutate({
       ...values,
       email,
@@ -52,8 +54,8 @@ export default function ChangePassword() {
                   message: "Please enter the old password.",
                 },
                 {
-                  min: 6,
-                  message: "Password must be at least 6 characters.",
+                  min: 5,
+                  message: "Password must be at least 5 characters.",
                 },
                 {
                   max: 20,
@@ -139,7 +141,7 @@ export default function ChangePassword() {
                   color="red"
                   icon={<CloseCircleOutlined />}
                   onClick={() => {
-                    router.push("/admin-login");
+                    router.push("/");
                   }}
                 >
                   Cancel

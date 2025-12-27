@@ -1,4 +1,5 @@
 import { Env } from "@/core/constants/env";
+import { HttpClient } from "@/core/network/http-client";
 import Cookies from "js-cookie";
 export interface User {
   id: number;
@@ -17,133 +18,56 @@ export interface UserList {
 }
 
 export const fetchApi = async (url: string): Promise<any> => {
-  const res = await fetch(`${Env.baseApiUrl}${url}`, {
+  const res = await HttpClient.get(url, {
     headers: {
       Authorization: `Bearer ${Cookies.get("user_access_token")}`,
     },
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message =
-      errorData?.message ||
-      errorData?.detail ||
-      JSON.stringify(errorData) ||
-      "Error fetching data";
-    throw new Error(message);
-  }
-
-  return res.json();
+  return res.data;
 };
 export const createApi = async (url: string, data: Omit<any, "id">) => {
-  const res = await fetch(`${Env.baseApiUrl}${url}`, {
-    method: "POST",
+  const res = await HttpClient.post(url, data, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${Cookies.get("user_access_token")}`,
     },
-    body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message =
-      errorData?.message ||
-      errorData?.detail ||
-      JSON.stringify(errorData) ||
-      "Error creating data";
-    throw new Error(message);
-  }
-
-  return res.json();
+  return res.data;
 };
 
 export const createApiFormData = async (url: string, data: any) => {
-  const res = await fetch(`${Env.baseApiUrl}${url}`, {
-    method: "POST",
+  const res = await HttpClient.post(url, data, {
     headers: {
       Authorization: `Bearer ${Cookies.get("user_access_token")}`,
     },
-    body: data,
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message =
-      errorData?.message ||
-      errorData?.detail ||
-      JSON.stringify(errorData) ||
-      "Error creating data";
-    throw new Error(message);
-  }
-
-  return res.json();
+  return res.data;
 };
 
 export const updateApiFormData = async (url: string, data: any) => {
-  const res = await fetch(`${Env.baseApiUrl}${url}/`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${Cookies.get("user_access_token")}`,
-    },
-    // body: JSON.stringify(user),
-    body: data,
-  });
+  const res = await HttpClient.put(`${Env.baseApiUrl}${url}/`, data);
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message =
-      errorData?.message ||
-      errorData?.detail ||
-      JSON.stringify(errorData) ||
-      "Error updating user";
-    throw new Error(message);
-  }
-
-  return res.json();
+  return res.data;
 };
 
 export const updateApi = async (url: string, user: any) => {
-  const res = await fetch(`${Env.baseApiUrl}${url}${user.id}/`, {
-    method: "PUT",
+  const res = await HttpClient.put(`${Env.baseApiUrl}${url}${user.id}/`, user, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${Cookies.get("user_access_token")}`,
     },
-    body: JSON.stringify(user),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message =
-      errorData?.message ||
-      errorData?.detail ||
-      JSON.stringify(errorData) ||
-      "Error updating user";
-    throw new Error(message);
-  }
-
-  return res.json();
+  return res.data;
 };
 
 export const deleteApi = async (url: string) => {
-  const res = await fetch(`${Env.baseApiUrl}${url}`, {
+  const res = await HttpClient.delete(url, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${Cookies.get("user_access_token")}`,
     },
   });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message =
-      errorData?.message ||
-      errorData?.detail ||
-      JSON.stringify(errorData) ||
-      "Error deleting data";
-    throw new Error(message);
-  }
-
-  return res.status === 204 ? {} : res.json();
+  return res.status === 204 ? {} : res.data;
 };

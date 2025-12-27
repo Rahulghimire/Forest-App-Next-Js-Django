@@ -1,6 +1,7 @@
 "use client";
 
 import { AntButton } from "@/components/AntButton";
+import { showErrorMessage } from "@/core/lib/toast";
 import { useLogout } from "@/hooks/useAuth";
 import {
   DashboardOutlined,
@@ -20,7 +21,9 @@ import {
   theme,
   Tooltip,
 } from "antd";
-import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import router from "next/router";
 import { useEffect, useState } from "react";
 
 const { Header, Sider, Content } = Layout;
@@ -30,7 +33,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+  const session = useSession();
   const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -51,7 +54,16 @@ export default function AdminLayout({
       setData(null);
     }
   }, []);
-
+  if (session.status == "loading") {
+    return;
+  }
+  if (
+    (session?.data?.user.role && session?.data?.user.role != "admin") ||
+    session.status == "unauthenticated"
+  ) {
+    showErrorMessage("Unauthorized access");
+    redirect("/");
+  }
   return (
     <>
       <Layout>

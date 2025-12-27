@@ -188,8 +188,8 @@ export default function StockType() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
-                rules: [{ required: true, message: "स्टक प्रका" }],
-                label: "स्टक प्रका",
+                rules: [{ required: true, message: "स्टक प्रकार" }],
+                label: "स्टक प्रकार",
                 name: "stock_type",
               }}
             />
@@ -234,6 +234,12 @@ export default function StockType() {
               formProps={{
                 name: "status",
                 label: "स्थिति",
+                initialValue: "Inactive",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
               }}
             />
           </div>

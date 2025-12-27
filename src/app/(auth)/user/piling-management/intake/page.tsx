@@ -53,17 +53,20 @@ export default function Intake() {
     queryFn: () => fetchApi(`forest/units`),
   });
 
+  // OPTIONAL (only if you actually have this endpoint)
+  // If you don't, keep entered_by_id as AntInputNumber manually.
+  // const { data: usersData } = useQuery({
+  //   queryKey: ["users"],
+  //   queryFn: () => fetchApi(`auth/users/`),
+  // });
+
   const columns = [
     {
       title: "प्रजाति",
       dataIndex: ["species", "species_name"],
       key: "species",
     },
-    {
-      title: "प्लट",
-      dataIndex: ["plot", "plot_name"],
-      key: "plot",
-    },
+    { title: "प्लट", dataIndex: ["plot", "plot_name"], key: "plot" },
     {
       title: "लम्बाई (ft)",
       dataIndex: "measurement_length",
@@ -74,56 +77,28 @@ export default function Intake() {
       dataIndex: "measurement_girth",
       key: "measurement_girth",
     },
-    {
-      title: "परिमाण (घनफिट)",
-      dataIndex: "volume_cft",
-      key: "volume_cft",
-    },
-    {
-      title: "तौल (के.जि.)",
-      dataIndex: "weight",
-      key: "weight",
-    },
-    {
-      title: "ग्रेड",
-      dataIndex: "grade",
-      key: "grade",
-    },
+    { title: "परिमाण (घनफिट)", dataIndex: "volume_cft", key: "volume_cft" },
+    { title: "तौल (के.जि.)", dataIndex: "weight", key: "weight" },
+    { title: "ग्रेड", dataIndex: "grade", key: "grade" },
     {
       title: "वर्ग",
       dataIndex: ["class_name", "class_name"],
       key: "class_name",
     },
-    {
-      title: "एकाई",
-      dataIndex: ["unit", "unit_name"],
-      key: "unit",
-    },
-    {
-      title: "इन्टेक मिति",
-      dataIndex: "intake_date",
-      key: "intake_date",
-    },
+    { title: "एकाई", dataIndex: ["unit", "unit_name"], key: "unit" },
+    { title: "इन्टेक मिति", dataIndex: "intake_date", key: "intake_date" },
     {
       title: "ट्याग कोड",
       dataIndex: "unique_tag_code",
       key: "unique_tag_code",
     },
-    {
-      title: "स्थिति",
-      dataIndex: "status",
-      key: "status",
-    },
+    { title: "स्थिति", dataIndex: "status", key: "status" },
     {
       title: "प्रविष्टि गर्ने",
       dataIndex: ["entered_by", "email"],
       key: "entered_by",
     },
-    {
-      title: "कैफियत",
-      dataIndex: "remarks",
-      key: "remarks",
-    },
+    { title: "कैफियत", dataIndex: "remarks", key: "remarks" },
     {
       title: "Actions",
       key: "actions",
@@ -134,17 +109,29 @@ export default function Intake() {
             onClick={() => {
               setViewingUser(false);
               setEditingUser(record);
+
               form.setFieldsValue({
                 ...record,
+
+                // ✅ date
                 intake_date: record?.intake_date
                   ? dayjs(record?.intake_date)
                   : null,
+
+                // ✅ FK ids expected by backend
                 species_id: record?.species?.id,
                 plot_id: record?.plot?.id,
-                class_id: record?.class_name?.id,
+                class_name_id: record?.class_name?.id, // ✅ CHANGED
                 unit_id: record?.unit?.id,
-                entered_by: record?.entered_by?.email,
+
+                // ✅ entered_by_id expected by backend (number)
+                entered_by_id:
+                  record?.entered_by?.id ?? record?.entered_by_id ?? null,
+
+                // ✅ payload field
+                category: record?.category ?? null,
               });
+
               setIsModalOpen(true);
             }}
             icon={<EditOutlined />}
@@ -153,6 +140,7 @@ export default function Intake() {
           <Button
             onClick={() => {
               setViewingUser(true);
+
               form.setFieldsValue({
                 ...record,
                 intake_date: record?.intake_date
@@ -160,14 +148,18 @@ export default function Intake() {
                   : null,
                 species_id: record?.species?.id,
                 plot_id: record?.plot?.id,
-                class_id: record?.class_name?.id,
+                class_name_id: record?.class_name?.id,
                 unit_id: record?.unit?.id,
-                entered_by: record?.entered_by?.email,
+                entered_by_id:
+                  record?.entered_by?.id ?? record?.entered_by_id ?? null,
+                category: record?.category ?? null,
               });
+
               setIsModalOpen(true);
             }}
             icon={<EyeOutlined />}
           />
+
           <Button
             danger
             onClick={() => deleteMutation.mutate(record.intake_id)}
@@ -184,7 +176,7 @@ export default function Intake() {
       queryClient.invalidateQueries({ queryKey: ["intakes"] });
       toast.success("Intake created");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
@@ -196,23 +188,24 @@ export default function Intake() {
       queryClient.invalidateQueries({ queryKey: ["intakes"] });
       toast.success("Intake updated");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteApi(`pilling/intakes/${id}/`),
+    mutationFn: (id: any) => deleteApi(`pilling/intakes/${id}/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["intakes"] });
       toast.success("Intake deleted");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
 
   const handleFinish = async (values: any) => {
+    // ✅ only adjust payload keys + date format; keep your approach
     const payload = {
       ...editingUser,
       ...values,
@@ -241,6 +234,7 @@ export default function Intake() {
         type="primary"
         onClick={() => {
           setViewingUser(false);
+          setEditingUser(null);
           setIsModalOpen(true);
         }}
         icon={<PlusCircleOutlined />}
@@ -249,7 +243,7 @@ export default function Intake() {
       </AntButton>
 
       <Table
-        rowKey="id"
+        rowKey="intake_id" // ✅ fix rowKey
         columns={columns || []}
         bordered
         dataSource={plots?.data || []}
@@ -288,10 +282,26 @@ export default function Intake() {
           disabled={viewingUser}
         >
           <div className="gap-x-2 grid md:grid-cols-2 lg:grid-cols-4">
+            {/* ✅ category (payload requirement) */}
+            <AntSelect
+              array={[
+                { id: "wood", name: "काठ" },
+                { id: "firewood", name: "दाउरा" },
+                { id: "herbs", name: "जडीबुटी" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "श्रेणी" }],
+                label: "श्रेणी",
+                name: "category",
+              }}
+            />
+
             <AntSelect
               array={speciesData?.data || []}
               renderKey={"species_name"}
-              valueKey={"id"}
+              valueKey={"species_id"}
               formProps={{
                 rules: [{ required: true, message: "प्रजाति" }],
                 label: "प्रजाति",
@@ -302,7 +312,7 @@ export default function Intake() {
             <AntSelect
               array={plotsData?.data || []}
               renderKey={"plot_name"}
-              valueKey={"id"}
+              valueKey={"plot_id"}
               formProps={{
                 rules: [{ required: true, message: "प्लट" }],
                 label: "प्लट",
@@ -328,6 +338,17 @@ export default function Intake() {
               }}
             />
 
+            {/* ✅ NEW: measurement_width (payload requirement) */}
+            <AntInputNumber
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "चौडाई (inch)" }],
+                name: "measurement_width",
+                label: "चौडाई (inch)",
+              }}
+            />
+
+            {/* ✅ KEEP YOUR WORKING CFT CALCULATION BLOCK EXACTLY */}
             <Form.Item shouldUpdate noStyle>
               {({ getFieldValue, setFieldsValue }) => {
                 const length = getFieldValue("measurement_length") || 0;
@@ -339,7 +360,7 @@ export default function Intake() {
                         (
                           (Math.PI * Math.pow(girth / 2, 2) * length) /
                           144
-                        ).toFixed(2)
+                        ).toFixed(3) // ✅ payload sample has 3 decimals
                       )
                     : 0;
 
@@ -355,7 +376,7 @@ export default function Intake() {
                       name: "volume_cft",
                       label: "परिमाण (घनफिट)",
                     }}
-                    precision={2}
+                    precision={3}
                     readOnly
                   />
                 );
@@ -371,6 +392,7 @@ export default function Intake() {
               }}
             />
 
+            {/* ✅ grade MUST be grade, not plot_id */}
             <AntSelect
               array={[
                 { id: "A", name: "A" },
@@ -380,27 +402,28 @@ export default function Intake() {
               renderKey={"name"}
               valueKey={"id"}
               formProps={{
-                rules: [{ required: true, message: "प्लट" }],
-                label: "प्लट",
-                name: "plot_id",
+                rules: [{ required: true, message: "ग्रेड" }],
+                label: "ग्रेड",
+                name: "grade",
               }}
             />
 
+            {/* ✅ class_name_id (payload requirement) */}
             <AntSelect
               array={classData?.data || []}
               renderKey={"class_name"}
-              valueKey={"id"}
+              valueKey={"class_id"}
               formProps={{
                 rules: [{ required: true, message: "वर्ग" }],
                 label: "वर्ग",
-                name: "class_id",
+                name: "class_name_id",
               }}
             />
 
             <AntSelect
               array={unitData?.data || []}
               renderKey={"unit_name"}
-              valueKey={"id"}
+              valueKey={"unit_id"}
               formProps={{
                 rules: [{ required: true, message: "एकाई" }],
                 label: "एकाई",
@@ -418,45 +441,50 @@ export default function Intake() {
 
             <AntInput
               formProps={{
-                rules: [
-                  {
-                    required: true,
-                    message: "ट्याग कोड",
-                  },
-                ],
+                rules: [{ required: true, message: "ट्याग कोड" }],
                 name: "unique_tag_code",
                 label: "ट्याग कोड",
               }}
             />
 
+            {/* ✅ status enum mapping (NOT boolean) */}
             <AntSwitch
               formProps={{
                 name: "status",
                 label: "स्थिति",
+                initialValue: "Active",
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Transferred",
+              }}
+            />
+            {/* <AntSelect
+              array={userData?.data || []}
+              renderKey={"unit_name"}
+              valueKey={"unit_id"}
+              formProps={{
+                rules: [
+                  { required: true, message: "प्रविष्टि गर्ने (User ID)" },
+                ],
+                label: "प्रविष्टि गर्ने (User ID)",
+                name: "entered_by_id",
+              }}
+            /> */}
+            {/* ✅ entered_by_id required by payload */}
+            <AntInputNumber
+              type="number"
+              formProps={{
+                rules: [{ required: true, message: "प्रविष्टि गर्ने (ID)" }],
+                name: "entered_by_id",
+                label: "प्रविष्टि गर्ने (User ID)",
               }}
             />
 
             <AntInput
               formProps={{
-                rules: [
-                  {
-                    required: true,
-                    message: "प्रविष्टि गर्ने",
-                  },
-                ],
-                name: "entered_by",
-                label: "प्रविष्टि गर्ने",
-              }}
-            />
-
-            <AntInput
-              formProps={{
-                rules: [
-                  {
-                    required: true,
-                    message: "कैफियत",
-                  },
-                ],
+                rules: [{ required: true, message: "कैफियत" }],
                 name: "remarks",
                 label: "कैफियत",
               }}

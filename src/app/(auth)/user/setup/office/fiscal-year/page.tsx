@@ -5,9 +5,9 @@ import { Button, DatePicker, Form, Modal, Space, Table } from "antd";
 import { useState } from "react";
 
 import { AntButton } from "@/components/AntButton";
+import { AntInput } from "@/components/AntInput";
 import { AntInputNumber } from "@/components/AntInputNumber";
 import { AntSelect } from "@/components/AntSelect";
-import { AntSwitch } from "@/components/AntSwitch";
 import {
   CloseCircleOutlined,
   DeleteOutlined,
@@ -218,7 +218,7 @@ export default function FiscalYear() {
           disabled={viewingUser}
         >
           <div className="gap-x-2 grid md:grid-cols-2 lg:grid-cols-4">
-            <AntSelect
+            {/* <AntSelect
               array={[
                 { id: "2082/83", name: "2082/83" },
                 { id: "2081/82", name: "2081/82" },
@@ -229,6 +229,15 @@ export default function FiscalYear() {
                 rules: [{ required: true, message: "आर्थिक वर्ष" }],
                 label: "आर्थिक वर्ष",
                 name: "fiscal_year",
+              }}
+            /> */}
+            <AntInput
+              placeholder="2082/83"
+              useEnglish
+              formProps={{
+                name: "fiscal_year",
+                label: "आर्थिक वर्ष",
+                rules: [{ required: true, message: "आर्थिक वर्ष" }],
               }}
             />
 
@@ -256,14 +265,26 @@ export default function FiscalYear() {
                 rules: [{ required: true, message: "बजेट सीमा" }],
               }}
             />
-
-            <AntSwitch
+            <AntSelect
+              array={[
+                { id: "Active", name: "Active" },
+                { id: "Inactive", name: "Inactive" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "स्थिति" }],
+                label: "स्थिति",
+                name: "status",
+              }}
+            />
+            {/* <AntSwitch
               formProps={{
                 initialValue: false,
                 label: "स्थिति",
-                name: "active",
+                name: "status",
               }}
-            />
+            /> */}
           </div>
 
           <div

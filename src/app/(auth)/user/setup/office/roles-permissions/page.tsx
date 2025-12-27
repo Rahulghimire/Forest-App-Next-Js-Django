@@ -218,7 +218,7 @@ export default function Member() {
             />
 
             <AntSelect
-              array={[{ id: "Staff", name: "Staff" }]}
+              array={[{ id: "staff", name: "Staff" }]}
               renderKey={"name"}
               valueKey={"id"}
               formProps={{

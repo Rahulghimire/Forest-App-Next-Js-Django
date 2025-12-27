@@ -12,11 +12,6 @@ export const useUserLogin = () => {
     mutationFn: (credentials: LoginCredentials) =>
       authAPI.login(credentials, router),
     onSuccess: (data) => {
-      Cookies.set("user_access_token", data?.access_token, { expires: 7 });
-      Cookies.set("user_refresh_token", data?.refresh_token, { expires: 7 });
-      // localStorage.setItem("access_token", data?.access_token);
-      // localStorage.setItem("refresh_token", data?.refresh_token);
-      localStorage.setItem("user_data", JSON.stringify(data?.user));
       queryClient.setQueryData(["currentUser"], data.user);
       toast.success(data?.message || "Login successful!");
       if (!data?.user?.password_changed) {

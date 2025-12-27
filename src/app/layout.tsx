@@ -3,6 +3,7 @@
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider } from "antd";
+import { SessionProvider } from "next-auth/react";
 import { Geist, Geist_Mono } from "next/font/google";
 import ToastProvider from "../components/ToastProvider";
 import "./globals.css";
@@ -17,7 +18,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,49 +29,51 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryClientProvider client={queryClient}>
-          <AntdRegistry>
-            <ConfigProvider
-              theme={{
-                components: {
-                  Form: {
-                    itemMarginBottom: 10,
-                  },
-                  DatePicker: {
-                    colorTextDisabled: "#000000",
-                    colorText: "#000000",
-                    colorTextLabel: "#000000",
-                  },
-                  Upload: {
-                    controlHeightLG: 28,
-                  },
-                  Input: {
-                    colorTextDisabled: "#000000",
-                    // colorBorder: "#595959",
-                  },
+        <SessionProvider refetchInterval={60}>
+          <QueryClientProvider client={queryClient}>
+            <AntdRegistry>
+              <ConfigProvider
+                theme={{
+                  components: {
+                    Form: {
+                      itemMarginBottom: 10,
+                    },
+                    DatePicker: {
+                      colorTextDisabled: "#000000",
+                      colorText: "#000000",
+                      colorTextLabel: "#000000",
+                    },
+                    Upload: {
+                      controlHeightLG: 28,
+                    },
+                    Input: {
+                      colorTextDisabled: "#000000",
+                      // colorBorder: "#595959",
+                    },
 
-                  InputNumber: {
-                    colorTextDisabled: "#000000",
+                    InputNumber: {
+                      colorTextDisabled: "#000000",
+                    },
+                    Select: {
+                      colorTextDisabled: "#000000",
+                    },
+                    Menu: {
+                      itemColor: "#343c46",
+                      itemBg: "rgb(237, 242, 248)",
+                      itemHoverBg: "#dfe6f1",
+                      itemSelectedBg: "#c7d4eb",
+                      subMenuItemBg: "#f5f7fa",
+                      fontSize: 16,
+                      fontWeightStrong: 800,
+                    },
                   },
-                  Select: {
-                    colorTextDisabled: "#000000",
-                  },
-                  Menu: {
-                    itemColor: "#343c46",
-                    itemBg: "rgb(237, 242, 248)",
-                    itemHoverBg: "#dfe6f1",
-                    itemSelectedBg: "#c7d4eb",
-                    subMenuItemBg: "#f5f7fa",
-                    fontSize: 16,
-                    fontWeightStrong: 800,
-                  },
-                },
-              }}
-            >
-              <ToastProvider>{children}</ToastProvider>
-            </ConfigProvider>
-          </AntdRegistry>
-        </QueryClientProvider>
+                }}
+              >
+                <ToastProvider>{children}</ToastProvider>
+              </ConfigProvider>
+            </AntdRegistry>
+          </QueryClientProvider>
+        </SessionProvider>
       </body>
     </html>
   );

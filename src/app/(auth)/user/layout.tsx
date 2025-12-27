@@ -142,6 +142,14 @@ export default function UserLayout({
             if (key === "4-6")
               router.push("/user/piling-management/internal-transfer");
             if (key === "4-7") router.push("/user/piling-management/audit-log");
+            console.log(key);
+            if (key === "13-1") router.push("/user/setup/finance/income-title");
+            if (key === "13-2") router.push("/user/setup/finance/bill-title");
+            if (key === "13-3") router.push("/user/setup/finance/budget-title");
+            if (key === "13-4")
+              router.push("/user/setup/finance/expense-title");
+            if (key === "13-5")
+              router.push("/user/setup/finance/expense-sub-title");
           }}
           items={items}
         />

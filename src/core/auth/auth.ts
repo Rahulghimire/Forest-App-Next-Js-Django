@@ -1,9 +1,11 @@
 import { Env } from "@/core/constants/env";
-import { LoginResponse } from "@/lib/auth";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { ApiError } from "next/dist/server/api-utils";
+import { ApiUser, LoginResponseDTO } from "../types/auth.types";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  session: { strategy: "jwt" },
   providers: [
     Credentials({
       credentials: {
@@ -12,56 +14,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         role: {},
       },
       authorize: async (credentials) => {
+        let res: Response;
         if (credentials.role == "admin") {
-          const res = await fetch(`${Env.baseApiUrl}user/login/`, {
+          res = await fetch(`${Env.baseApiUrl}user/login/`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify(credentials),
           });
-
-          if (!res.ok) throw new Error((await res.json()).error);
-          const resData: LoginResponse = await res.json();
-          return {
-            ...resData.user,
-            access_token: resData.access_token,
-            // expires_in: resData?.expires_in,
-            refresh_token: resData?.refresh_token,
-            token_type: resData?.token_type,
-          };
         } else {
-          const res = await fetch(`${Env.baseApiUrl}user/login/`, {
+          res = await fetch(`${Env.baseApiUrl}user/login/`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify(credentials),
           });
-
-          if (!res.ok) throw new Error((await res.json()).error);
-          const resData: LoginResponse = await res.json();
-          return {
-            ...resData.user,
-            access_token: resData.access_token,
-            // expires_in: resData.expires_in,
-            refresh_token: resData.refresh_token,
-            token_type: resData.token_type,
-          };
         }
+
+        if (res.status == 307) {
+          throw new ApiError(307, (await res.json()).detail);
+        }
+        if (!res.ok) throw new Error((await res.json()).error);
+        const resData: LoginResponseDTO = await res.json();
+        return {
+          ...resData.user,
+          access_token: resData.access_token,
+          // expires_in: resData?.expires_in,
+          refresh_token: resData?.refresh_token,
+          token_type: resData?.token_type,
+        };
       },
     }),
   ],
   callbacks: {
     jwt({ token, user }) {
-      if (user)
-        return {
-          ...token,
-          access_token: user?.access_token,
-          refresh_token: user?.refresh_token,
-          // exp: user?.expires_in,
-        };
-      else if (token.exp && Date.now() < token.exp * 1000) {
+      if (user) {
+        token.user = user;
+        token.access_token = user.access_token;
+        token.refresh_token = user.refresh_token;
+
+        return token;
+      } else if (token.exp && Date.now() < token.exp * 1000) {
         return token;
       } else {
         // subsequent calls, if the access token is expired
@@ -80,8 +75,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token, user }) {
       return {
         ...session,
-        // expires: user.expires_in?.toString() || token.exp?.toString() || "0",
-        user: user,
+        user: {
+          ...(token.user as ApiUser),
+          access_token: token.access_token,
+          refresh_token: token.refresh_token,
+        },
       };
     },
     signIn({ user }) {
@@ -91,20 +89,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 });
 
 declare module "next-auth" {
-  /**
-   * The shape of the user object returned in the OAuth providers' `profile` callback,
-   * or the second parameter of the `session` callback, when using a database.
-   */
-  interface User {
+  interface Session {
+    user: ApiUser;
     access_token: string;
-    // expires_in: number;
+    refresh_token: string;
+  }
+  interface User extends ApiUser {
+    access_token: string;
     refresh_token: string;
     token_type: string;
-    password_changed: boolean;
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    permissions: string[];
   }
 }

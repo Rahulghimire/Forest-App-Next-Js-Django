@@ -430,7 +430,7 @@ export default function Member() {
           <div className="gap-2 grid md:grid-cols-2 lg:grid-cols-4">
             <AntInput
               formProps={{
-                name: "position_name",
+                name: "name",
                 label: "नाम",
                 rules: [{ required: true, message: "नाम" }],
               }}
@@ -438,9 +438,9 @@ export default function Member() {
 
             <AntSelect
               array={[
-                { id: "M", name: "Male" },
-                { id: "F", name: "Female" },
-                { id: "O", name: "Others" },
+                { id: "Male", name: "Male" },
+                { id: "Female", name: "Female" },
+                { id: "Others", name: "Others" },
               ]}
               renderKey={"name"}
               valueKey={"id"}
@@ -483,7 +483,7 @@ export default function Member() {
               }}
             />
 
-            <AntInput
+            <AntInputNumber
               type="number"
               formProps={{
                 name: "family_size",
@@ -491,7 +491,6 @@ export default function Member() {
                 rules: [{ required: true, message: "परिवार सदस्य संख्या" }],
               }}
             />
-
             <AntInput
               formProps={{
                 name: "occupation",
@@ -551,7 +550,12 @@ export default function Member() {
               formProps={{
                 name: "status",
                 label: "सदस्यता स्थिति",
-                initialValue: false,
+                initialValue: "Inactive", // default
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
               }}
             />
             <Form.Item
@@ -592,11 +596,12 @@ export default function Member() {
                 {fileList2.length >= 1 ? null : uploadButton}
               </Upload>
             </Form.Item>
-            <AntInput
+            <AntInputNumber
               type="number"
               formProps={{
                 name: "emergency_contact",
                 label: "आपतकालीन सम्पर्क",
+                required: true,
               }}
             />
 

@@ -276,11 +276,71 @@ export default function Plot() {
                 label: "औसत उमेर (वर्षमा)",
               }}
             />
+            <AntInput
+              placeholder="काठ, दाउरा"
+              formProps={{
+                rules: [{ required: true, message: "पैदावार स्थिति" }],
+                name: "produce_types",
+                label: "पैदावार स्थिति",
+              }}
+            />
+
+            {/* <AntSwitch
+              formProps={{
+                name: "protected_area",
+                label: "संरक्षण क्षेत्र (हो/होइन)",
+              }}
+            /> */}
+            <AntSelect
+              array={[
+                { id: "Yes", name: "हो" },
+                { id: "No", name: "होइन" },
+              ]}
+              renderKey={"name"}
+              valueKey={"id"}
+              formProps={{
+                rules: [{ required: true, message: "स्वामित्व" }],
+                label: "संरक्षण क्षेत्र (हो/होइन)",
+                name: "protected_area",
+              }}
+            />
+            <AntInput
+              placeholder="पूर्वमा खोल्सा, पश्चिममा बाटो"
+              formProps={{
+                rules: [{ required: true, message: "जलस्रोत/सिमाना विवरण" }],
+                name: "boundary_description",
+                label: "जलस्रोत/सिमाना विवरण",
+              }}
+            />
+            <AntInput
+              placeholder="mgmt-208"
+              formProps={{
+                rules: [
+                  { required: true, message: "व्यवस्थापन योजना सन्दर्भ नं." },
+                ],
+                name: "mgmt_plan_ref_no",
+                label: "व्यवस्थापन योजना सन्दर्भ नं.",
+              }}
+              useEnglish
+            />
+            <AntInputNumber
+              formProps={{
+                rules: [{ required: true, message: "औसत उमेर (वर्षमा)" }],
+                name: "avg_age_years",
+                label: "औसत उमेर (वर्षमा)",
+              }}
+            />
 
             <AntSwitch
               formProps={{
                 name: "status",
-                label: "स्थिति",
+                label: "सदस्यता स्थिति",
+                initialValue: "Inactive", // default
+                getValueProps: (value: string) => ({
+                  checked: value === "Active",
+                }),
+                getValueFromEvent: (checked: boolean) =>
+                  checked ? "Active" : "Inactive",
               }}
             />
           </div>
